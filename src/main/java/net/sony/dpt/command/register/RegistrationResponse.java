@@ -1,4 +1,4 @@
-package net.sony.dpt;
+package net.sony.dpt.command.register;
 
 public class RegistrationResponse {
     /**

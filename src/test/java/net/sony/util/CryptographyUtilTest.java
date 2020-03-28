@@ -1,7 +1,7 @@
 package net.sony.util;
 
 import com.google.common.primitives.Bytes;
-import net.sony.dpt.HashRequest;
+import net.sony.dpt.command.register.HashRequest;
 import org.junit.Test;
 
 import java.math.BigInteger;

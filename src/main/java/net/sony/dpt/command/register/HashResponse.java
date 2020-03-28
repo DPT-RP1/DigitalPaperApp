@@ -1,6 +1,5 @@
-package net.sony.dpt;
+package net.sony.dpt.command.register;
 
-import net.sony.util.SimpleHttpClient;
 import org.bouncycastle.util.encoders.Base64;
 
 import java.io.IOException;
@@ -13,6 +12,7 @@ public class HashResponse {
     private byte[] returnedNonce2;
     private byte[] eHash;
     private byte[] m3hmac;
+    private HashRequest hashRequest;
 
     public HashResponse(byte[] returnedNonce2, byte[] eHash, byte[] m3hmac) {
         this.returnedNonce2 = returnedNonce2;
@@ -39,5 +39,13 @@ public class HashResponse {
         byte[] m3hmac = Base64.decode(response.get("e"));
 
         return new HashResponse(returnedNonce2, eHash, m3hmac);
+    }
+
+    public HashRequest getHashRequest() {
+        return hashRequest;
+    }
+
+    public void setHashRequest(HashRequest hashRequest) {
+        this.hashRequest = hashRequest;
     }
 }

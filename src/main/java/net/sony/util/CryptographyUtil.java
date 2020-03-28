@@ -1,7 +1,7 @@
 package net.sony.util;
 
 import com.google.common.primitives.Bytes;
-import net.sony.dpt.HashRequest;
+import net.sony.dpt.command.register.HashRequest;
 import org.bouncycastle.crypto.digests.GeneralDigest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;

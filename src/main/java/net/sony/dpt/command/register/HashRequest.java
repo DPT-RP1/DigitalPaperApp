@@ -1,4 +1,4 @@
-package net.sony.dpt;
+package net.sony.dpt.command.register;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -40,6 +40,14 @@ public class HashRequest {
 
     public byte[] getM2hmac() {
         return m2hmac;
+    }
+
+    public byte[] getPublicKey() {
+        return publicKey;
+    }
+
+    public byte[] getNonce2() {
+        return nonce2;
     }
 
     public Map<String, String> asMap() {
