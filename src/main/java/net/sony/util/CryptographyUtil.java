@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 
@@ -17,7 +18,9 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.security.*;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
+import java.util.Base64;
 
 public class CryptographyUtil {
 
@@ -125,10 +128,27 @@ public class CryptographyUtil {
 
     public String exportPrivateKeyToPEM(PrivateKey privateKey) throws IOException {
         StringWriter writer = new StringWriter();
-        JcaPEMWriter pemWriter = new JcaPEMWriter(writer);
-        pemWriter.writeObject(privateKey);
-        pemWriter.flush();
-        pemWriter.close();
+        try (JcaPEMWriter pemWriter = new JcaPEMWriter(writer)) {
+            pemWriter.writeObject(new JcaPKCS8Generator(privateKey, null));
+        }
         return writer.toString();
+    }
+
+    public byte[] signSHA256RSA(byte[] input, String privateKeyPem) throws Exception {
+        // Remove markers and new line characters in private key
+        String privateKeyB64 = privateKeyPem
+                .replaceAll("-----END PRIVATE KEY-----", "")
+                .replaceAll("-----BEGIN PRIVATE KEY-----", "")
+                .replaceAll("\n", "");
+        byte[] privateKey = Base64.getMimeDecoder().decode(privateKeyB64);
+
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKey);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        PrivateKey key = kf.generatePrivate(keySpec);
+
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(key);
+        signature.update(input);
+        return signature.sign();
     }
 }
