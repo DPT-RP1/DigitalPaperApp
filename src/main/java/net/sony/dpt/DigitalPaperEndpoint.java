@@ -1,15 +1,27 @@
 package net.sony.dpt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sony.dpt.command.documents.EntryType;
 import net.sony.util.SimpleHttpClient;
+import org.apache.commons.text.StringSubstitutor;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 import static net.sony.util.SimpleHttpClient.fromJSON;
+import static net.sony.util.SimpleHttpClient.ok;
 
 public class DigitalPaperEndpoint {
+
+    private static final String filePathUrl = "/documents/{doc_id}/file";
 
     private static int PORT = 8443;
     private String baseUrl;
@@ -32,8 +44,69 @@ public class DigitalPaperEndpoint {
         return simpleHttpClient.get(baseUrl + "/documents2?entry_type=" + entryType);
     }
 
+    private static ObjectMapper objectMapper = new ObjectMapper();
+    private final String downloadRemoteIdUrl = "/documents/{remote_id}/file";
+    private final String resolveObjectByPathUrl = "/resolve/entry/path/{enc_path}";
+    private final String deleteByDocumentIdUrl = "/documents/{doc_id}";
+
+    private static String resolve(String template, Map<String, String> variables) {
+        StringSubstitutor stringSubstitutor = new StringSubstitutor(variables);
+        return stringSubstitutor.replace(template);
+    }
+
+    private static Map<String, String> variable(String name, String value) {
+        return new HashMap<>() {{
+            put(name, value);
+        }};
+    }
+
     public URI getURI() throws URISyntaxException {
         return new URI(baseUrl);
     }
 
+    public InputStream downloadByRemoteId(String remoteId) throws IOException, InterruptedException {
+        Map<String, String> resolution = new HashMap<>() {{
+            put("remote_id", remoteId);
+        }};
+        StringSubstitutor stringSubstitutor = new StringSubstitutor(resolution);
+        String downloadUrl = stringSubstitutor.replace(downloadRemoteIdUrl);
+
+        return simpleHttpClient.getFile(downloadUrl);
+    }
+
+    public String resolveObjectByPath(Path path) throws IOException, InterruptedException {
+        String encodedPath = URLEncoder.encode(path.toString(), StandardCharsets.UTF_8);
+        String url = resolve(resolveObjectByPathUrl, variable("enc_path", encodedPath));
+
+        HttpResponse<String> result = simpleHttpClient.getWithResponse(url);
+        if (ok(result)) {
+            return (String) objectMapper.readValue(result.body(), Map.class).get("entry_id");
+        }
+        return null;
+    }
+
+    public void deleteByDocumentId(String remoteId) throws IOException, InterruptedException {
+        simpleHttpClient.delete(resolve(deleteByDocumentIdUrl, variable("doc_id", remoteId)));
+    }
+
+    public String createDirectory(Path directory, String parentId) throws IOException, InterruptedException {
+        Map<String, String> body = new HashMap<>() {{
+            put("folder_name", directory.getFileName().toString());
+            put("parent_folder_id", parentId);
+        }};
+        simpleHttpClient.post("/folder2", body);
+        return resolveObjectByPath(directory);
+    }
+
+    public String uploadFile(Path filePath, String parentId) throws IOException, InterruptedException {
+        Map<String, String> touchParam = new HashMap<>() {{
+            put("file_name", filePath.getFileName().toString());
+            put("parent_folder_id", parentId);
+            put("document_source", "");
+        }};
+        String documentId = fromJSON(simpleHttpClient.post("/documents2", touchParam)).get("document_id");
+        String documentUrl = resolve(filePathUrl, variable("doc_id", documentId));
+        simpleHttpClient.putFile(documentUrl, filePath);
+        return documentId;
+    }
 }
