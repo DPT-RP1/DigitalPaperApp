@@ -9,9 +9,9 @@ import static net.sony.util.SimpleHttpClient.fromJSON;
 
 public class HashResponse {
 
-    private byte[] returnedNonce2;
-    private byte[] eHash;
-    private byte[] m3hmac;
+    private final byte[] returnedNonce2;
+    private final byte[] eHash;
+    private final byte[] m3hmac;
     private HashRequest hashRequest;
 
     public HashResponse(byte[] returnedNonce2, byte[] eHash, byte[] m3hmac) {

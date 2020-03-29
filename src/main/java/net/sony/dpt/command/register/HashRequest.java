@@ -4,21 +4,16 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * byte[] authKey = new byte[32];
- *         byte[] keyWrapKey = new byte[16];
- *         byte[] m2hmac = cryptographyUtil.generateHash(
- */
 public class HashRequest {
 
-    private byte[] authKey;
-    private byte[] keyWrapKey;
-    private byte[] m2hmac;
+    private final byte[] authKey;
+    private final byte[] keyWrapKey;
+    private final byte[] m2hmac;
 
-    private byte[] nonce1;
-    private byte[] nonce2;
-    private byte[] publicKey;
-    private byte[] mac;
+    private final byte[] nonce1;
+    private final byte[] nonce2;
+    private final byte[] publicKey;
+    private final byte[] mac;
 
     public HashRequest(byte[] authKey, byte[] keyWrapKey, byte[] m2hmac, byte[] nonce1, byte[] nonce2, byte[] publicKey, byte[] mac) {
         this.authKey = authKey;

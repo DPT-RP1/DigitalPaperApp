@@ -23,9 +23,9 @@ public class DigitalPaperEndpoint {
 
     private static final String filePathUrl = "/documents/${doc_id}/file";
 
-    private static int PORT = 8443;
-    private String baseUrl;
-    private SimpleHttpClient simpleHttpClient;
+    private static final int PORT = 8443;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final String baseUrl;
 
     public DigitalPaperEndpoint(String addr, SimpleHttpClient simpleHttpClient) {
         this.baseUrl = "https://" + addr + ":" + PORT;
@@ -44,7 +44,7 @@ public class DigitalPaperEndpoint {
         return simpleHttpClient.get(baseUrl + "/documents2?entry_type=" + entryType);
     }
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private final SimpleHttpClient simpleHttpClient;
     private static final String downloadRemoteIdUrl = "/documents/${remote_id}/file";
     private static final String resolveObjectByPathUrl = "/resolve/entry/path/${enc_path}";
     private static final String deleteByDocumentIdUrl = "/documents/${doc_id}";

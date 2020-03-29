@@ -27,7 +27,7 @@ import java.util.Properties;
 
 public class SimpleHttpClient {
 
-    private static ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     private HttpClient httpClient;
     private SSLContext sslContext;
@@ -123,8 +123,9 @@ public class SimpleHttpClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream()).body();
     }
 
+    @SuppressWarnings("unchecked")
     public static Map<String, String> fromJSON(String json) throws IOException {
-        return mapper.readValue(json, Map.class);
+        return (Map<String, String>) mapper.readValue(json, Map.class);
     }
 
     private void disableSsl() throws NoSuchAlgorithmException, KeyManagementException {

@@ -14,7 +14,7 @@ public class RegistrationTokenStore {
     private static final Path clientIdPath = Path.of("client_id.dat");
     private static final Path certificatePath = Path.of("cert.pem");
     private static final Path applicationPath = Path.of(".dpt");
-    private Path storagePath;
+    private final Path storagePath;
 
     public RegistrationTokenStore(Path storagePath) {
         this.storagePath = storagePath.resolve(applicationPath);

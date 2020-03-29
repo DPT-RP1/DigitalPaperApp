@@ -9,7 +9,7 @@ public class AuthenticationCookie {
     /**
      * Credentials: base64 token
      */
-    private String credentials;
+    private final String credentials;
 
     public AuthenticationCookie(String credentials) {
         this.credentials = credentials;

@@ -2,7 +2,6 @@ package net.sony.util;
 
 import org.junit.Test;
 
-import java.math.BigInteger;
 import java.util.Base64;
 
 import static org.junit.Assert.assertTrue;

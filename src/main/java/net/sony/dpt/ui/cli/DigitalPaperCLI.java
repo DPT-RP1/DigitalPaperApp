@@ -36,14 +36,14 @@ import java.util.List;
 
 public class DigitalPaperCLI {
 
-    private Options options;
-    private CommandLineParser parser;
-    private SimpleHttpClient simpleHttpClient;
-    private DiffieHelman diffieHelman;
-    private CryptographyUtil cryptographyUtil;
-    private LogWriter logWriter;
-    private InputReader inputReader;
-    private RegistrationTokenStore registrationTokenStore;
+    private final Options options;
+    private final CommandLineParser parser;
+    private final SimpleHttpClient simpleHttpClient;
+    private final DiffieHelman diffieHelman;
+    private final CryptographyUtil cryptographyUtil;
+    private final LogWriter logWriter;
+    private final InputReader inputReader;
+    private final RegistrationTokenStore registrationTokenStore;
     private DigitalPaperEndpoint digitalPaperEndpoint;
 
     public DigitalPaperCLI(SimpleHttpClient simpleHttpClient,

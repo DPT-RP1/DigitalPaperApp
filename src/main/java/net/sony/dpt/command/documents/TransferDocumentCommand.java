@@ -13,7 +13,7 @@ import java.nio.file.PathMatcher;
 
 public class TransferDocumentCommand {
 
-    private DigitalPaperEndpoint digitalPaperEndpoint;
+    private final DigitalPaperEndpoint digitalPaperEndpoint;
 
     public TransferDocumentCommand(DigitalPaperEndpoint digitalPaperEndpoint) {
         this.digitalPaperEndpoint = digitalPaperEndpoint;

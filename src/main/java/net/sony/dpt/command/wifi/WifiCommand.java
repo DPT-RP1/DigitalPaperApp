@@ -8,7 +8,7 @@ import java.io.IOException;
 public class WifiCommand {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private DigitalPaperEndpoint digitalPaperEndpoint;
+    private final DigitalPaperEndpoint digitalPaperEndpoint;
 
     public WifiCommand(DigitalPaperEndpoint digitalPaperEndpoint) {
         this.digitalPaperEndpoint = digitalPaperEndpoint;

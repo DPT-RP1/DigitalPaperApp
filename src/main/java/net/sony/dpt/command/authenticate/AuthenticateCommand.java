@@ -29,7 +29,7 @@ public class AuthenticateCommand {
     private final CryptographyUtil cryptographyUtil;
     private final DigitalPaperEndpoint digitalPaperEndpoint;
     private final SimpleHttpClient simpleHttpClient;
-    private String baseUrl;
+    private final String baseUrl;
 
     public AuthenticateCommand(
             String addr,

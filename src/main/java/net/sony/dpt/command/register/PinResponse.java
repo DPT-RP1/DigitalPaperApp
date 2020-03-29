@@ -8,19 +8,12 @@ import java.util.Map;
 
 import static net.sony.util.SimpleHttpClient.fromJSON;
 
-/**
- *         Map<String, String> pinResponse = fromJSON(simpleHttpClient.post(registerPinUrl));
- *
- *         byte[] nonce1 = b64decoder.decode(pinResponse.get("a"));
- *         byte[] mac = b64decoder.decode(pinResponse.get("b"));
- *         byte[] otherContribution = b64decoder.decode(pinResponse.get("c"));
- */
 public class PinResponse {
 
-    private byte[] nonce1;
-    private byte[] mac;
-    private byte[] otherContribution;
-    private byte[] rawOtherContribution;
+    private final byte[] nonce1;
+    private final byte[] mac;
+    private final byte[] otherContribution;
+    private final byte[] rawOtherContribution;
 
     public PinResponse(byte[] nonce1, byte[] mac, byte[] rawOtherContribution, byte[] otherContribution) {
         this.nonce1 = nonce1;

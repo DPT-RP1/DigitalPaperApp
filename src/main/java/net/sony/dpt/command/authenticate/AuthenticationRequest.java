@@ -6,8 +6,8 @@ import java.util.Map;
 
 public class AuthenticationRequest {
 
-    private String clientId;
-    private byte[] signedNonce;
+    private final String clientId;
+    private final byte[] signedNonce;
 
     public AuthenticationRequest(String clientId, byte[] signedNonce) {
         this.clientId = clientId;

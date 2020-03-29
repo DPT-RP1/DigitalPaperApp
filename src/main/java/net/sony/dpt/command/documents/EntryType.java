@@ -6,7 +6,7 @@ public enum EntryType {
     ALL("all"),
     DOCUMENT("document");
 
-    private String value;
+    private final String value;
 
     EntryType(String value) {
         this.value = value;

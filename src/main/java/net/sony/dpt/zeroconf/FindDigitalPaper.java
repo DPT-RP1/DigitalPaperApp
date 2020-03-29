@@ -22,8 +22,8 @@ public class FindDigitalPaper {
     private final static String SERVICE_TYPE = "_digitalpaper._tcp.local.";
     private static final String BIND_IP = "0.0.0.0";
     private static final String SERVICE_NAME = "Digital Paper DPT-RP1";
-    private LogWriter logWriter;
-    private DigitalPaperServiceListener digitalPaperServiceListener;
+    private final LogWriter logWriter;
+    private final DigitalPaperServiceListener digitalPaperServiceListener;
 
     public FindDigitalPaper(LogWriter logWriter, SimpleHttpClient simpleHttpClient, String matchSerial) {
         this.logWriter = logWriter;
@@ -65,7 +65,6 @@ public class FindDigitalPaper {
         if (!inetAddresses.isEmpty()) {
             Inet4Address inet4Address = (Inet4Address) inetAddresses.keySet().iterator().next();
             logWriter.log("Found a Digital Paper at " + inet4Address.getHostAddress());
-            ;
             return inet4Address.getHostAddress();
         }
         return null;
@@ -74,11 +73,11 @@ public class FindDigitalPaper {
     private static class DigitalPaperServiceListener implements ServiceListener {
 
         private static final String INFO_URL = "/register/information";
-        private Map<InetAddress, ServiceEvent> digitalPapersDiscovered;
-        private LogWriter logWriter;
-        private ConcurrentMap<Inet4Address, ServiceEvent> ipv4Found;
-        private SimpleHttpClient simpleHttpClient;
-        private String matchSerial;
+        private final Map<InetAddress, ServiceEvent> digitalPapersDiscovered;
+        private final LogWriter logWriter;
+        private final ConcurrentMap<Inet4Address, ServiceEvent> ipv4Found;
+        private final SimpleHttpClient simpleHttpClient;
+        private final String matchSerial;
 
         public DigitalPaperServiceListener(LogWriter logWriter, SimpleHttpClient simpleHttpClient, String matchSerial) {
             digitalPapersDiscovered = new HashMap<>();

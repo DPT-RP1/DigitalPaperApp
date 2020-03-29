@@ -7,10 +7,10 @@ import java.util.Map;
 
 public class RegisterCaRequest {
 
-    private byte[] nonce1;
-    private byte[] rHash;
-    private byte[] wrappedRs;
-    private byte[] m4hmac;
+    private final byte[] nonce1;
+    private final byte[] rHash;
+    private final byte[] wrappedRs;
+    private final byte[] m4hmac;
 
     public RegisterCaRequest(byte[] nonce1, byte[] rHash, byte[] wrappedRs, byte[] m4hmac) {
         this.nonce1 = nonce1;
@@ -20,13 +20,12 @@ public class RegisterCaRequest {
     }
 
     public Map<String, String> asMap() {
-        Map<String, String> m4 = new HashMap<>();
-        m4.put("a", Base64.toBase64String(nonce1));
-        m4.put("b", Base64.toBase64String(rHash));
-        m4.put("d", Base64.toBase64String(wrappedRs));
-        m4.put("e", Base64.toBase64String(m4hmac));
-
-        return m4;
+        return new HashMap<>() {{
+            put("a", Base64.toBase64String(nonce1));
+            put("b", Base64.toBase64String(rHash));
+            put("d", Base64.toBase64String(wrappedRs));
+            put("e", Base64.toBase64String(m4hmac));
+        }};
     }
 
 }

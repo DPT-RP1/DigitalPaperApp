@@ -9,9 +9,9 @@ import static net.sony.util.SimpleHttpClient.fromJSON;
 
 public class RegisterCaResponse {
 
-    private byte[] returnedNonce2;
-    private byte[] wrappedEsCert;
-    private byte[] m5hmac;
+    private final byte[] returnedNonce2;
+    private final byte[] wrappedEsCert;
+    private final byte[] m5hmac;
     private byte[] cert;
 
     public RegisterCaResponse(byte[] returnedNonce2, byte[] wrappedEsCert, byte[] m5hmac) {
