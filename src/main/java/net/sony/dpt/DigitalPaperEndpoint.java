@@ -45,9 +45,9 @@ public class DigitalPaperEndpoint {
     }
 
     private static ObjectMapper objectMapper = new ObjectMapper();
-    private final String downloadRemoteIdUrl = "/documents/${remote_id}/file";
-    private final String resolveObjectByPathUrl = "/resolve/entry/path/${enc_path}";
-    private final String deleteByDocumentIdUrl = "/documents/${doc_id}";
+    private static final String downloadRemoteIdUrl = "/documents/${remote_id}/file";
+    private static final String resolveObjectByPathUrl = "/resolve/entry/path/${enc_path}";
+    private static final String deleteByDocumentIdUrl = "/documents/${doc_id}";
 
     private static String resolve(String template, Map<String, String> variables) {
         StringSubstitutor stringSubstitutor = new StringSubstitutor(variables);
@@ -108,5 +108,16 @@ public class DigitalPaperEndpoint {
         String documentUrl = baseUrl + resolve(filePathUrl, variable("doc_id", documentId));
         simpleHttpClient.putFile(documentUrl, filePath);
         return documentId;
+    }
+
+    private static final String deleteFolderUrl = "/folders/${folder_id}";
+    private static final String wifiAccessPointsUrl = "/system/configs/wifi_accesspoints";
+
+    public void deleteFolderByRemoteId(String remoteId) throws IOException, InterruptedException {
+        simpleHttpClient.delete(baseUrl + resolve(deleteFolderUrl, variable("folder_id", remoteId)));
+    }
+
+    public String listWifi() throws IOException, InterruptedException {
+        return simpleHttpClient.get(baseUrl + wifiAccessPointsUrl);
     }
 }

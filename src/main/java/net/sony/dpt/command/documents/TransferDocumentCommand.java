@@ -48,6 +48,11 @@ public class TransferDocumentCommand {
         return currentId;
     }
 
+    public void deleteFolder(Path remotePath) throws IOException, InterruptedException {
+        String remoteId = digitalPaperEndpoint.resolveObjectByPath(remotePath);
+        digitalPaperEndpoint.deleteFolderByRemoteId(remoteId);
+    }
+
     public String upload(Path localPath, Path remotePath) throws IOException, InterruptedException {
         delete(remotePath);
         Path directory = remotePath.getParent();

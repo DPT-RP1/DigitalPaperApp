@@ -39,6 +39,8 @@ public class DocumentEntry {
     private String title;
     @JsonProperty("total_page")
     private long totalPage;
+    @JsonProperty("ext_id")
+    private String extId;
 
     public String getAuthor() {
         return author;
@@ -174,5 +176,28 @@ public class DocumentEntry {
 
     public void setTotalPage(long totalPage) {
         this.totalPage = totalPage;
+    }
+
+    @Override
+    public String toString() {
+        return "author: " + author +
+                ", createDate: " + createDate +
+                ", currentPage: " + currentPage +
+                ", documentSource: " + documentSource +
+                ", documentType: " + documentType +
+                ", entryId: " + entryId +
+                ", entryName: " + entryName +
+                ", entryPath: " + entryPath +
+                ", entryType: " + entryType +
+                ", fileRevision: " + fileRevision +
+                ", fileSize: " + fileSize +
+                ", isNew: " + isNew +
+                ", mimeType: " + mimeType +
+                ", modifiedDate: " + modifiedDate +
+                ", parentFolderId: " + parentFolderId +
+                ", readingDate: " + readingDate +
+                ", title: " + title +
+                ", totalPage: " + totalPage +
+                ", extId: " + extId;
     }
 }
