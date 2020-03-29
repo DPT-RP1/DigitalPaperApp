@@ -32,27 +32,28 @@ public class TransferDocumentCommand {
         }
     }
 
-    public boolean exists(Path path) throws IOException, InterruptedException {
-        return digitalPaperEndpoint.resolveObjectByPath(path) != null;
-    }
 
     public String createFolderRecursively(Path folderPath) throws IOException, InterruptedException {
-        String parentId = digitalPaperEndpoint.resolveObjectByPath(Path.of("/"));
+        String parentId = "root";
+        String currentId = null;
+        Path base = Path.of("");
         for (Path subDirectory : folderPath) {
-            if (!exists(subDirectory)) {
-                parentId = digitalPaperEndpoint.createDirectory(subDirectory, parentId);
+            base = base.resolve(subDirectory);
+            currentId = digitalPaperEndpoint.resolveObjectByPath(base);
+            if (currentId == null) {
+                currentId = digitalPaperEndpoint.createDirectory(base, parentId);
             }
+            parentId = currentId;
         }
-        return parentId;
+        return currentId;
     }
 
-    public void upload(InputStream file, Path remotePath) throws IOException, InterruptedException {
+    public String upload(Path localPath, Path remotePath) throws IOException, InterruptedException {
         delete(remotePath);
-        Path fileName = remotePath.getFileName();
         Path directory = remotePath.getParent();
 
-        createFolderRecursively(directory);
-
+        String parentId = createFolderRecursively(directory);
+        return digitalPaperEndpoint.uploadFile(localPath, parentId);
     }
 
 }

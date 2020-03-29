@@ -4,6 +4,7 @@ import net.sony.dpt.command.authenticate.AuthenticateCommand;
 import net.sony.dpt.command.authenticate.AuthenticationCookie;
 import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.documents.ListDocumentsCommand;
+import net.sony.dpt.command.documents.TransferDocumentCommand;
 import net.sony.dpt.command.register.RegisterCommand;
 import net.sony.dpt.command.register.RegistrationResponse;
 import net.sony.dpt.persistence.RegistrationTokenStore;
@@ -86,6 +87,10 @@ public class DigitalPaper {
 
         DocumentListResponse documents = digitalPaper.listDocuments();
         System.out.println("Documents listed");
+
+        Path testUpload = Path.of("/Users/Pierre/DigitalPaperApp/src/test/resources/sample.pdf");
+        String id = new TransferDocumentCommand(digitalPaperEndpoint).upload(testUpload, Path.of("Document/Test/sample.pdf"));
+        System.out.println("Document id = " + id);
     }
 
     public RegistrationResponse register() throws IllegalBlockSizeException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IOException, BadPaddingException, NoSuchPaddingException, InvalidKeyException {

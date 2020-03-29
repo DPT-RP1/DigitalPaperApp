@@ -21,7 +21,7 @@ import static net.sony.util.SimpleHttpClient.ok;
 
 public class DigitalPaperEndpoint {
 
-    private static final String filePathUrl = "/documents/{doc_id}/file";
+    private static final String filePathUrl = "/documents/${doc_id}/file";
 
     private static int PORT = 8443;
     private String baseUrl;
@@ -45,9 +45,9 @@ public class DigitalPaperEndpoint {
     }
 
     private static ObjectMapper objectMapper = new ObjectMapper();
-    private final String downloadRemoteIdUrl = "/documents/{remote_id}/file";
-    private final String resolveObjectByPathUrl = "/resolve/entry/path/{enc_path}";
-    private final String deleteByDocumentIdUrl = "/documents/{doc_id}";
+    private final String downloadRemoteIdUrl = "/documents/${remote_id}/file";
+    private final String resolveObjectByPathUrl = "/resolve/entry/path/${enc_path}";
+    private final String deleteByDocumentIdUrl = "/documents/${doc_id}";
 
     private static String resolve(String template, Map<String, String> variables) {
         StringSubstitutor stringSubstitutor = new StringSubstitutor(variables);
@@ -76,7 +76,7 @@ public class DigitalPaperEndpoint {
 
     public String resolveObjectByPath(Path path) throws IOException, InterruptedException {
         String encodedPath = URLEncoder.encode(path.toString(), StandardCharsets.UTF_8);
-        String url = resolve(resolveObjectByPathUrl, variable("enc_path", encodedPath));
+        String url = baseUrl + resolve(resolveObjectByPathUrl, variable("enc_path", encodedPath));
 
         HttpResponse<String> result = simpleHttpClient.getWithResponse(url);
         if (ok(result)) {
@@ -94,7 +94,7 @@ public class DigitalPaperEndpoint {
             put("folder_name", directory.getFileName().toString());
             put("parent_folder_id", parentId);
         }};
-        simpleHttpClient.post("/folder2", body);
+        simpleHttpClient.post(baseUrl + "/folders2", body);
         return resolveObjectByPath(directory);
     }
 
@@ -104,8 +104,8 @@ public class DigitalPaperEndpoint {
             put("parent_folder_id", parentId);
             put("document_source", "");
         }};
-        String documentId = fromJSON(simpleHttpClient.post("/documents2", touchParam)).get("document_id");
-        String documentUrl = resolve(filePathUrl, variable("doc_id", documentId));
+        String documentId = fromJSON(simpleHttpClient.post(baseUrl + "/documents2", touchParam)).get("document_id");
+        String documentUrl = baseUrl + resolve(filePathUrl, variable("doc_id", documentId));
         simpleHttpClient.putFile(documentUrl, filePath);
         return documentId;
     }
