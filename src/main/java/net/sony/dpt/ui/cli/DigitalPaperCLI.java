@@ -16,13 +16,17 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.apache.commons.io.IOUtils;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -107,11 +111,23 @@ public class DigitalPaperCLI {
             case "delete-folder":
                 deleteFolder(arguments.get(1));
                 break;
-            case "screenshot":
-            case "download":
             case "delete":
+                deleteDocument(arguments.get(1));
+                break;
+            case "download":
+                String localDownloadPath = null;
+                if (arguments.size() > 2) {
+                    localDownloadPath = arguments.get(2);
+                }
+                downloadDocument(arguments.get(1), localDownloadPath);
+                break;
             case "new-folder":
+                newFolder(arguments.get(1));
+                break;
             case "move-document":
+                moveDocument(arguments.get(1), arguments.get(2));
+                break;
+            case "screenshot":
             case "copy-document":
             case "wifi-scan":
             case "wifi-add":
@@ -168,6 +184,38 @@ public class DigitalPaperCLI {
 
     private void deleteFolder(String remotePath) throws IOException, InterruptedException {
         new TransferDocumentCommand(digitalPaperEndpoint).deleteFolder(Path.of(remotePath));
+    }
+
+    private void deleteDocument(String remotePath) throws IOException, InterruptedException {
+        new TransferDocumentCommand(digitalPaperEndpoint).delete(Path.of(remotePath));
+    }
+
+    private void downloadDocument(String remotePath, String localPath) throws IOException, InterruptedException {
+        Path localDownloadPath;
+        if (localPath == null) {
+            localDownloadPath = Path.of(".");
+        } else {
+            localDownloadPath = Path.of(localPath);
+        }
+        Path remoteDownloadPath = Path.of(remotePath);
+        InputStream inputStream = new TransferDocumentCommand(digitalPaperEndpoint).download(remoteDownloadPath);
+
+        if (Files.isDirectory(localDownloadPath)) {
+            localDownloadPath = localDownloadPath.resolve(remoteDownloadPath.getFileName());
+        }
+
+        try (OutputStream outputStream = Files.newOutputStream(localDownloadPath)) {
+            IOUtils.copy(inputStream, outputStream);
+            inputStream.close();
+        }
+    }
+
+    private void newFolder(String remotePath) throws IOException, InterruptedException {
+        new TransferDocumentCommand(digitalPaperEndpoint).createFolderRecursively(Path.of(remotePath));
+    }
+
+    public void moveDocument(String oldPath, String newPath) throws IOException, InterruptedException {
+        new TransferDocumentCommand(digitalPaperEndpoint).moveDocument(Path.of(oldPath), Path.of(newPath));
     }
 
 }

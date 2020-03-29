@@ -120,4 +120,15 @@ public class DigitalPaperEndpoint {
     public String listWifi() throws IOException, InterruptedException {
         return simpleHttpClient.get(baseUrl + wifiAccessPointsUrl);
     }
+
+    private static final String fileInfoUrl = "/documents/${file_id}";
+
+    public void setFileInfo(String remoteId, String newParentFolderId, String newFilename) throws IOException, InterruptedException {
+        Map<String, String> moveParam = new HashMap<>();
+        moveParam.put("parent_folder_id", newParentFolderId);
+        if (newFilename != null) {
+            moveParam.put("file_name", newFilename);
+        }
+        simpleHttpClient.put(baseUrl + resolve(fileInfoUrl, variable("file_id", remoteId)), moveParam);
+    }
 }
