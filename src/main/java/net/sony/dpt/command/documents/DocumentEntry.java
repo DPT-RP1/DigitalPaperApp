@@ -21,7 +21,7 @@ public class DocumentEntry {
     @JsonProperty("entry_path")
     private String entryPath;
     @JsonProperty("entry_type")
-    private String entryType;
+    private EntryType entryType;
     @JsonProperty("file_revision")
     private String fileRevision;
     @JsonProperty("file_size")
@@ -96,11 +96,11 @@ public class DocumentEntry {
         this.entryPath = entryPath;
     }
 
-    public String getEntryType() {
+    public EntryType getEntryType() {
         return entryType;
     }
 
-    public void setEntryType(String entryType) {
+    public void setEntryType(EntryType entryType) {
         this.entryType = entryType;
     }
 

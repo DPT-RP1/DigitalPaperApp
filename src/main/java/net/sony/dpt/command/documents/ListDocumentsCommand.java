@@ -9,17 +9,24 @@ public class ListDocumentsCommand {
 
     private DigitalPaperEndpoint digitalPaperEndpoint;
 
-    private ObjectMapper objectMapper;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public ListDocumentsCommand(DigitalPaperEndpoint digitalPaperEndpoint) {
         this.digitalPaperEndpoint = digitalPaperEndpoint;
+    }
 
-        this.objectMapper = new ObjectMapper();
+    public static DocumentListResponse fromJson(String json) throws IOException {
+        return objectMapper.readValue(json, DocumentListResponse.class);
     }
 
     public DocumentListResponse listDocuments() throws IOException, InterruptedException {
         String json = digitalPaperEndpoint.listDocuments();
-        return objectMapper.readValue(json, DocumentListResponse.class);
+        return fromJson(json);
+    }
+
+    public DocumentListResponse listDocument(EntryType entryType) throws IOException, InterruptedException {
+        String json = digitalPaperEndpoint.listDocuments(entryType);
+        return fromJson(json);
     }
 
 }

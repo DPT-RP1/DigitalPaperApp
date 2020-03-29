@@ -1,5 +1,6 @@
 package net.sony.dpt;
 
+import net.sony.dpt.command.documents.EntryType;
 import net.sony.util.SimpleHttpClient;
 
 import java.io.IOException;
@@ -25,6 +26,10 @@ public class DigitalPaperEndpoint {
 
     public String listDocuments() throws IOException, InterruptedException {
         return simpleHttpClient.get(baseUrl + "/documents2");
+    }
+
+    public String listDocuments(EntryType entryType) throws IOException, InterruptedException {
+        return simpleHttpClient.get(baseUrl + "/documents2?entry_type=" + entryType);
     }
 
     public URI getURI() throws URISyntaxException {
