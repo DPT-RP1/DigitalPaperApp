@@ -51,7 +51,7 @@ public class FindDigitalPaper {
         }
 
         kill(jmdns);
-        digitalPaperServiceListener.digitalPapersDiscovered.forEach((inetAddress, ignored) -> System.out.println("Ready to connect to " + inetAddress));
+        digitalPaperServiceListener.digitalPapersDiscovered.forEach((inetAddress, ignored) -> logWriter.log("Ready to connect to " + inetAddress));
         return digitalPaperServiceListener.digitalPapersDiscovered;
     }
 
@@ -110,7 +110,7 @@ public class FindDigitalPaper {
 
         @Override
         public void serviceAdded(ServiceEvent event) {
-            System.out.println("Service added: " + event.getInfo());
+            logWriter.log("Service added: " + event.getInfo());
         }
 
         @Override
