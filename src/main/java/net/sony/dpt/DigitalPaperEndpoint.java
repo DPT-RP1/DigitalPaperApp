@@ -21,33 +21,45 @@ import static net.sony.util.SimpleHttpClient.ok;
 
 public class DigitalPaperEndpoint {
 
+    private static final String downloadRemoteIdUrl = "/documents/${remote_id}/file";
+    private static final String resolveObjectByPathUrl = "/resolve/entry/path/${enc_path}";
+    private static final String deleteByDocumentIdUrl = "/documents/${doc_id}";
     private static final String filePathUrl = "/documents/${doc_id}/file";
+    private static final String deleteFolderUrl = "/folders/${folder_id}";
+    private static final String wifiAccessPointsUrl = "/system/configs/wifi_accesspoints";
+    private static final String wifiScanUrl = "/system/controls/wifi_accesspoints/scan";
+    private static final String fileInfoUrl = "/documents/${file_id}";
+    private static final String authenticateUrl = "/auth";
+    private static final String takeScreenshotUrl = "/system/controls/screen_shot";
 
-    private static final int PORT = 8443;
+    private static final int SECURE_PORT = 8443;
+    private static final int INSECURE_PORT = 8080;
+
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final String baseUrl;
 
-    public DigitalPaperEndpoint(String addr, SimpleHttpClient simpleHttpClient) {
-        this.baseUrl = "https://" + addr + ":" + PORT;
+    private final SimpleHttpClient simpleHttpClient;
+    private final String secureBaseUrl;
+    private final String insecureBaseUrl;
+    private final String ip;
+
+    public DigitalPaperEndpoint(String ip, SimpleHttpClient simpleHttpClient) {
+        this.ip = ip;
+        this.secureBaseUrl = "https://" + ip + ":" + SECURE_PORT;
+        this.insecureBaseUrl = "http://" + ip + ":" + INSECURE_PORT;
         this.simpleHttpClient = simpleHttpClient;
     }
 
     public String getNonce(String clientId) throws IOException, InterruptedException {
-        return fromJSON(simpleHttpClient.get(baseUrl + "/auth/nonce/" + clientId)).get("nonce");
+        return fromJSON(simpleHttpClient.get(secureBaseUrl + "/auth/nonce/" + clientId)).get("nonce");
     }
 
     public String listDocuments() throws IOException, InterruptedException {
-        return simpleHttpClient.get(baseUrl + "/documents2");
+        return simpleHttpClient.get(secureBaseUrl + "/documents2");
     }
 
     public String listDocuments(EntryType entryType) throws IOException, InterruptedException {
-        return simpleHttpClient.get(baseUrl + "/documents2?entry_type=" + entryType);
+        return simpleHttpClient.get(secureBaseUrl + "/documents2?entry_type=" + entryType);
     }
-
-    private final SimpleHttpClient simpleHttpClient;
-    private static final String downloadRemoteIdUrl = "/documents/${remote_id}/file";
-    private static final String resolveObjectByPathUrl = "/resolve/entry/path/${enc_path}";
-    private static final String deleteByDocumentIdUrl = "/documents/${doc_id}";
 
     private static String resolve(String template, Map<String, String> variables) {
         StringSubstitutor stringSubstitutor = new StringSubstitutor(variables);
@@ -61,7 +73,7 @@ public class DigitalPaperEndpoint {
     }
 
     public URI getURI() throws URISyntaxException {
-        return new URI(baseUrl);
+        return new URI(secureBaseUrl);
     }
 
     public InputStream downloadByRemoteId(String remoteId) throws IOException, InterruptedException {
@@ -76,7 +88,7 @@ public class DigitalPaperEndpoint {
 
     public String resolveObjectByPath(Path path) throws IOException, InterruptedException {
         String encodedPath = URLEncoder.encode(path.toString(), StandardCharsets.UTF_8);
-        String url = baseUrl + resolve(resolveObjectByPathUrl, variable("enc_path", encodedPath));
+        String url = secureBaseUrl + resolve(resolveObjectByPathUrl, variable("enc_path", encodedPath));
 
         HttpResponse<String> result = simpleHttpClient.getWithResponse(url);
         if (ok(result)) {
@@ -94,7 +106,7 @@ public class DigitalPaperEndpoint {
             put("folder_name", directory.getFileName().toString());
             put("parent_folder_id", parentId);
         }};
-        simpleHttpClient.post(baseUrl + "/folders2", body);
+        simpleHttpClient.post(secureBaseUrl + "/folders2", body);
         return resolveObjectByPath(directory);
     }
 
@@ -104,29 +116,24 @@ public class DigitalPaperEndpoint {
             put("parent_folder_id", parentId);
             put("document_source", "");
         }};
-        String documentId = fromJSON(simpleHttpClient.post(baseUrl + "/documents2", touchParam)).get("document_id");
-        String documentUrl = baseUrl + resolve(filePathUrl, variable("doc_id", documentId));
+        String documentId = fromJSON(simpleHttpClient.post(secureBaseUrl + "/documents2", touchParam)).get("document_id");
+        String documentUrl = secureBaseUrl + resolve(filePathUrl, variable("doc_id", documentId));
         simpleHttpClient.putFile(documentUrl, filePath);
         return documentId;
     }
 
-    private static final String deleteFolderUrl = "/folders/${folder_id}";
-    private static final String wifiAccessPointsUrl = "/system/configs/wifi_accesspoints";
-    private static final String wifiScanUrl = "/system/controls/wifi_accesspoints/scan";
 
     public void deleteFolderByRemoteId(String remoteId) throws IOException, InterruptedException {
-        simpleHttpClient.delete(baseUrl + resolve(deleteFolderUrl, variable("folder_id", remoteId)));
+        simpleHttpClient.delete(secureBaseUrl + resolve(deleteFolderUrl, variable("folder_id", remoteId)));
     }
 
     public String listWifi() throws IOException, InterruptedException {
-        return simpleHttpClient.get(baseUrl + wifiAccessPointsUrl);
+        return simpleHttpClient.get(secureBaseUrl + wifiAccessPointsUrl);
     }
 
     public String scanWifi() throws IOException, InterruptedException {
-        return simpleHttpClient.post(baseUrl + wifiScanUrl);
+        return simpleHttpClient.post(secureBaseUrl + wifiScanUrl);
     }
-
-    private static final String fileInfoUrl = "/documents/${file_id}";
 
     public void setFileInfo(String remoteId, String newParentFolderId, String newFilename) throws IOException, InterruptedException {
         Map<String, String> moveParam = new HashMap<>();
@@ -134,12 +141,15 @@ public class DigitalPaperEndpoint {
         if (newFilename != null) {
             moveParam.put("file_name", newFilename);
         }
-        simpleHttpClient.put(baseUrl + resolve(fileInfoUrl, variable("file_id", remoteId)), moveParam);
+        simpleHttpClient.put(secureBaseUrl + resolve(fileInfoUrl, variable("file_id", remoteId)), moveParam);
     }
 
-    private static final String takeScreenshotUrl = "/system/controls/screen_shot";
-
     public InputStream takeScreenshot() throws IOException, InterruptedException {
-        return simpleHttpClient.getFile(baseUrl + takeScreenshotUrl);
+        return simpleHttpClient.getFile(secureBaseUrl + takeScreenshotUrl);
+    }
+
+    public String authenticate(Map<String, String> params) throws IOException, InterruptedException {
+        HttpResponse<String> response = simpleHttpClient.putWithResponse(secureBaseUrl + authenticateUrl, params);
+        return response.headers().map().get("set-cookie").get(0).split("; ")[0].split("=")[1];
     }
 }

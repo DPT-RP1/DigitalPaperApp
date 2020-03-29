@@ -29,11 +29,11 @@ public class SimpleHttpClient {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private HttpClient httpClient;
+    private final HttpClient httpClient;
     private SSLContext sslContext;
     private SSLParameters sslParameters;
 
-    private Map<String, String> defaultHeaders;
+    private final Map<String, String> defaultHeaders;
 
     public SimpleHttpClient() throws KeyManagementException, NoSuchAlgorithmException {
         disableSsl();
@@ -44,10 +44,6 @@ public class SimpleHttpClient {
                 .sslContext(sslContext)
                 .sslParameters(sslParameters)
                 .build();
-    }
-
-    public static String body(HttpResponse<String> response) {
-        return response.body();
     }
 
     public HttpRequest.Builder requestBuilder() {
