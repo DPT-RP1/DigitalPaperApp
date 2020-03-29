@@ -3,6 +3,7 @@ package net.sony.dpt.ui.cli;
 import net.sony.dpt.DigitalPaperEndpoint;
 import net.sony.dpt.command.authenticate.AuthenticateCommand;
 import net.sony.dpt.command.authenticate.AuthenticationCookie;
+import net.sony.dpt.command.device.TakeScreenshotCommand;
 import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.documents.ListDocumentsCommand;
 import net.sony.dpt.command.documents.TransferDocumentCommand;
@@ -135,6 +136,8 @@ public class DigitalPaperCLI {
                 wifiScan();
                 break;
             case "screenshot":
+                takeScreenshot(arguments.get(1));
+                break;
             case "copy-document":
             case "wifi-add":
             case "wifi-del":
@@ -226,8 +229,19 @@ public class DigitalPaperCLI {
         new TransferDocumentCommand(digitalPaperEndpoint).createFolderRecursively(Path.of(remotePath));
     }
 
-    public void moveDocument(String oldPath, String newPath) throws IOException, InterruptedException {
+    private void moveDocument(String oldPath, String newPath) throws IOException, InterruptedException {
         new TransferDocumentCommand(digitalPaperEndpoint).moveDocument(Path.of(oldPath), Path.of(newPath));
+    }
+
+    private void takeScreenshot(String target) throws IOException, InterruptedException {
+        if (!target.endsWith(".png")) {
+            target = target + ".png";
+        }
+        InputStream memoryCopy = new TakeScreenshotCommand(digitalPaperEndpoint).takeScreenshot();
+        try (OutputStream targetStream = Files.newOutputStream(Path.of(target))) {
+            IOUtils.copy(memoryCopy, targetStream);
+            memoryCopy.close();
+        }
     }
 
 }

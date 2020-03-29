@@ -136,4 +136,10 @@ public class DigitalPaperEndpoint {
         }
         simpleHttpClient.put(baseUrl + resolve(fileInfoUrl, variable("file_id", remoteId)), moveParam);
     }
+
+    private static final String takeScreenshotUrl = "/system/controls/screen_shot";
+
+    public InputStream takeScreenshot() throws IOException, InterruptedException {
+        return simpleHttpClient.getFile(baseUrl + takeScreenshotUrl);
+    }
 }
