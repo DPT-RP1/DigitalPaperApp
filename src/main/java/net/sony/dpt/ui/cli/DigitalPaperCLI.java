@@ -12,6 +12,7 @@ import net.sony.dpt.command.register.RegistrationResponse;
 import net.sony.dpt.command.wifi.AccessPointList;
 import net.sony.dpt.command.wifi.WifiCommand;
 import net.sony.dpt.persistence.RegistrationTokenStore;
+import net.sony.dpt.ui.gui.whiteboard.Whiteboard;
 import net.sony.dpt.zeroconf.FindDigitalPaper;
 import net.sony.util.*;
 import org.apache.commons.cli.CommandLine;
@@ -137,6 +138,9 @@ public class DigitalPaperCLI {
                 break;
             case "screenshot":
                 takeScreenshot(arguments.get(1));
+                break;
+            case "whiteboard":
+                new Whiteboard(new TakeScreenshotCommand(digitalPaperEndpoint));
                 break;
             case "copy-document":
             case "wifi-add":
