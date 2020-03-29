@@ -1917,7 +1917,7 @@
     "/system/configs": {
       "get": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -1939,7 +1939,7 @@
     "/system/configs/timezone": {
       "get": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -1959,7 +1959,7 @@
       },
       "put": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -1998,7 +1998,7 @@
     "/system/configs/datetime": {
       "put": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -2037,7 +2037,7 @@
     "/system/configs/date_format": {
       "get": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -2057,7 +2057,7 @@
       },
       "put": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -2096,7 +2096,7 @@
     "/system/configs/time_format": {
       "get": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -2116,7 +2116,7 @@
       },
       "put": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -2155,7 +2155,7 @@
     "/system/configs/initialized_flag": {
       "get": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -2175,7 +2175,7 @@
       },
       "put": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -2214,7 +2214,7 @@
     "/system/configs/timeout_to_standby": {
       "get": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -2234,7 +2234,7 @@
       },
       "put": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -2273,7 +2273,7 @@
     "/system/configs/owner": {
       "get": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -2293,7 +2293,7 @@
       },
       "put": {
         "tags": [
-          "settings"
+          "Settings management"
         ],
         "schemes": [
           "https"
@@ -2332,7 +2332,7 @@
     "/system/status/storage": {
       "get": {
         "tags": [
-          "status"
+          "Settings - status"
         ],
         "schemes": [
           "https"
@@ -2354,7 +2354,7 @@
     "/system/status/firmware_version": {
       "get": {
         "tags": [
-          "status"
+          "Settings - status"
         ],
         "schemes": [
           "https"
@@ -2376,7 +2376,7 @@
     "/system/status/mac_address": {
       "get": {
         "tags": [
-          "status"
+          "Settings - status"
         ],
         "schemes": [
           "https"
@@ -2398,7 +2398,7 @@
     "/system/status/battery": {
       "get": {
         "tags": [
-          "status"
+          "Settings - status"
         ],
         "schemes": [
           "https"
@@ -2431,12 +2431,12 @@
         "produces": [
           "application/json"
         ],
-        "description": "画面上に各種通知用ダイアログを表示する",
+        "description": "Display various notification dialogs on the screen",
         "parameters": [
           {
             "name": "value",
             "in": "body",
-            "description": "ダイアログのパラメータ",
+            "description": "Dialog parameters",
             "required": true,
             "schema": {
               "$ref": "#/definitions/indicationInfoObject2"
@@ -2470,7 +2470,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "画面上に各種通知用ダイアログを表示する<br>\n※識別子はUUID形式であれば任意なものを指定可能<br>\n※以前指定したのと同じ識別子を指定した場合は、対応するダイアログの情報を上書きする",
+        "description": "Display various notification dialogs on the screen<br>\n※識別子はUUID形式であれば任意なものを指定可能<br>\n※以前指定したのと同じ識別子を指定した場合は、対応するダイアログの情報を上書きする",
         "parameters": [
           {
             "name": "indication_id",
@@ -2482,7 +2482,7 @@
           {
             "name": "indication_info",
             "in": "body",
-            "description": "ダイアログのパラメータ",
+            "description": "Dialog parameters",
             "required": true,
             "schema": {
               "$ref": "#/definitions/indicationInfoObject2"
@@ -3294,7 +3294,7 @@
     "/register/information": {
       "get": {
         "tags": [
-          "クライアント登録"
+          "Client registration"
         ],
         "schemes": [
           "http",
@@ -3317,7 +3317,7 @@
     "/register/pin": {
       "post": {
         "tags": [
-          "クライアント登録"
+          "Client registration"
         ],
         "schemes": [
           "http",
@@ -3340,7 +3340,7 @@
     "/register/hash": {
       "post": {
         "tags": [
-          "クライアント登録"
+          "Client registration"
         ],
         "schemes": [
           "http",
@@ -3389,7 +3389,7 @@
     "/register/ca": {
       "post": {
         "tags": [
-          "クライアント登録"
+          "Client registration"
         ],
         "schemes": [
           "http",
@@ -3438,7 +3438,7 @@
     "/register": {
       "post": {
         "tags": [
-          "クライアント登録"
+          "Client registration"
         ],
         "schemes": [
           "http",
@@ -3484,7 +3484,7 @@
     "/register/dcss1": {
       "post": {
         "tags": [
-          "クライアント登録"
+          "Client registration"
         ],
         "schemes": [
           "http",
@@ -3513,7 +3513,7 @@
     "/register/dcss2": {
       "post": {
         "tags": [
-          "クライアント登録"
+          "Client registration"
         ],
         "schemes": [
           "http",
@@ -3562,7 +3562,7 @@
     "/register/dcss3": {
       "post": {
         "tags": [
-          "クライアント登録"
+          "Client registration"
         ],
         "schemes": [
           "http",
@@ -3611,7 +3611,7 @@
     "/register/dcss4": {
       "post": {
         "tags": [
-          "クライアント登録"
+          "Client registration"
         ],
         "schemes": [
           "http",
@@ -3657,7 +3657,7 @@
     "/register/cleanup": {
       "put": {
         "tags": [
-          "クライアント登録"
+          "Client registration"
         ],
         "schemes": [
           "http",
@@ -3926,7 +3926,7 @@
     "/testmode/auth/nonce": {
       "get": {
         "tags": [
-          "テストモード"
+          "Test mode"
         ],
         "schemes": [
           "https"
@@ -3954,7 +3954,7 @@
     "/testmode/auth": {
       "put": {
         "tags": [
-          "テストモード"
+          "Test mode"
         ],
         "schemes": [
           "https"
@@ -4004,7 +4004,7 @@
     "/testmode/launch": {
       "put": {
         "tags": [
-          "テストモード"
+          "Test mode"
         ],
         "schemes": [
           "https"
@@ -4029,7 +4029,7 @@
     "/testmode/recovery_mode": {
       "put": {
         "tags": [
-          "テストモード"
+          "Test mode"
         ],
         "schemes": [
           "https"
@@ -4054,7 +4054,7 @@
     "/testmode/assets/{path}": {
       "get": {
         "tags": [
-          "テストモード"
+          "Test mode"
         ],
         "schemes": [
           "https"
@@ -4103,7 +4103,7 @@
       },
       "put": {
         "tags": [
-          "テストモード"
+          "Test mode"
         ],
         "schemes": [
           "https"
@@ -4150,7 +4150,7 @@
       },
       "delete": {
         "tags": [
-          "テストモード"
+          "Test mode"
         ],
         "schemes": [
           "https"
@@ -4196,7 +4196,7 @@
     "/kitting/auth/nonce": {
       "get": {
         "tags": [
-          "キッティング"
+          "OEM (Kit-preparation)"
         ],
         "schemes": [
           "https"
@@ -4224,7 +4224,7 @@
     "/kitting/auth": {
       "put": {
         "tags": [
-          "キッティング"
+          "OEM (Kit-preparation)"
         ],
         "schemes": [
           "https"
@@ -4274,7 +4274,7 @@
     "/kitting/register/code": {
       "put": {
         "tags": [
-          "キッティング"
+          "OEM (Kit-preparation)"
         ],
         "schemes": [
           "https"
@@ -4316,7 +4316,7 @@
     "/kitting/shutdown": {
       "put": {
         "tags": [
-          "キッティング"
+          "OEM (Kit-preparation)"
         ],
         "schemes": [
           "https"
@@ -4348,7 +4348,7 @@
     "/resolve/entry/{path}": {
       "get": {
         "tags": [
-          "その他"
+          "Miscellaneous"
         ],
         "schemes": [
           "https"
@@ -4385,7 +4385,7 @@
     "/resolve/entry/path/{path}": {
       "get": {
         "tags": [
-          "その他"
+          "Miscellaneous"
         ],
         "schemes": [
           "https"
@@ -4428,7 +4428,7 @@
     "/resolve/entry/ext_id/{ext_id}": {
       "get": {
         "tags": [
-          "その他"
+          "Miscellaneous"
         ],
         "schemes": [
           "https"
@@ -4459,7 +4459,7 @@
     "/notify/login_result": {
       "put": {
         "tags": [
-          "その他"
+          "Miscellaneous"
         ],
         "schemes": [
           "https"
@@ -4498,7 +4498,7 @@
     "/notify/logout_result": {
       "put": {
         "tags": [
-          "その他"
+          "Miscellaneous"
         ],
         "schemes": [
           "https"
@@ -4537,7 +4537,7 @@
     "/api_version": {
       "get": {
         "tags": [
-          "その他"
+          "Miscellaneous"
         ],
         "schemes": [
           "http",
@@ -4560,7 +4560,7 @@
     "/ping": {
       "get": {
         "tags": [
-          "その他"
+          "Miscellaneous"
         ],
         "schemes": [
           "https"
@@ -5717,7 +5717,7 @@
       "required": [
         "level",
         "icon_type",
-        "status",
+        "Settings - status",
         "health",
         "plugged",
         "pen"
@@ -5731,7 +5731,7 @@
           "description": "バッテリーアイコンの種類 ['level_bar_0'/'level_bar_1'/'level_bar_2'/'level_bar_3'/'level_bar_4'/'charging'/'full']",
           "type": "string"
         },
-        "status": {
+        "Settings - status": {
           "description": "バッテリー状態 [充電中:'charging'/放電中:'discharging'/満タン:'full'/充電中でない:'not_charging'/不明:'unknown']",
           "type": "string"
         },
