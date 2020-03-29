@@ -3,6 +3,8 @@ package net.sony.dpt;
 import net.sony.util.SimpleHttpClient;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static net.sony.util.SimpleHttpClient.fromJSON;
 
@@ -19,6 +21,14 @@ public class DigitalPaperEndpoint {
 
     public String getNonce(String clientId) throws IOException, InterruptedException {
         return fromJSON(simpleHttpClient.get(baseUrl + "/auth/nonce/" + clientId)).get("nonce");
+    }
+
+    public String listDocuments() throws IOException, InterruptedException {
+        return simpleHttpClient.get(baseUrl + "/documents2");
+    }
+
+    public URI getURI() throws URISyntaxException {
+        return new URI(baseUrl);
     }
 
 }

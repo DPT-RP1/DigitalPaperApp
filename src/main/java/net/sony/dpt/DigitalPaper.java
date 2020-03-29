@@ -2,6 +2,8 @@ package net.sony.dpt;
 
 import net.sony.dpt.command.authenticate.AuthenticateCommand;
 import net.sony.dpt.command.authenticate.AuthenticationCookie;
+import net.sony.dpt.command.documents.DocumentListResponse;
+import net.sony.dpt.command.documents.ListDocumentsCommand;
 import net.sony.dpt.command.register.RegisterCommand;
 import net.sony.dpt.command.register.RegistrationResponse;
 import net.sony.dpt.persistence.RegistrationTokenStore;
@@ -11,6 +13,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -48,7 +52,9 @@ public class DigitalPaper {
 
     public static void main(String[] args) throws Exception {
         String addr = "192.168.0.48";
+
         SimpleHttpClient simpleHttpClient = new SimpleHttpClient();
+        DigitalPaperEndpoint digitalPaperEndpoint = new DigitalPaperEndpoint(addr, simpleHttpClient);
         DigitalPaper digitalPaper = new DigitalPaper(
                 addr,
                 simpleHttpClient,
@@ -59,7 +65,7 @@ public class DigitalPaper {
                     Scanner scanner = new Scanner(System.in);
                     return scanner.next();
                 },
-                new DigitalPaperEndpoint(addr, simpleHttpClient)
+                digitalPaperEndpoint
         );
 
         RegistrationTokenStore registrationTokenStore = new RegistrationTokenStore(Path.of(System.getProperty("user.home")));
@@ -74,6 +80,12 @@ public class DigitalPaper {
         System.out.println(registrationResponse);
 
         AuthenticationCookie cookie = digitalPaper.authenticate(registrationResponse);
+        System.out.println(cookie);
+        cookie.insertInCookieManager(digitalPaperEndpoint.getURI(), (CookieManager) CookieHandler.getDefault());
+        cookie.insertInRequest(simpleHttpClient::addDefaultHeader);
+
+        DocumentListResponse documents = digitalPaper.listDocuments();
+        System.out.println("Documents listed");
     }
 
     public RegistrationResponse register() throws IllegalBlockSizeException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IOException, BadPaddingException, NoSuchPaddingException, InvalidKeyException {
@@ -82,6 +94,10 @@ public class DigitalPaper {
 
     public AuthenticationCookie authenticate(RegistrationResponse registrationResponse) throws Exception {
         return new AuthenticateCommand(addr, digitalPaperEndpoint, cryptographyUtil, simpleHttpClient).authenticate(registrationResponse);
+    }
+
+    public DocumentListResponse listDocuments() throws IOException, InterruptedException {
+        return new ListDocumentsCommand(digitalPaperEndpoint).listDocuments();
     }
 
 }

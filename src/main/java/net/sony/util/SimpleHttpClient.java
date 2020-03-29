@@ -17,6 +17,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -28,9 +29,12 @@ public class SimpleHttpClient {
     private SSLContext sslContext;
     private SSLParameters sslParameters;
 
+    private Map<String, String> defaultHeaders;
+
     public SimpleHttpClient() throws KeyManagementException, NoSuchAlgorithmException {
         disableSsl();
         CookieHandler.setDefault(new CookieManager());
+        defaultHeaders = new HashMap<>();
         httpClient = HttpClient.newBuilder()
                 .cookieHandler(CookieHandler.getDefault())
                 .sslContext(sslContext)
@@ -38,18 +42,22 @@ public class SimpleHttpClient {
                 .build();
     }
 
-    public String get(String url) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .method("GET", HttpRequest.BodyPublishers.ofString(""))
-                .build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+    public static String body(HttpResponse<String> response) {
+        return response.body();
     }
 
-    public String put(String url) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
+    public HttpRequest.Builder requestBuilder() {
+        HttpRequest.Builder builder = HttpRequest.newBuilder();
+        for (Map.Entry<String, String> entry : defaultHeaders.entrySet()) {
+            builder.header(entry.getKey(), entry.getValue());
+        }
+        return builder;
+    }
+
+    public String get(String url) throws IOException, InterruptedException {
+        HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
-                .method("PUT", HttpRequest.BodyPublishers.ofString(""))
+                .method("GET", HttpRequest.BodyPublishers.ofString(""))
                 .build();
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
     }
@@ -58,8 +66,16 @@ public class SimpleHttpClient {
         return putWithResponse(url, jsonBody).body();
     }
 
+    public String put(String url) throws IOException, InterruptedException {
+        HttpRequest request = requestBuilder()
+                .uri(URI.create(url))
+                .method("PUT", HttpRequest.BodyPublishers.ofString(""))
+                .build();
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+    }
+
     public HttpResponse<String> putWithResponse(String url, Map<String, String> jsonBody) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
                 .method("PUT", HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(jsonBody)))
                 .build();
@@ -68,7 +84,7 @@ public class SimpleHttpClient {
 
     public String post(String url) throws IOException, InterruptedException {
 
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
                 .method("POST", HttpRequest.BodyPublishers.ofString(""))
                 .build();
@@ -76,7 +92,7 @@ public class SimpleHttpClient {
     }
 
     public String post(String url, Map<String, String> jsonBody) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
                 .method("POST", HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(jsonBody)))
                 .build();
@@ -117,4 +133,7 @@ public class SimpleHttpClient {
         props.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
     }
 
+    public void addDefaultHeader(String header, String value) {
+        defaultHeaders.put(header, value);
+    }
 }
