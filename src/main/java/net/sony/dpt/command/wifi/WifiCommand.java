@@ -19,13 +19,6 @@ public class WifiCommand {
         return objectMapper.readValue(json, AccessPointList.class);
     }
 
-    /**
-     * def wifi_scan(self):
-     * data = self._post_endpoint('/system/controls/wifi_accesspoints/scan').json()
-     * for ap in data['aplist']:
-     * ap['ssid'] = base64.b64decode(ap['ssid']).decode('utf-8', errors='replace')
-     * return data['aplist']
-     */
     public AccessPointList scan() throws IOException, InterruptedException {
         String json = digitalPaperEndpoint.scanWifi();
         return objectMapper.readValue(json, AccessPointList.class);
