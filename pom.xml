@@ -78,6 +78,12 @@
       <artifactId>guava</artifactId>
       <version>28.2-jre</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.jmdns/jmdns -->
+    <dependency>
+      <groupId>org.jmdns</groupId>
+      <artifactId>jmdns</artifactId>
+      <version>3.5.5</version>
+    </dependency>
 
   </dependencies>
 

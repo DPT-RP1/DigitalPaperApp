@@ -11,6 +11,7 @@ import net.sony.dpt.command.register.RegistrationResponse;
 import net.sony.dpt.command.wifi.AccessPointList;
 import net.sony.dpt.command.wifi.WifiCommand;
 import net.sony.dpt.persistence.RegistrationTokenStore;
+import net.sony.dpt.zeroconf.FindDigitalPaper;
 import net.sony.util.*;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -76,8 +77,11 @@ public class DigitalPaperCLI {
         if (commandLine.hasOption("addr")) {
             addr = commandLine.getOptionValue("addr");
         } else {
-            // TODO: auto-find address
-            throw new IllegalArgumentException("We need an addresse to connect to");
+            String matchSerial = null;
+            if (commandLine.hasOption("serial")) {
+                matchSerial = commandLine.getOptionValue("serial");
+            }
+            addr = new FindDigitalPaper(logWriter, simpleHttpClient, matchSerial).findOneIpv4();
         }
 
         // TODO: inject then setup ?
