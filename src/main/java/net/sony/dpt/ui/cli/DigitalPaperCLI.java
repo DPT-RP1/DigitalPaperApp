@@ -127,9 +127,11 @@ public class DigitalPaperCLI {
             case "move-document":
                 moveDocument(arguments.get(1), arguments.get(2));
                 break;
+            case "wifi-scan":
+                wifiScan();
+                break;
             case "screenshot":
             case "copy-document":
-            case "wifi-scan":
             case "wifi-add":
             case "wifi-del":
             case "wifi":
@@ -172,7 +174,13 @@ public class DigitalPaperCLI {
     private void wifiList() throws IOException, InterruptedException {
         WifiCommand wifiCommand = new WifiCommand(digitalPaperEndpoint);
         AccessPointList accessPointList = wifiCommand.list();
-        accessPointList.getAccessPoints().forEach(accessPoint -> logWriter.log(accessPoint.decodedSSID()));
+        accessPointList.getAccessPoints().forEach(accessPoint -> logWriter.log(accessPoint.getDecodedSSID()));
+    }
+
+    private void wifiScan() throws IOException, InterruptedException {
+        WifiCommand wifiCommand = new WifiCommand(digitalPaperEndpoint);
+        AccessPointList accessPointList = wifiCommand.scan();
+        accessPointList.getAccessPoints().forEach(accessPoint -> logWriter.log(accessPoint.getDecodedSSID()));
     }
 
     private void upload(String localPath, String remotePath) throws IOException, InterruptedException {

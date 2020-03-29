@@ -14,14 +14,20 @@ public class WifiCommand {
         this.digitalPaperEndpoint = digitalPaperEndpoint;
     }
 
+    public AccessPointList list() throws IOException, InterruptedException {
+        String json = digitalPaperEndpoint.listWifi();
+        return objectMapper.readValue(json, AccessPointList.class);
+    }
+
     /**
-     * data = self._get_endpoint('/system/configs/wifi_accesspoints').json()
+     * def wifi_scan(self):
+     * data = self._post_endpoint('/system/controls/wifi_accesspoints/scan').json()
      * for ap in data['aplist']:
      * ap['ssid'] = base64.b64decode(ap['ssid']).decode('utf-8', errors='replace')
      * return data['aplist']
      */
-    public AccessPointList list() throws IOException, InterruptedException {
-        String json = digitalPaperEndpoint.listWifi();
+    public AccessPointList scan() throws IOException, InterruptedException {
+        String json = digitalPaperEndpoint.scanWifi();
         return objectMapper.readValue(json, AccessPointList.class);
     }
 

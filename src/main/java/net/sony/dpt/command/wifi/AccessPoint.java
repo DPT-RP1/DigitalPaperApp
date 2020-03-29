@@ -1,6 +1,7 @@
 package net.sony.dpt.command.wifi;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -11,6 +12,16 @@ public class AccessPoint {
     private boolean proxy;
     private String security;
     private String ssid;
+
+    @JsonProperty("frequency_band")
+    private String frequencyBand;
+    @JsonProperty("rssi_level")
+    private String rssiLevel;
+    @JsonProperty("state")
+    private String state;
+
+    @JsonIgnore
+    private String decodedSSID;
 
     public boolean isDhcp() {
         return dhcp;
@@ -42,10 +53,11 @@ public class AccessPoint {
 
     public void setSsid(String ssid) {
         this.ssid = ssid;
+        this.decodedSSID = new String(Base64.getDecoder().decode(ssid), StandardCharsets.UTF_8);
     }
 
     @JsonIgnore
-    public String decodedSSID() {
-        return new String(Base64.getDecoder().decode(ssid), StandardCharsets.UTF_8);
+    public String getDecodedSSID() {
+        return decodedSSID;
     }
 }

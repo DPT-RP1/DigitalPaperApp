@@ -112,6 +112,7 @@ public class DigitalPaperEndpoint {
 
     private static final String deleteFolderUrl = "/folders/${folder_id}";
     private static final String wifiAccessPointsUrl = "/system/configs/wifi_accesspoints";
+    private static final String wifiScanUrl = "/system/controls/wifi_accesspoints/scan";
 
     public void deleteFolderByRemoteId(String remoteId) throws IOException, InterruptedException {
         simpleHttpClient.delete(baseUrl + resolve(deleteFolderUrl, variable("folder_id", remoteId)));
@@ -119,6 +120,10 @@ public class DigitalPaperEndpoint {
 
     public String listWifi() throws IOException, InterruptedException {
         return simpleHttpClient.get(baseUrl + wifiAccessPointsUrl);
+    }
+
+    public String scanWifi() throws IOException, InterruptedException {
+        return simpleHttpClient.post(baseUrl + wifiScanUrl);
     }
 
     private static final String fileInfoUrl = "/documents/${file_id}";
