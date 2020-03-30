@@ -99,7 +99,7 @@ public class DigitalPaperCLI {
             return;
         }
 
-        auth(addr);
+        auth();
 
         switch (command) {
             case "list-documents":
@@ -169,9 +169,9 @@ public class DigitalPaperCLI {
         registrationTokenStore.storeRegistrationToken(registrationResponse);
     }
 
-    private void auth(String addr) throws Exception {
+    private void auth() throws Exception {
         RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
-        AuthenticationCookie authenticationCookie = new AuthenticateCommand(addr, digitalPaperEndpoint, cryptographyUtil, simpleHttpClient).authenticate(registrationResponse);
+        AuthenticationCookie authenticationCookie = new AuthenticateCommand(digitalPaperEndpoint, cryptographyUtil).authenticate(registrationResponse);
         authenticationCookie.insertInCookieManager(digitalPaperEndpoint.getURI(), (CookieManager) CookieHandler.getDefault());
         authenticationCookie.insertInRequest(simpleHttpClient::addDefaultHeader);
 
