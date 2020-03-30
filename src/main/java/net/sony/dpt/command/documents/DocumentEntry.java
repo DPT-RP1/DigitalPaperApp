@@ -1,6 +1,9 @@
 package net.sony.dpt.command.documents;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Date;
 
 public class DocumentEntry {
 
@@ -31,7 +34,8 @@ public class DocumentEntry {
     @JsonProperty("mime_type")
     private String mimeType;
     @JsonProperty("modified_date")
-    private String modifiedDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss'Z'")
+    private Date modifiedDate;
     @JsonProperty("parent_folder_id")
     private String parentFolderId;
     @JsonProperty("reading_date")
@@ -138,11 +142,11 @@ public class DocumentEntry {
         this.mimeType = mimeType;
     }
 
-    public String getModifiedDate() {
+    public Date getModifiedDate() {
         return modifiedDate;
     }
 
-    public void setModifiedDate(String modifiedDate) {
+    public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
 

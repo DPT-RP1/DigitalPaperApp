@@ -1,6 +1,7 @@
 package net.sony.dpt;
 
 import net.sony.dpt.persistence.RegistrationTokenStore;
+import net.sony.dpt.persistence.SyncStore;
 import net.sony.dpt.ui.cli.DigitalPaperCLI;
 import net.sony.util.CryptographyUtil;
 import net.sony.util.DiffieHelman;
@@ -21,7 +22,8 @@ public class DigitalPaperApp {
                     Scanner scanner = new Scanner(System.in);
                     return scanner.next();
                 },
-                new RegistrationTokenStore(Path.of(System.getProperty("user.home")))
+                new RegistrationTokenStore(Path.of(System.getProperty("user.home"))),
+                new SyncStore(Path.of(System.getProperty("user.home")))
         );
         digitalPaperCLI.execute(args);
     }

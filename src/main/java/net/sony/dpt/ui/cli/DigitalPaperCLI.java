@@ -9,9 +9,11 @@ import net.sony.dpt.command.documents.ListDocumentsCommand;
 import net.sony.dpt.command.documents.TransferDocumentCommand;
 import net.sony.dpt.command.register.RegisterCommand;
 import net.sony.dpt.command.register.RegistrationResponse;
+import net.sony.dpt.command.sync.SyncCommand;
 import net.sony.dpt.command.wifi.AccessPointList;
 import net.sony.dpt.command.wifi.WifiCommand;
 import net.sony.dpt.persistence.RegistrationTokenStore;
+import net.sony.dpt.persistence.SyncStore;
 import net.sony.dpt.ui.gui.whiteboard.Whiteboard;
 import net.sony.dpt.zeroconf.FindDigitalPaper;
 import net.sony.util.*;
@@ -47,13 +49,15 @@ public class DigitalPaperCLI {
     private final InputReader inputReader;
     private final RegistrationTokenStore registrationTokenStore;
     private DigitalPaperEndpoint digitalPaperEndpoint;
+    private final SyncStore syncStore;
 
     public DigitalPaperCLI(SimpleHttpClient simpleHttpClient,
                            DiffieHelman diffieHelman,
                            CryptographyUtil cryptographyUtil,
                            LogWriter logWriter,
                            InputReader inputReader,
-                           RegistrationTokenStore registrationTokenStore) {
+                           RegistrationTokenStore registrationTokenStore,
+                           SyncStore syncStore) {
 
         parser = new DefaultParser();
         this.simpleHttpClient = simpleHttpClient;
@@ -62,6 +66,7 @@ public class DigitalPaperCLI {
         this.logWriter = logWriter;
         this.inputReader = inputReader;
         this.registrationTokenStore = registrationTokenStore;
+        this.syncStore = syncStore;
 
         options = new Options();
         options.addOption("addr", "addr", true, "The ip address of the Digital Paper");
@@ -142,6 +147,9 @@ public class DigitalPaperCLI {
             case "whiteboard":
                 new Whiteboard(new TakeScreenshotCommand(digitalPaperEndpoint));
                 break;
+            case "sync":
+                sync(arguments.get(1), commandLine.hasOption("dryrun") && commandLine.getOptionValue("dryrun").equals("true"));
+                break;
             case "copy-document":
             case "wifi-add":
             case "wifi-del":
@@ -149,7 +157,6 @@ public class DigitalPaperCLI {
             case "wifi-enable":
             case "wifi-disable":
             case "update-firmware":
-            case "sync":
             case "command-help":
                 throw new UnsupportedOperationException(command);
 
@@ -246,6 +253,17 @@ public class DigitalPaperCLI {
             IOUtils.copy(memoryCopy, targetStream);
             memoryCopy.close();
         }
+    }
+
+    private void sync(String localFolder, boolean dryrun) throws IOException, InterruptedException {
+        DocumentListResponse documentListResponse = new ListDocumentsCommand(digitalPaperEndpoint).listDocuments();
+        new SyncCommand(
+                Path.of(localFolder),
+                documentListResponse,
+                digitalPaperEndpoint,
+                logWriter,
+                syncStore
+        ).sync(dryrun);
     }
 
 }
