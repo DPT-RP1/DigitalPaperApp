@@ -7,11 +7,13 @@ import net.sony.dpt.command.device.TakeScreenshotCommand;
 import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.documents.ListDocumentsCommand;
 import net.sony.dpt.command.documents.TransferDocumentCommand;
+import net.sony.dpt.command.ping.PingCommand;
 import net.sony.dpt.command.register.RegisterCommand;
 import net.sony.dpt.command.register.RegistrationResponse;
 import net.sony.dpt.command.sync.SyncCommand;
 import net.sony.dpt.command.wifi.AccessPointList;
 import net.sony.dpt.command.wifi.WifiCommand;
+import net.sony.dpt.persistence.DeviceInfoStore;
 import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
 import net.sony.dpt.ui.gui.whiteboard.Whiteboard;
@@ -50,6 +52,7 @@ public class DigitalPaperCLI {
     private final RegistrationTokenStore registrationTokenStore;
     private DigitalPaperEndpoint digitalPaperEndpoint;
     private final SyncStore syncStore;
+    private final DeviceInfoStore deviceInfoStore;
 
     public DigitalPaperCLI(SimpleHttpClient simpleHttpClient,
                            DiffieHelman diffieHelman,
@@ -57,7 +60,8 @@ public class DigitalPaperCLI {
                            LogWriter logWriter,
                            InputReader inputReader,
                            RegistrationTokenStore registrationTokenStore,
-                           SyncStore syncStore) {
+                           SyncStore syncStore,
+                           DeviceInfoStore deviceInfoStore) {
 
         parser = new DefaultParser();
         this.simpleHttpClient = simpleHttpClient;
@@ -67,33 +71,46 @@ public class DigitalPaperCLI {
         this.inputReader = inputReader;
         this.registrationTokenStore = registrationTokenStore;
         this.syncStore = syncStore;
+        this.deviceInfoStore = deviceInfoStore;
 
         options = new Options();
         options.addOption("addr", "addr", true, "The ip address of the Digital Paper");
+        options.addOption("serial", "serial", true, "The serial number of the Digital Paper we want to auto discover");
+        options.addOption("dryrun", "dryrun", false, "For commands that can run in dry mode, simulate their action");
+    }
+
+    private String findAddress(CommandLine commandLine) throws IOException, InterruptedException {
+        String addr;
+        if (commandLine.hasOption("addr")) {
+            addr = commandLine.getOptionValue("addr");
+        } else {
+            // Before trying autoconfig, we can try loading the last ip
+            String lastIp = deviceInfoStore.retrieveLastIp();
+            if (lastIp != null && new PingCommand(simpleHttpClient).pingIp(lastIp)) {
+                addr = lastIp;
+            } else {
+                String matchSerial = null;
+                if (commandLine.hasOption("serial")) {
+                    matchSerial = commandLine.getOptionValue("serial");
+                }
+                addr = new FindDigitalPaper(logWriter, simpleHttpClient, matchSerial).findOneIpv4();
+            }
+        }
+        if (addr == null || addr.isEmpty()) throw new IllegalStateException("No device found or reachable.");
+        // We store the last address
+        deviceInfoStore.storeLastIp(addr);
+        return addr;
     }
 
     public void execute(String[] args) throws Exception {
         CommandLine commandLine = parser.parse(options, args);
 
-        // The arguments have to be ordered: command param1 param2 etc.
-        List<String> arguments = commandLine.getArgList();
-
-        String command = arguments.get(0);
-
-        String addr;
-        if (commandLine.hasOption("addr")) {
-            addr = commandLine.getOptionValue("addr");
-        } else {
-            String matchSerial = null;
-            if (commandLine.hasOption("serial")) {
-                matchSerial = commandLine.getOptionValue("serial");
-            }
-            addr = new FindDigitalPaper(logWriter, simpleHttpClient, matchSerial).findOneIpv4();
-        }
-
-        // TODO: inject then setup ?
+        String addr = findAddress(commandLine);
         digitalPaperEndpoint = new DigitalPaperEndpoint(addr, simpleHttpClient);
 
+        // The arguments have to be ordered: command param1 param2 etc.
+        List<String> arguments = commandLine.getArgList();
+        String command = arguments.get(0);
         if (command.equals("register")) {
             register(addr);
             return;
@@ -148,7 +165,7 @@ public class DigitalPaperCLI {
                 new Whiteboard(new TakeScreenshotCommand(digitalPaperEndpoint));
                 break;
             case "sync":
-                sync(arguments.get(1), commandLine.hasOption("dryrun") && commandLine.getOptionValue("dryrun").equals("true"));
+                sync(arguments.get(1), commandLine.hasOption("dryrun"));
                 break;
             case "copy-document":
             case "wifi-add":

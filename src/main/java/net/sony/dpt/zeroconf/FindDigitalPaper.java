@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static net.sony.util.SimpleHttpClient.fromJSON;
-
 public class FindDigitalPaper {
     private final static int TIMEOUT_SLICES_MS = 500;
     private final static String SERVICE_TYPE = "_digitalpaper._tcp.local.";
@@ -72,7 +70,7 @@ public class FindDigitalPaper {
 
     private static class DigitalPaperServiceListener implements ServiceListener {
 
-        private static final String INFO_URL = "/register/information";
+        private static final String INFO_URL = "/register/serial_number";
         private final Map<InetAddress, ServiceEvent> digitalPapersDiscovered;
         private final LogWriter logWriter;
         private final ConcurrentMap<Inet4Address, ServiceEvent> ipv4Found;
@@ -101,7 +99,7 @@ public class FindDigitalPaper {
         public boolean matchesSerial(Inet4Address address, ServiceEvent event, String matchSerial) {
             String infoUrl = "http://" + address.getHostAddress() + ":" + event.getInfo().getPort() + INFO_URL;
             try {
-                String serialNumber = fromJSON(simpleHttpClient.get(infoUrl)).get("serial_number");
+                String serialNumber = simpleHttpClient.get(infoUrl);
                 return matchSerial.equals(serialNumber);
             } catch (Exception e) {
                 return false;

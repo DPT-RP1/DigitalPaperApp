@@ -7,6 +7,7 @@ import net.sony.dpt.persistence.SyncStore;
 import net.sony.util.LogWriter;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.*;
 import java.util.*;
 
@@ -70,7 +71,7 @@ public class SyncCommand {
      * @param dryrun If true, only displays what would happen, but do not transfer/delete anything
      * @throws IOException
      */
-    public void sync(boolean dryrun) throws IOException {
+    public void sync(boolean dryrun) throws IOException, InterruptedException {
         loadRemoteDocuments(remoteDocumentList);
         loadLocalDocuments(localPath);
         Date lastSyncDate = syncStore.retrieveLastSyncDate();
@@ -79,9 +80,10 @@ public class SyncCommand {
         }
         this.dryrun = dryrun;
         sync(lastSyncDate);
+        syncStore.storeLastSyncDate(new Date());
     }
 
-    public void sync(Date lastSync) {
+    public void sync(Date lastSync) throws IOException, InterruptedException {
 
         // We are in initialization mode for the remote
         if (remoteFileMap.isEmpty() && !localFileMap.isEmpty()) {
@@ -89,19 +91,29 @@ public class SyncCommand {
             localFileMap.keySet().forEach(this::sendLocalFile);
         } else if (!remoteFileMap.isEmpty() && localFileMap.isEmpty()) {
             logWriter.log("Initial sync, fetching all from remote...");
-            remoteFileMap.keySet().forEach(this::fetchRemoteFile);
+            for (Path path : remoteFileMap.keySet()) {
+                fetchRemoteFile(path);
+            }
         } else if (!remoteFileMap.isEmpty()) {
             // We are in tree merge mode
             logWriter.log("Starting sync...");
-            handleFileDifference(localFileMap, remoteFileMap);
-            handleExistOnlyInRemote(localFileMap, remoteFileMap, lastSync);
-            handleExistOnlyInLocal(localFileMap, remoteFileMap, lastSync);
+            int count = 0;
+            count += handleFileDifference(localFileMap, remoteFileMap);
+            count += handleExistOnlyInRemote(localFileMap, remoteFileMap, lastSync);
+            count += handleExistOnlyInLocal(localFileMap, remoteFileMap, lastSync);
+            if (count == 0) {
+                logWriter.log("Nothing to synchronize: both sides are identical.");
+            } else {
+                logWriter.log("Synchronized " + count + " files.");
+            }
         } else {
-            logWriter.log("There is nothing to sync: both your local folder and the device are empty.");
+            logWriter.log("There is nothing to synchronize: both your local folder and the device are empty.");
         }
     }
 
-    private void handleExistOnlyInLocal(Map<Path, DocumentEntry> localFileMap, Map<Path, DocumentEntry> remoteFileMap, Date lastSync) {
+    private int handleExistOnlyInLocal(Map<Path, DocumentEntry> localFileMap, Map<Path, DocumentEntry> remoteFileMap, Date lastSync) {
+        int count = 0;
+
         Set<Path> onlyLocal = new HashSet<>(localFileMap.keySet());
         onlyLocal.removeAll(remoteFileMap.keySet());
 
@@ -110,7 +122,7 @@ public class SyncCommand {
         //  if the last sync is more recent than the local file: the file existed remotely and got deleted
         //  if the last sync is older than the local file: the local file was added between the last sync and now
         //  if the last sync never happened: then we conservatively not delete
-        onlyLocal.forEach(path -> {
+        for (Path path : onlyLocal) {
             if (lastSync == null) {
                 sendLocalFile(path);
             } else {
@@ -121,11 +133,15 @@ public class SyncCommand {
                     sendLocalFile(path);
                 }
             }
-        });
+            count += 1;
+        }
+        return count;
     }
 
 
-    private void handleExistOnlyInRemote(Map<Path, DocumentEntry> localFileMap, Map<Path, DocumentEntry> remoteFileMap, Date lastSync) {
+    private int handleExistOnlyInRemote(Map<Path, DocumentEntry> localFileMap, Map<Path, DocumentEntry> remoteFileMap, Date lastSync) throws IOException, InterruptedException {
+        int count = 0;
+
         Set<Path> onlyRemote = new HashSet<>(remoteFileMap.keySet());
         onlyRemote.removeAll(localFileMap.keySet());
 
@@ -134,7 +150,7 @@ public class SyncCommand {
         //  if the last sync is more recent than the remote file: the file existed locally and got deleted
         //  if the last sync is older than the remote file: the remote file was added between the last sync and now
         //  if the last sync never happened: then we conservatively not delete
-        onlyRemote.forEach(path -> {
+        for (Path path : onlyRemote) {
             if (lastSync == null) {
                 fetchRemoteFile(path);
             } else {
@@ -145,15 +161,19 @@ public class SyncCommand {
                     fetchRemoteFile(path);
                 }
             }
-        });
+            count += 1;
+        }
+        return count;
     }
 
-    private void handleFileDifference(Map<Path, DocumentEntry> localFileMap,
-                                      Map<Path, DocumentEntry> remoteFileMap) {
+    private int handleFileDifference(Map<Path, DocumentEntry> localFileMap,
+                                     Map<Path, DocumentEntry> remoteFileMap) throws IOException, InterruptedException {
+        int count = 0;
+
         Set<Path> insersect = new HashSet<>(localFileMap.keySet());
         insersect.retainAll(remoteFileMap.keySet());
 
-        insersect.forEach(path -> {
+        for (Path path : insersect) {
             DocumentEntry local = localFileMap.get(path);
             DocumentEntry remote = remoteFileMap.get(path);
 
@@ -163,7 +183,7 @@ public class SyncCommand {
             long localSize = local.getFileSize();
             long remoteSize = remote.getFileSize();
 
-            if (localSize == remoteSize) return; // Do nothing, files are the same.
+            if (localSize == remoteSize) continue;
 
             // Since we can't merge, the most recent takes priority
             if (localLastModified.compareTo(remoteLastModified) > 0) {
@@ -171,7 +191,9 @@ public class SyncCommand {
             } else {
                 fetchRemoteFile(path);
             }
-        });
+            count += 1;
+        }
+        return count;
     }
 
     private void sendLocalFile(Path path) {
@@ -181,10 +203,19 @@ public class SyncCommand {
         }
     }
 
-    private void fetchRemoteFile(Path path) {
+    private void fetchRemoteFile(Path path) throws IOException, InterruptedException {
         logWriter.log("Fetching " + path);
         if (!dryrun) {
-
+            Path target = localPath.resolve(path);
+            Files.createDirectories(target.getParent());
+            try (InputStream inputStream = digitalPaperEndpoint.downloadByRemoteId(
+                    remoteFileMap.get(path).getEntryId()
+            )) {
+                Files.copy(
+                        inputStream,
+                        localPath.resolve(path)
+                );
+            }
         }
     }
 

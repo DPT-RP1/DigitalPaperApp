@@ -26,7 +26,7 @@ public class SyncCommandTest {
     }
 
     @Test
-    public void initWithEmptyLocalFolderShouldFetchAll() throws IOException {
+    public void initWithEmptyLocalFolderShouldFetchAll() throws IOException, InterruptedException {
         List<String> messages = new ArrayList<>();
 
         SyncCommand syncCommand = new SyncCommand(null, null, null, message -> {
@@ -42,7 +42,7 @@ public class SyncCommandTest {
     }
 
     @Test
-    public void initWithEmptyRemoteFolderShouldSendAll() throws IOException {
+    public void initWithEmptyRemoteFolderShouldSendAll() throws IOException, InterruptedException {
         List<String> messages = new ArrayList<>();
 
         SyncCommand syncCommand = new SyncCommand(null, null, null, message -> {
@@ -64,7 +64,7 @@ public class SyncCommandTest {
     }
 
     @Test
-    public void bothFoldersEmptyShouldDoNothing() throws IOException {
+    public void bothFoldersEmptyShouldDoNothing() throws IOException, InterruptedException {
         List<String> messages = new ArrayList<>();
 
         SyncCommand syncCommand = new SyncCommand(null, null, null, messages::add, null);

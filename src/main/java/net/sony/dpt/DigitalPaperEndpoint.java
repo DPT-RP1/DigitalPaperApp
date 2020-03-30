@@ -83,7 +83,7 @@ public class DigitalPaperEndpoint {
         StringSubstitutor stringSubstitutor = new StringSubstitutor(resolution);
         String downloadUrl = stringSubstitutor.replace(downloadRemoteIdUrl);
 
-        return simpleHttpClient.getFile(downloadUrl);
+        return simpleHttpClient.getFile(secureBaseUrl + downloadUrl);
     }
 
     public String resolveObjectByPath(Path path) throws IOException, InterruptedException {

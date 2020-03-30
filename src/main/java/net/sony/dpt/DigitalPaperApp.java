@@ -1,5 +1,6 @@
 package net.sony.dpt;
 
+import net.sony.dpt.persistence.DeviceInfoStore;
 import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
 import net.sony.dpt.ui.cli.DigitalPaperCLI;
@@ -23,7 +24,8 @@ public class DigitalPaperApp {
                     return scanner.next();
                 },
                 new RegistrationTokenStore(Path.of(System.getProperty("user.home"))),
-                new SyncStore(Path.of(System.getProperty("user.home")))
+                new SyncStore(Path.of(System.getProperty("user.home"))),
+                new DeviceInfoStore(Path.of(System.getProperty("user.home")))
         );
         digitalPaperCLI.execute(args);
     }
