@@ -5760,7 +5760,7 @@
           "$ref": "#/definitions/dialogParametersObject"
         },
         "show_animation": {
-          "description": "処理中アニメーションを表示するか 表示する:'true', 表示しない:'false' (省略時'false')",
+          "description": "Show an animation. To enable: 'true', to disable:'false' (by default: 'false')",
           "type": "string"
         }
       }

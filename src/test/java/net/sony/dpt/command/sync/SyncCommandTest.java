@@ -31,7 +31,7 @@ public class SyncCommandTest {
 
         SyncCommand syncCommand = new SyncCommand(null, null, null, null, message -> {
             if (message.contains("Fetching")) messages.add(message);
-        }, null);
+        }, null, null);
 
         syncCommand.loadLocalDocuments(Path.of(""));
 
@@ -47,7 +47,7 @@ public class SyncCommandTest {
 
         SyncCommand syncCommand = new SyncCommand(null, null, null, null, message -> {
             if (message.contains("Sending")) messages.add(message);
-        }, null);
+        }, null, null);
 
         syncCommand.loadLocalDocuments(
                 Path.of(
@@ -67,7 +67,7 @@ public class SyncCommandTest {
     public void bothFoldersEmptyShouldDoNothing() throws IOException, InterruptedException {
         List<String> messages = new ArrayList<>();
 
-        SyncCommand syncCommand = new SyncCommand(null, null, null, null, messages::add, null);
+        SyncCommand syncCommand = new SyncCommand(null, null, null, null, messages::add, null, null);
 
         syncCommand.loadLocalDocuments(
                 Path.of(

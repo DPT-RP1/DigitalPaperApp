@@ -102,7 +102,7 @@ public class DigitalPaperEndpoint {
     }
 
     private static final String showDialogUrl = "/system/controls/indicate";
-    private static final String showDialogWithUUID = "/system/controls/indicate/{indication_id}";
+    private static final String showDialogWithUUID = "/system/controls/indicate/${indication_id}";
 
 
     public void deleteFolderByRemoteId(String remoteId) throws IOException, InterruptedException {
@@ -178,6 +178,7 @@ public class DigitalPaperEndpoint {
                 put("message", text);
                 put("button_caption", buttonText);
             }});
+            put("show_animation", animate);
         }};
         simpleHttpClient.put(secureBaseUrl + resolve(showDialogWithUUID, variable("indication_id", UUID)), params);
     }

@@ -12,6 +12,7 @@ import net.sony.dpt.command.documents.TransferDocumentCommand;
 import net.sony.dpt.command.ping.PingCommand;
 import net.sony.dpt.command.register.RegisterCommand;
 import net.sony.dpt.command.register.RegistrationResponse;
+import net.sony.dpt.command.sync.RemoteSyncProgressBar;
 import net.sony.dpt.command.sync.SyncCommand;
 import net.sony.dpt.command.wifi.AccessPointList;
 import net.sony.dpt.command.wifi.WifiCommand;
@@ -288,14 +289,14 @@ public class DigitalPaperCLI {
     }
 
     private void sync(String localFolder, boolean dryrun) throws IOException, InterruptedException {
-        DocumentListResponse documentListResponse = new ListDocumentsCommand(digitalPaperEndpoint).listDocuments();
         new SyncCommand(
                 Path.of(localFolder),
-                documentListResponse,
+                new ListDocumentsCommand(digitalPaperEndpoint),
                 new TransferDocumentCommand(digitalPaperEndpoint),
                 digitalPaperEndpoint,
                 logWriter,
-                syncStore
+                syncStore,
+                new RemoteSyncProgressBar(digitalPaperEndpoint)
         ).sync(dryrun);
     }
 
