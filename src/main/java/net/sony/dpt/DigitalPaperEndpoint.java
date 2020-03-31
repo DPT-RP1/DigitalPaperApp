@@ -98,7 +98,7 @@ public class DigitalPaperEndpoint {
     }
 
     public void deleteByDocumentId(String remoteId) throws IOException, InterruptedException {
-        simpleHttpClient.delete(resolve(deleteByDocumentIdUrl, variable("doc_id", remoteId)));
+        simpleHttpClient.delete(secureBaseUrl + resolve(deleteByDocumentIdUrl, variable("doc_id", remoteId)));
     }
 
     private static final String showDialogUrl = "/system/controls/indicate";

@@ -18,7 +18,7 @@ public class SyncCommand {
     private final DigitalPaperEndpoint digitalPaperEndpoint;
     private final SyncStore syncStore;
     private final LogWriter logWriter;
-    private final Path localPath;
+    private final Path localRoot;
     private final DocumentListResponse remoteDocumentList;
     private Map<Path, DocumentEntry> localFileMap;
     private Map<Path, DocumentEntry> remoteFileMap;
@@ -31,14 +31,14 @@ public class SyncCommand {
     private final List<Path> toDeleteRemotely;
     private final List<Path> toDeleteLocally;
 
-    public SyncCommand(Path localPath, DocumentListResponse remoteDocumentList, final TransferDocumentCommand transferDocumentCommand, DigitalPaperEndpoint digitalPaperEndpoint, LogWriter logWriter, SyncStore syncStore) {
+    public SyncCommand(Path localRoot, DocumentListResponse remoteDocumentList, final TransferDocumentCommand transferDocumentCommand, DigitalPaperEndpoint digitalPaperEndpoint, LogWriter logWriter, SyncStore syncStore) {
         this.digitalPaperEndpoint = digitalPaperEndpoint;
         this.logWriter = logWriter;
         this.syncStore = syncStore;
         localFileMap = new HashMap<>();
         remoteFileMap = new HashMap<>();
 
-        this.localPath = localPath;
+        this.localRoot = localRoot;
         this.remoteDocumentList = remoteDocumentList;
 
         this.transferDocumentCommand = transferDocumentCommand;
@@ -87,7 +87,7 @@ public class SyncCommand {
      */
     public void sync(boolean dryrun) throws IOException, InterruptedException {
         loadRemoteDocuments(remoteDocumentList);
-        loadLocalDocuments(localPath);
+        loadLocalDocuments(localRoot);
         Date lastSyncDate = syncStore.retrieveLastSyncDate();
         if (dryrun) {
             logWriter.log("Synchronization dry-run starting...");
@@ -250,14 +250,14 @@ public class SyncCommand {
     private void fetchRemoteFile(Path path) throws IOException, InterruptedException {
         logWriter.log("Fetching " + path);
         if (!dryrun) {
-            Path target = localPath.resolve(path);
+            Path target = localRoot.resolve(path);
             Files.createDirectories(target.getParent());
             try (InputStream inputStream = digitalPaperEndpoint.downloadByRemoteId(
                     remoteFileMap.get(path).getEntryId()
             )) {
                 Files.copy(
                         inputStream,
-                        localPath.resolve(path)
+                        localRoot.resolve(path)
                 );
             }
         }
@@ -273,7 +273,7 @@ public class SyncCommand {
     private void deleteLocalFile(Path path) throws IOException {
         logWriter.log("Deleting locally " + path);
         if (!dryrun) {
-            Files.delete(path);
+            Files.delete(localRoot.resolve(path));
         }
     }
 
