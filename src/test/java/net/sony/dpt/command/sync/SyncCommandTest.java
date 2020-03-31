@@ -29,7 +29,7 @@ public class SyncCommandTest {
     public void initWithEmptyLocalFolderShouldFetchAll() throws IOException, InterruptedException {
         List<String> messages = new ArrayList<>();
 
-        SyncCommand syncCommand = new SyncCommand(null, null, null, message -> {
+        SyncCommand syncCommand = new SyncCommand(null, null, null, null, message -> {
             if (message.contains("Fetching")) messages.add(message);
         }, null);
 
@@ -45,7 +45,7 @@ public class SyncCommandTest {
     public void initWithEmptyRemoteFolderShouldSendAll() throws IOException, InterruptedException {
         List<String> messages = new ArrayList<>();
 
-        SyncCommand syncCommand = new SyncCommand(null, null, null, message -> {
+        SyncCommand syncCommand = new SyncCommand(null, null, null, null, message -> {
             if (message.contains("Sending")) messages.add(message);
         }, null);
 
@@ -67,7 +67,7 @@ public class SyncCommandTest {
     public void bothFoldersEmptyShouldDoNothing() throws IOException, InterruptedException {
         List<String> messages = new ArrayList<>();
 
-        SyncCommand syncCommand = new SyncCommand(null, null, null, messages::add, null);
+        SyncCommand syncCommand = new SyncCommand(null, null, null, null, messages::add, null);
 
         syncCommand.loadLocalDocuments(
                 Path.of(

@@ -292,6 +292,7 @@ public class DigitalPaperCLI {
         new SyncCommand(
                 Path.of(localFolder),
                 documentListResponse,
+                new TransferDocumentCommand(digitalPaperEndpoint),
                 digitalPaperEndpoint,
                 logWriter,
                 syncStore

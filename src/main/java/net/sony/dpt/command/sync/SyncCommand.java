@@ -3,6 +3,7 @@ package net.sony.dpt.command.sync;
 import net.sony.dpt.DigitalPaperEndpoint;
 import net.sony.dpt.command.documents.DocumentEntry;
 import net.sony.dpt.command.documents.DocumentListResponse;
+import net.sony.dpt.command.documents.TransferDocumentCommand;
 import net.sony.dpt.persistence.SyncStore;
 import net.sony.util.LogWriter;
 
@@ -23,8 +24,14 @@ public class SyncCommand {
     private Map<Path, DocumentEntry> remoteFileMap;
     private PathMatcher pdfMatcher = FileSystems.getDefault().getPathMatcher("glob:**.pdf");
     private boolean dryrun = true;
+    private final TransferDocumentCommand transferDocumentCommand;
 
-    public SyncCommand(Path localPath, DocumentListResponse remoteDocumentList, DigitalPaperEndpoint digitalPaperEndpoint, LogWriter logWriter, SyncStore syncStore) {
+    private final List<Path> toFetch;
+    private final List<Path> toSend;
+    private final List<Path> toDeleteRemotely;
+    private final List<Path> toDeleteLocally;
+
+    public SyncCommand(Path localPath, DocumentListResponse remoteDocumentList, final TransferDocumentCommand transferDocumentCommand, DigitalPaperEndpoint digitalPaperEndpoint, LogWriter logWriter, SyncStore syncStore) {
         this.digitalPaperEndpoint = digitalPaperEndpoint;
         this.logWriter = logWriter;
         this.syncStore = syncStore;
@@ -33,6 +40,13 @@ public class SyncCommand {
 
         this.localPath = localPath;
         this.remoteDocumentList = remoteDocumentList;
+
+        this.transferDocumentCommand = transferDocumentCommand;
+
+        toFetch = new ArrayList<>();
+        toSend = new ArrayList<>();
+        toDeleteRemotely = new ArrayList<>();
+        toDeleteLocally = new ArrayList<>();
     }
 
     public Map<Path, DocumentEntry> loadRemoteDocuments(DocumentListResponse documentListResponse) {
@@ -80,7 +94,10 @@ public class SyncCommand {
         }
         this.dryrun = dryrun;
         sync(lastSyncDate);
-        syncStore.storeLastSyncDate(new Date());
+
+        if (!dryrun) {
+            syncStore.storeLastSyncDate(new Date());
+        }
     }
 
     public void sync(Date lastSync) throws IOException, InterruptedException {
@@ -88,27 +105,39 @@ public class SyncCommand {
         // We are in initialization mode for the remote
         if (remoteFileMap.isEmpty() && !localFileMap.isEmpty()) {
             logWriter.log("Initial sync, sending all to remote...");
-            localFileMap.keySet().forEach(this::sendLocalFile);
+            toSend.addAll(localFileMap.keySet());
         } else if (!remoteFileMap.isEmpty() && localFileMap.isEmpty()) {
             logWriter.log("Initial sync, fetching all from remote...");
-            for (Path path : remoteFileMap.keySet()) {
-                fetchRemoteFile(path);
-            }
-        } else if (!remoteFileMap.isEmpty()) {
+            toFetch.addAll(remoteFileMap.keySet());
+        } else if (remoteFileMap.isEmpty()) {
+            logWriter.log("There is nothing to synchronize: both your local folder and the device are empty.");
+        } else {
             // We are in tree merge mode
             logWriter.log("Starting sync...");
             int count = 0;
-            count += handleFileDifference(localFileMap, remoteFileMap);
+            long start = System.currentTimeMillis();
             count += handleExistOnlyInRemote(localFileMap, remoteFileMap, lastSync);
             count += handleExistOnlyInLocal(localFileMap, remoteFileMap, lastSync);
+            count += handleFileDifference(localFileMap, remoteFileMap);
+
+            printStatistics();
+
+            runAllTasks();
+            long delay = System.currentTimeMillis() - start;
+
             if (count == 0) {
                 logWriter.log("Nothing to synchronize: both sides are identical.");
             } else {
-                logWriter.log("Synchronized " + count + " files.");
+                logWriter.log("Synchronized " + count + " files in " + delay / 1000 + " seconds.");
             }
-        } else {
-            logWriter.log("There is nothing to synchronize: both your local folder and the device are empty.");
         }
+    }
+
+    private void printStatistics() {
+        logWriter.log("We will send " + toSend.size() + " files to the Digital Paper");
+        logWriter.log("We will receive " + toFetch.size() + " files from the Digital Paper");
+        logWriter.log("We will delete " + toDeleteLocally.size() + " files locally");
+        logWriter.log("We will delete " + toDeleteRemotely.size() + " files remotely");
     }
 
     private int handleExistOnlyInLocal(Map<Path, DocumentEntry> localFileMap, Map<Path, DocumentEntry> remoteFileMap, Date lastSync) {
@@ -124,13 +153,13 @@ public class SyncCommand {
         //  if the last sync never happened: then we conservatively not delete
         for (Path path : onlyLocal) {
             if (lastSync == null) {
-                sendLocalFile(path);
+                toSend.add(path);
             } else {
                 DocumentEntry local = localFileMap.get(path);
                 if (lastSync.compareTo(local.getModifiedDate()) > 0) {
-                    deleteLocalFile(path);
+                    toDeleteLocally.add(path);
                 } else {
-                    sendLocalFile(path);
+                    toSend.add(path);
                 }
             }
             count += 1;
@@ -152,13 +181,13 @@ public class SyncCommand {
         //  if the last sync never happened: then we conservatively not delete
         for (Path path : onlyRemote) {
             if (lastSync == null) {
-                fetchRemoteFile(path);
+                toFetch.add(path);
             } else {
                 DocumentEntry remote = remoteFileMap.get(path);
                 if (lastSync.compareTo(remote.getModifiedDate()) > 0) {
-                    deleteRemoteFile(path);
+                    toDeleteRemotely.add(path);
                 } else {
-                    fetchRemoteFile(path);
+                    toFetch.add(path);
                 }
             }
             count += 1;
@@ -187,19 +216,34 @@ public class SyncCommand {
 
             // Since we can't merge, the most recent takes priority
             if (localLastModified.compareTo(remoteLastModified) > 0) {
-                sendLocalFile(path);
+                toSend.add(path);
             } else {
-                fetchRemoteFile(path);
+                toFetch.add(path);
             }
             count += 1;
         }
         return count;
     }
 
-    private void sendLocalFile(Path path) {
+    private void runAllTasks() throws IOException, InterruptedException {
+        for (Path path : toFetch) {
+            fetchRemoteFile(path);
+        }
+        for (Path path : toSend) {
+            sendLocalFile(path);
+        }
+        for (Path path : toDeleteLocally) {
+            deleteLocalFile(path);
+        }
+        for (Path path : toDeleteRemotely) {
+            deleteRemoteFile(path);
+        }
+    }
+
+    private void sendLocalFile(Path path) throws IOException, InterruptedException {
         logWriter.log("Sending " + path);
         if (!dryrun) {
-
+            transferDocumentCommand.upload(path, remoteRoot.resolve(path));
         }
     }
 
@@ -219,17 +263,17 @@ public class SyncCommand {
         }
     }
 
-    private void deleteRemoteFile(Path path) {
+    private void deleteRemoteFile(Path path) throws IOException, InterruptedException {
         logWriter.log("Deleting remotely " + path);
         if (!dryrun) {
-
+            digitalPaperEndpoint.deleteByDocumentId(remoteFileMap.get(path).getEntryId());
         }
     }
 
-    private void deleteLocalFile(Path path) {
+    private void deleteLocalFile(Path path) throws IOException {
         logWriter.log("Deleting locally " + path);
         if (!dryrun) {
-
+            Files.delete(path);
         }
     }
 

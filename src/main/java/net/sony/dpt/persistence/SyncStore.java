@@ -28,7 +28,7 @@ public class SyncStore {
     public Date retrieveLastSyncDate() {
         try {
             String epochString = Files.readString(storagePath.resolve(lastSyncPath));
-            return new Date(Long.parseLong(epochString));
+            return new Date(Long.parseLong(epochString.strip()));
         } catch (IOException e) {
             return null;
         }
