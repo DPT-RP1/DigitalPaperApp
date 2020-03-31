@@ -101,26 +101,8 @@ public class DigitalPaperEndpoint {
         simpleHttpClient.delete(resolve(deleteByDocumentIdUrl, variable("doc_id", remoteId)));
     }
 
-    public String createDirectory(Path directory, String parentId) throws IOException, InterruptedException {
-        Map<String, String> body = new HashMap<>() {{
-            put("folder_name", directory.getFileName().toString());
-            put("parent_folder_id", parentId);
-        }};
-        simpleHttpClient.post(secureBaseUrl + "/folders2", body);
-        return resolveObjectByPath(directory);
-    }
-
-    public String uploadFile(Path filePath, String parentId) throws IOException, InterruptedException {
-        Map<String, String> touchParam = new HashMap<>() {{
-            put("file_name", filePath.getFileName().toString());
-            put("parent_folder_id", parentId);
-            put("document_source", "");
-        }};
-        String documentId = fromJSON(simpleHttpClient.post(secureBaseUrl + "/documents2", touchParam)).get("document_id");
-        String documentUrl = secureBaseUrl + resolve(filePathUrl, variable("doc_id", documentId));
-        simpleHttpClient.putFile(documentUrl, filePath);
-        return documentId;
-    }
+    private static final String showDialogUrl = "/system/controls/indicate";
+    private static final String showDialogWithUUID = "/system/controls/indicate/{indication_id}";
 
 
     public void deleteFolderByRemoteId(String remoteId) throws IOException, InterruptedException {
@@ -135,8 +117,37 @@ public class DigitalPaperEndpoint {
         return simpleHttpClient.post(secureBaseUrl + wifiScanUrl);
     }
 
+    private static final String ownerNameGetUrl = "/system/configs/owner";
+
+    public InputStream takeScreenshot() throws IOException, InterruptedException {
+        return simpleHttpClient.getFile(secureBaseUrl + takeScreenshotUrl);
+    }
+
+    private static final String ownerNameSetUrl = "/system/configs/owner";
+
+    public String createDirectory(Path directory, String parentId) throws IOException, InterruptedException {
+        Map<String, Object> body = new HashMap<>() {{
+            put("folder_name", directory.getFileName().toString());
+            put("parent_folder_id", parentId);
+        }};
+        simpleHttpClient.post(secureBaseUrl + "/folders2", body);
+        return resolveObjectByPath(directory);
+    }
+
+    public String uploadFile(Path filePath, String parentId) throws IOException, InterruptedException {
+        Map<String, Object> touchParam = new HashMap<>() {{
+            put("file_name", filePath.getFileName().toString());
+            put("parent_folder_id", parentId);
+            put("document_source", "");
+        }};
+        String documentId = fromJSON(simpleHttpClient.post(secureBaseUrl + "/documents2", touchParam)).get("document_id");
+        String documentUrl = secureBaseUrl + resolve(filePathUrl, variable("doc_id", documentId));
+        simpleHttpClient.putFile(documentUrl, filePath);
+        return documentId;
+    }
+
     public void setFileInfo(String remoteId, String newParentFolderId, String newFilename) throws IOException, InterruptedException {
-        Map<String, String> moveParam = new HashMap<>();
+        Map<String, Object> moveParam = new HashMap<>();
         moveParam.put("parent_folder_id", newParentFolderId);
         if (newFilename != null) {
             moveParam.put("file_name", newFilename);
@@ -144,12 +155,38 @@ public class DigitalPaperEndpoint {
         simpleHttpClient.put(secureBaseUrl + resolve(fileInfoUrl, variable("file_id", remoteId)), moveParam);
     }
 
-    public InputStream takeScreenshot() throws IOException, InterruptedException {
-        return simpleHttpClient.getFile(secureBaseUrl + takeScreenshotUrl);
-    }
-
-    public String authenticate(Map<String, String> params) throws IOException, InterruptedException {
+    public String authenticate(Map<String, Object> params) throws IOException, InterruptedException {
         HttpResponse<String> response = simpleHttpClient.putWithResponse(secureBaseUrl + authenticateUrl, params);
         return response.headers().map().get("set-cookie").get(0).split("; ")[0].split("=")[1];
+    }
+
+    public void showDialog(String title, String text, String buttonText, boolean animate) throws IOException, InterruptedException {
+        Map<String, Object> params = new HashMap<>() {{
+            put("dialog_params", new HashMap<>() {{
+                put("title", title);
+                put("message", text);
+                put("button_caption", buttonText);
+            }});
+        }};
+        simpleHttpClient.post(secureBaseUrl + showDialogUrl, params);
+    }
+
+    public void showDialog(String UUID, String title, String text, String buttonText, boolean animate) throws IOException, InterruptedException {
+        Map<String, Object> params = new HashMap<>() {{
+            put("dialog_params", new HashMap<>() {{
+                put("title", title);
+                put("message", text);
+                put("button_caption", buttonText);
+            }});
+        }};
+        simpleHttpClient.put(secureBaseUrl + resolve(showDialogWithUUID, variable("indication_id", UUID)), params);
+    }
+
+    public Map<String, String> getOwnerName() throws IOException, InterruptedException {
+        return fromJSON(simpleHttpClient.get(secureBaseUrl + ownerNameGetUrl));
+    }
+
+    public void setOwnerName(String escapedName) throws IOException, InterruptedException {
+        simpleHttpClient.putCommonValue(secureBaseUrl + ownerNameSetUrl, escapedName);
     }
 }

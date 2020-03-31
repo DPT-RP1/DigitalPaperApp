@@ -74,7 +74,7 @@ public class SimpleHttpClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    public String put(String url, Map<String, String> jsonBody) throws IOException, InterruptedException {
+    public String put(String url, Map<String, Object> jsonBody) throws IOException, InterruptedException {
         return putWithResponse(url, jsonBody).body();
     }
 
@@ -86,7 +86,14 @@ public class SimpleHttpClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
     }
 
-    public HttpResponse<String> putWithResponse(String url, Map<String, String> jsonBody) throws IOException, InterruptedException {
+    public String putCommonValue(String url, String rawBody) throws IOException, InterruptedException {
+        Map<String, Object> commonValueParam = new HashMap<>() {{
+            put("value", rawBody);
+        }};
+        return put(url, commonValueParam);
+    }
+
+    public HttpResponse<String> putWithResponse(String url, Map<String, Object> jsonBody) throws IOException, InterruptedException {
         HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
                 .method("PUT", HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(jsonBody)))
@@ -103,7 +110,7 @@ public class SimpleHttpClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
     }
 
-    public String post(String url, Map<String, String> jsonBody) throws IOException, InterruptedException {
+    public String post(String url, Map<String, Object> jsonBody) throws IOException, InterruptedException {
         HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
                 .method("POST", HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(jsonBody)))

@@ -45,13 +45,14 @@ public class HashRequest {
         return nonce2;
     }
 
-    public Map<String, String> asMap() {
-        Map<String, String> m2 = new HashMap<>();
-        m2.put("a", Base64.getEncoder().encodeToString(nonce1));
-        m2.put("b", Base64.getEncoder().encodeToString(nonce2));
-        m2.put("c", Base64.getEncoder().encodeToString(mac));
-        m2.put("d", Base64.getEncoder().encodeToString(publicKey));
-        m2.put("e", Base64.getEncoder().encodeToString(m2hmac));
-        return m2;
+    public Map<String, Object> asMap() {
+        return new HashMap<>() {{
+            put("a", Base64.getEncoder().encodeToString(nonce1));
+            put("b", Base64.getEncoder().encodeToString(nonce2));
+            put("c", Base64.getEncoder().encodeToString(mac));
+            put("d", Base64.getEncoder().encodeToString(publicKey));
+            put("e", Base64.getEncoder().encodeToString(m2hmac));
+
+        }};
     }
 }

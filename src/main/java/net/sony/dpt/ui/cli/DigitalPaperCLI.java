@@ -3,7 +3,9 @@ package net.sony.dpt.ui.cli;
 import net.sony.dpt.DigitalPaperEndpoint;
 import net.sony.dpt.command.authenticate.AuthenticateCommand;
 import net.sony.dpt.command.authenticate.AuthenticationCookie;
+import net.sony.dpt.command.device.StatusCommand;
 import net.sony.dpt.command.device.TakeScreenshotCommand;
+import net.sony.dpt.command.dialog.DialogCommand;
 import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.documents.ListDocumentsCommand;
 import net.sony.dpt.command.documents.TransferDocumentCommand;
@@ -167,6 +169,16 @@ public class DigitalPaperCLI {
             case "sync":
                 sync(arguments.get(1), commandLine.hasOption("dryrun"));
                 break;
+            case "dialog":
+                showDialog(arguments.get(1), arguments.get(2), arguments.get(3));
+                break;
+            case "get-owner":
+            case "show-owner":
+                showOwner();
+                break;
+            case "set-owner":
+                setOwner(arguments.get(1));
+                break;
             case "copy-document":
             case "wifi-add":
             case "wifi-del":
@@ -181,6 +193,10 @@ public class DigitalPaperCLI {
 
     }
 
+    private void showDialog(String title, String text, String buttonText) throws IOException, InterruptedException {
+        new DialogCommand(digitalPaperEndpoint).show(title, text, buttonText);
+    }
+
     private void register(String addr) throws IOException, BadPaddingException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, InvalidKeyException {
         RegistrationResponse registrationResponse = new RegisterCommand(addr, simpleHttpClient, diffieHelman, cryptographyUtil, logWriter, inputReader).register();
         registrationTokenStore.storeRegistrationToken(registrationResponse);
@@ -191,7 +207,6 @@ public class DigitalPaperCLI {
         AuthenticationCookie authenticationCookie = new AuthenticateCommand(digitalPaperEndpoint, cryptographyUtil).authenticate(registrationResponse);
         authenticationCookie.insertInCookieManager(digitalPaperEndpoint.getURI(), (CookieManager) CookieHandler.getDefault());
         authenticationCookie.insertInRequest(simpleHttpClient::addDefaultHeader);
-
     }
 
     private void listDocuments() throws IOException, InterruptedException {
@@ -281,6 +296,14 @@ public class DigitalPaperCLI {
                 logWriter,
                 syncStore
         ).sync(dryrun);
+    }
+
+    private void showOwner() throws IOException, InterruptedException {
+        new StatusCommand(digitalPaperEndpoint, logWriter).showOwnerName();
+    }
+
+    private void setOwner(String ownerName) throws IOException, InterruptedException {
+        new StatusCommand(digitalPaperEndpoint, logWriter).setOwnerName(ownerName);
     }
 
 }

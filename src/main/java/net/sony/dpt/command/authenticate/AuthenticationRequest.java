@@ -14,10 +14,10 @@ public class AuthenticationRequest {
         this.signedNonce = signedNonce;
     }
 
-    public Map<String, String> toMap() {
-        Map<String, String> map = new HashMap<>();
-        map.put("client_id", clientId);
-        map.put("nonce_signed", Base64.getEncoder().encodeToString(signedNonce));
-        return map;
+    public Map<String, Object> toMap() {
+        return new HashMap<>() {{
+            put("client_id", clientId);
+            put("nonce_signed", Base64.getEncoder().encodeToString(signedNonce));
+        }};
     }
 }

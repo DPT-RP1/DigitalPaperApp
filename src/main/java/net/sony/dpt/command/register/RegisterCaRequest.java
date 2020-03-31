@@ -19,7 +19,7 @@ public class RegisterCaRequest {
         this.m4hmac = m4hmac;
     }
 
-    public Map<String, String> asMap() {
+    public Map<String, Object> asMap() {
         return new HashMap<>() {{
             put("a", Base64.toBase64String(nonce1));
             put("b", Base64.toBase64String(rHash));

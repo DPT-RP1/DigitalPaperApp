@@ -17,7 +17,7 @@ public class RegistrationRequest {
         this.m6hmac = m6hmac;
     }
 
-    public Map<String, String> asMap() {
+    public Map<String, Object> asMap() {
         return new HashMap<>() {{
             put("a", Base64.toBase64String(nonce1));
             put("d", Base64.toBase64String(wrappedDIDKPUBC));

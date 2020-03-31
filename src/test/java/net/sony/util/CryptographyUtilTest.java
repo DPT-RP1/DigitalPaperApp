@@ -30,7 +30,7 @@ public class CryptographyUtilTest {
         String macb64 = "rImV9/iZ";
         String ybb64 = "AN2q7dz8gtIrs1OL2bMO8w/B8ohHGNOjKDIhVfrRN7YKdctiRFYjiqDeK4cB9ZqdarwkN4UQD+pJZ5iCPwgoCED82ZGCGhUgQjqceOmUxrAInZBkOqrk8hmmvaYVETagwmVZDuZ9iB9GkDMzICJWQcJaQ0BEPftkx/dxcky6KIBkifmCO8TejDnrSwoeJUwbfvf7+gG+efsZcI5twyz0OJWhW6urx3RZs0R3GKW3cw65NVEQ+wt5WO4dQ32bkUdz1sWBPtJ39cwBJxU4CmDz9AUv2Y5h2DHXxZZOaAGAhOvjPVtWX0yDnbz1VouljnIBEb6+J47PfZTLua5YMc58svs=";
 
-        Map<String, String> expected = new HashMap<>();
+        Map<String, Object> expected = new HashMap<>();
         expected.put("a", "hn4v6BLaRl+UWIRfXs9VHA==");
         expected.put("b", "Hdhb1FNQf4IDVKRMb5WEwg==");
         expected.put("c", "rImV9/iZ");
@@ -58,7 +58,7 @@ public class CryptographyUtilTest {
                 nonce2,
                 publicKey);
 
-        Map<String, String> actual = hashRequest.asMap();
+        Map<String, Object> actual = hashRequest.asMap();
 
         assertEquals(expected, actual);
     }

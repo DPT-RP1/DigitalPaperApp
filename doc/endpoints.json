@@ -855,34 +855,34 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40002] 数値を期待しているパラメータについて、数値として認識できなかった\n* [40004] 指定パラメータが ISO8601 フォーマットでない\n* [40005] 仕様で定めた選択肢以外のもの指定した\n* [40006] 不正なパラメータ値が指定された",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40002] 数値を期待しているパラメータについて、数値として認識できなかった\n* [40004] 指定パラメータが ISO8601 フォーマットでない\n* [40005] 仕様で定めた選択肢以外のもの指定した\n* [40006] 不正なパラメータ値が指定された",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "403": {
-            "description": "* [40310] 指定されたIDのドキュメントの操作権限がない",
+            "description": "* [40310] You do not have permission to alter the document with the specified ID",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "404": {
-            "description": "* [40401] 指定されたIDのドキュメントが存在しない",
+            "description": "* [40401] The document with the specified ID does not exist",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within the expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "507": {
-            "description": "* [50701] 本体のストレージ容量が不足が原因で処理が完了できなかった",
+            "description": "* [50701] Processing could not be completed due to insufficient storage capacity of the device",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -899,22 +899,22 @@
         "produces": [
           "application/json"
         ],
-        "description": "**ドキュメントの属性情報をクリアする**",
+        "description": "**Clear document attribute information**",
         "parameters": [
           {
             "name": "document_id",
             "in": "path",
-            "description": "属性をクリアするドキュメントのID",
+            "description": "ID of the document whose attributes are to be cleared",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "403": {
-            "description": "* [40310] 指定されたIDのドキュメントの操作権限がない",
+            "description": "* [40310] You do not have permission to alter the document with the specified ID",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -926,7 +926,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -974,7 +974,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1010,7 +1010,7 @@
         ],
         "responses": {
           "200": {
-            "description": "成功",
+            "description": "Success",
             "schema": {
               "$ref": "#/definitions/commonFolderIdObject2"
             }
@@ -1028,7 +1028,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1071,7 +1071,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1127,7 +1127,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1179,7 +1179,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1210,7 +1210,7 @@
         ],
         "responses": {
           "200": {
-            "description": "成功",
+            "description": "Success",
             "schema": {
               "$ref": "#/definitions/commonEntryObjectResult2"
             }
@@ -1228,7 +1228,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1269,7 +1269,7 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
             "description": "* [40001] 必須パラメータが指定されていなかった\n* [40006] サポートされていないフォルダー名が指定された\n* [40007] 名前重複により処理ができない\n* [40012] parent_folder_id に存在しないフォルダーIDが指定された",
@@ -1290,7 +1290,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1351,7 +1351,7 @@
             }
           },
           "400": {
-            "description": "* [40002] 数値指定のパラメータが数値として認識できなかった\n* [40005] 規定された選択肢以外の文字列が指定された",
+            "description": "* [40002] Numeric parameter was not recognized as numerical value\n* [40005] An option not in the specifications was provided",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1363,7 +1363,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1418,13 +1418,13 @@
         ],
         "responses": {
           "200": {
-            "description": "成功",
+            "description": "Success",
             "schema": {
               "$ref": "#/definitions/commonEntryListObjectResult2"
             }
           },
           "400": {
-            "description": "* [40002] 数値指定のパラメータが数値として認識できなかった\n* [40005] 規定された選択肢以外の文字列が指定された",
+            "description": "* [40002] Numeric parameter was not recognized as numerical value\n* [40005] An option not in the specifications was provided",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1442,7 +1442,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1470,7 +1470,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1516,13 +1516,13 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "507": {
-            "description": "* [50701] 本体のストレージ容量が不足が原因で処理が完了できなかった",
+            "description": "* [50701] Processing could not be completed due to insufficient storage capacity of the device",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1565,7 +1565,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1621,13 +1621,13 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "507": {
-            "description": "* [50701] 本体のストレージ容量が不足が原因で処理が完了できなかった",
+            "description": "* [50701] Processing could not be completed due to insufficient storage capacity of the device",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1671,7 +1671,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1730,7 +1730,7 @@
             }
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40002] 数値指定のパラメータが数値として認識できなかった\n* [40009] 更新不可であるデフォルトノートテンプレートが指定された\n* [40010] ファイルが指定されていない\n* [40011] 分割アップロードで不整合\n* [40013] このファイル形式はサポートしない\n* [40014] このファイルは開く事ができない\n* [40015] このファイルは編集する事できない\n* [40016] このファイルはサイズの規格を満たしていない",
+            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40002] Numeric parameter was not recognized as numerical value\n* [40009] 更新不可であるデフォルトノートテンプレートが指定された\n* [40010] ファイルが指定されていない\n* [40011] 分割アップロードで不整合\n* [40013] このファイル形式はサポートしない\n* [40014] このファイルは開く事ができない\n* [40015] このファイルは編集する事できない\n* [40016] このファイルはサイズの規格を満たしていない",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1742,13 +1742,13 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "507": {
-            "description": "* [50701] 本体のストレージ容量が不足が原因で処理が完了できなかった",
+            "description": "* [50701] Processing could not be completed due to insufficient storage capacity of the device",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1821,7 +1821,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1857,16 +1857,16 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40002] 数値指定のパラメータが数値として認識できなかった\n* [40006] 不正なパラメータ値が指定された(ページ数が 0 もしくは負の値)",
+            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40002] Numeric parameter was not recognized as numerical value\n* [40006] 不正なパラメータ値が指定された(ページ数が 0 もしくは負の値)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "403": {
-            "description": "* [40310] 指定されたIDのドキュメントの操作権限がない",
+            "description": "* [40310] You do not have permission to alter the document with the specified ID",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1878,7 +1878,7 @@
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1984,10 +1984,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40005] 規定された選択肢以外の文字列が指定された",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40005] An option not in the specifications was provided",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2023,10 +2023,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40004] 指定パラメータが ISO8601 フォーマットでない",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40004] 指定パラメータが ISO8601 フォーマットでない",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2082,10 +2082,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40006] 不正なパラメータ値が指定された",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40006] 不正なパラメータ値が指定された",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2141,10 +2141,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40005] 規定された選択肢以外の文字列が指定された",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40005] An option not in the specifications was provided",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2200,10 +2200,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40005] 規定された選択肢以外の文字列が指定された",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40005] An option not in the specifications was provided",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2222,10 +2222,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "設定されているスリープに入る時間を取得する",
+        "description": "Get the timeout before going to sleep",
         "responses": {
           "200": {
-            "description": "設定時間 (分単位)<br>\nスリープに入らない時は 'never'",
+            "description": "Timeout (in minutes)<br>\nIf the timeout is infinite: 'never'",
             "schema": {
               "$ref": "#/definitions/commonValueObject"
             }
@@ -2245,12 +2245,12 @@
         "produces": [
           "application/json"
         ],
-        "description": "スリープに入る時間を設定する",
+        "description": "Set the timeout before going to sleep",
         "parameters": [
           {
             "name": "value",
             "in": "body",
-            "description": "設定時間を分単位で数値を指定<br>\nスリープに入らない時は 'never'",
+            "description": "Specify a numerical value for the set time in minutes<br>\nTo never go to sleep, send 'never'",
             "required": true,
             "schema": {
               "$ref": "#/definitions/commonValueObject"
@@ -2259,10 +2259,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40002] 数値指定のパラメータが数値として認識できなかった\n* [40006] 不正なパラメータ値が指定された(数値が規定範囲外)",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40002] Numeric parameter was not recognized as numerical value\n* [40006] An invalid parameter value has been specified (numeric value is out of the specified range)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2281,10 +2281,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "設定されている所有者名情報を取得する",
+        "description": "Get the owner name",
         "responses": {
           "200": {
-            "description": "設定されている所有者名(JSONエスケープ)",
+            "description": "Owner name (JSON-escaped)",
             "schema": {
               "$ref": "#/definitions/commonValueObject"
             }
@@ -2304,12 +2304,12 @@
         "produces": [
           "application/json"
         ],
-        "description": "所有者名情報を設定する",
+        "description": "Sets the owner's name",
         "parameters": [
           {
             "name": "value",
             "in": "body",
-            "description": "所有者名(JSONエスケープ)",
+            "description": "Owner's name (JSON-escaped)",
             "required": true,
             "schema": {
               "$ref": "#/definitions/commonValueObject"
@@ -2318,10 +2318,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40006] 不正なパラメータ値が指定された(桁数オーバーなど)",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40006] 不正なパラメータ値が指定された(桁数オーバーなど)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2340,10 +2340,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "本体ストレージ使用状況の取得",
+        "description": "Get device storage usage",
         "responses": {
           "200": {
-            "description": "ストレージ使用状況",
+            "description": "Storage usage",
             "schema": {
               "$ref": "#/definitions/statusStorageResult"
             }
@@ -2362,10 +2362,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "本体ファームウェアバージョン番号とモデル名の取得",
+        "description": "Get device firmware version number and model name",
         "responses": {
           "200": {
-            "description": "ファームウェアバージョン番号とモデル名",
+            "description": "Firmware version number and model name",
             "schema": {
               "$ref": "#/definitions/statusFirmwareVersionResult"
             }
@@ -2384,10 +2384,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "本体搭載の無線LANデバイスの物理アドレスの取得<br>\n※コロン繋ぎの16進数表現 (xx:xx:xx:xx:xx:xx)",
+        "description": "Obtain the physical address of the wifi network card on the device<br>\n※Hex-encoded, colon-separated MAC address (xx:xx:xx:xx:xx:xx)",
         "responses": {
           "200": {
-            "description": "アドレス値",
+            "description": "Address value",
             "schema": {
               "$ref": "#/definitions/commonValueObject"
             }
@@ -2406,10 +2406,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "バッテリー状態の取得",
+        "description": "Get battery status",
         "responses": {
           "200": {
-            "description": "バッテリー状態",
+            "description": "Battery status",
             "schema": {
               "$ref": "#/definitions/statusBatteryResult2"
             }
@@ -2420,7 +2420,7 @@
     "/system/controls/indicate": {
       "post": {
         "tags": [
-          "設定-本体制御"
+          "Settings - Device control"
         ],
         "schemes": [
           "https"
@@ -2445,10 +2445,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2459,7 +2459,7 @@
     "/system/controls/indicate/{indication_id}": {
       "put": {
         "tags": [
-          "設定-本体制御"
+          "Settings - Device control"
         ],
         "schemes": [
           "https"
@@ -2470,12 +2470,12 @@
         "produces": [
           "application/json"
         ],
-        "description": "Display various notification dialogs on the screen<br>\n※識別子はUUID形式であれば任意なものを指定可能<br>\n※以前指定したのと同じ識別子を指定した場合は、対応するダイアログの情報を上書きする",
+        "description": "Display various notification dialogs on the screen<br>\n※ Any identifier can be specified if it is in UUID format<br>\n※ If you specify the same identifier as previously specified, the information in the corresponding dialog is overwritten.",
         "parameters": [
           {
             "name": "indication_id",
             "in": "path",
-            "description": "識別子(UUID形式)",
+            "description": "Identifier (UUID format)",
             "required": true,
             "type": "string"
           },
@@ -2491,10 +2491,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40006] 識別子がUUID形式じゃなかった",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40006] Identifier was not in UUID format",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2503,7 +2503,7 @@
       },
       "delete": {
         "tags": [
-          "設定-本体制御"
+          "Settings - Device control"
         ],
         "schemes": [
           "https"
@@ -2511,22 +2511,22 @@
         "produces": [
           "application/json"
         ],
-        "description": "画面上に表示されている、指定した識別子に対応する各種通知用ダイアログを非表示にする<br>\n※指定した識別子に対応するダイアログが、ユーザー操作等により非表示だった場合でも、エラーとならずに成功となる",
+        "description": "Hide various notification dialogs corresponding to the specified identifier displayed on the screen<br>\n※Even if the dialog corresponding to the specified identifier is hidden by user operation, etc., it will succeed without error",
         "parameters": [
           {
             "name": "indication_id",
             "in": "path",
-            "description": "表示時に指定した識別子(UUID形式)",
+            "description": "Identifier specified when displaying (UUID format)",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40006] 識別子がUUID形式じゃなかった",
+            "description": "* [40006] Identifier was not in UUID format",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2537,7 +2537,7 @@
     "/system/controls/screen_shot": {
       "get": {
         "tags": [
-          "設定-本体制御"
+          "Settings - Device control"
         ],
         "schemes": [
           "https"
@@ -2547,13 +2547,13 @@
           "image/jpeg",
           "application/json"
         ],
-        "description": "本体のスクリーンショット画像取得 (png形式 または jpeg形式)<br>\n※Polaris1.0では、1650×2200ピクセルのpng形式",
+        "description": "Acquisition of a screenshot image of the device (png format or jpeg format)<br>\n※In Polaris1.0, png format of 1650 x 2200 pixels",
         "responses": {
           "200": {
-            "description": "スクリーンショット画像",
+            "description": "Screenshot image",
             "schema": {
               "type": "file",
-              "description": "画像データバイナリ"
+              "description": "Image data binary"
             }
           }
         }
@@ -2562,7 +2562,7 @@
     "/system/controls/update_firmware/precheck": {
       "get": {
         "tags": [
-          "設定-本体制御"
+          "Settings - Device control"
         ],
         "schemes": [
           "https"
@@ -2570,10 +2570,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "本体のファームウェアアップデートが開始できるか事前チェック",
+        "description": "Check whether the firmware update of the device can be started",
         "responses": {
           "200": {
-            "description": "チェック結果",
+            "description": "Check result",
             "schema": {
               "$ref": "#/definitions/updateFirmwarePrecheckResult"
             }
@@ -2584,7 +2584,7 @@
     "/system/controls/update_firmware": {
       "put": {
         "tags": [
-          "設定-本体制御"
+          "Settings - Device control"
         ],
         "schemes": [
           "https"
@@ -2615,7 +2615,7 @@
     "/system/controls/update_firmware/file": {
       "put": {
         "tags": [
-          "設定-本体制御"
+          "Settings - Device control"
         ],
         "schemes": [
           "https"
@@ -2658,7 +2658,7 @@
             }
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40002] 数値指定のパラメータが数値として認識できなかった\n* [40010] ファイルが指定されていない\n* [40011] 分割アップロードで不整合",
+            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40002] Numeric parameter was not recognized as numerical value\n* [40010] ファイルが指定されていない\n* [40011] 分割アップロードで不整合",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2675,7 +2675,7 @@
     "/system/controls/pastlog": {
       "get": {
         "tags": [
-          "設定-本体制御"
+          "Settings - Device control"
         ],
         "schemes": [
           "https"
@@ -2684,13 +2684,13 @@
           "application/octet-stream",
           "application/json"
         ],
-        "description": "本体に記録されている各種ログ情報を暗号化した上で取得する<br>\n※注意: 処理にかなり時間がかかる上、データ量も十数MB程度になる",
+        "description": "Obtain various log information recorded in the device after encrypting them<br>\n※Note: It takes a long time to process and the data volume is about 10 MB",
         "responses": {
           "200": {
-            "description": "成功",
+            "description": "Success",
             "schema": {
               "type": "file",
-              "description": "暗号化されたログ情報"
+              "description": "Encrypted log information"
             }
           }
         }
@@ -2699,7 +2699,7 @@
     "/system/configs/wifi": {
       "get": {
         "tags": [
-          "設定-無線設定"
+          "Settings - Wireless Settings"
         ],
         "schemes": [
           "https"
@@ -2707,10 +2707,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "本体の Wi-Fi 機能利用 ON/OFF 設定状態を取得する",
+        "description": "Get the ON/OFF status of the Wi-Fi adapter",
         "responses": {
           "200": {
-            "description": "設定値 'on'で有効、'off'で無効",
+            "description": "Value 'on' or 'off'",
             "schema": {
               "$ref": "#/definitions/commonValueObject"
             }
@@ -2719,7 +2719,7 @@
       },
       "put": {
         "tags": [
-          "設定-無線設定"
+          "Settings - Wireless Settings"
         ],
         "schemes": [
           "https"
@@ -2730,12 +2730,12 @@
         "produces": [
           "application/json"
         ],
-        "description": "本体の Wi-Fi 機能利用 ON/OFF 状態を設定する",
+        "description": "Set Wi-Fi to ON or OFF status",
         "parameters": [
           {
             "name": "value",
             "in": "body",
-            "description": "'on'で有効、'off'で無効",
+            "description": "'on' to enable, 'off' to disable",
             "required": true,
             "schema": {
               "$ref": "#/definitions/commonValueObject"
@@ -2744,25 +2744,25 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40005] 規定された選択肢以外の文字列が指定された"
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40005] An option not in the specifications was provided"
           },
           "403": {
-            "description": "* [40302] 本体の電池残量不足で ON にできない\n* [40307] 本体がスリープ状態のため ON にできない",
+            "description": "* [40302] Cannot turn on due to insufficient battery power on the device\n* [40307] The device cannot be turned on because it is in sleep mode",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "503": {
-            "description": "* [50301] 同時にできない処理を実行中で、要求に応じられない",
+            "description": "* [50301] Processing cannot be performed in parallel.",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2773,7 +2773,7 @@
     "/system/configs/wifi_accesspoints": {
       "get": {
         "tags": [
-          "設定-無線設定"
+          "Settings - Wireless Settings"
         ],
         "schemes": [
           "https"
@@ -2781,16 +2781,16 @@
         "produces": [
           "application/json"
         ],
-        "description": "全ての登録済みアクセスポイントの設定を取得する",
+        "description": "List all registered access points",
         "responses": {
           "200": {
-            "description": "登録済みアクセスポイントの設定情報のリスト<br>\n※ passwd は取得できず、常に未設定",
+            "description": "List of registered access points<br>\n※ no password will be returned",
             "schema": {
               "$ref": "#/definitions/apConfigureListObject"
             }
           },
           "403": {
-            "description": "* [40304] Wi-Fi が OFF なので処理できない",
+            "description": "* [40304] Wi-Fi is off so the request cannot be handled",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2801,7 +2801,7 @@
     "/system/configs/wifi_accesspoints/{ssid}/{security}": {
       "get": {
         "tags": [
-          "設定-無線設定"
+          "Settings - Wireless Settings"
         ],
         "schemes": [
           "https"
@@ -2809,19 +2809,19 @@
         "produces": [
           "application/json"
         ],
-        "description": "指定した SSID の登録済みアクセスポイントの設定を取得する",
+        "description": "Get the settings of the registered access point of the specified SSID",
         "parameters": [
           {
             "name": "ssid",
             "in": "path",
-            "description": "SSID を URL encode したもの、文字コードは UTF-8",
+            "description": "SSID as URL encode string, in UTF-8",
             "required": true,
             "type": "string"
           },
           {
             "name": "security",
             "in": "path",
-            "description": "暗号化方式 ['nonsec'/'psk'/'eap']",
+            "description": "Security mode ['nonsec'/'psk'/'eap']",
             "required": true,
             "type": "string"
           }
@@ -2834,13 +2834,13 @@
             }
           },
           "403": {
-            "description": "* [40304] Wi-Fi が OFF なので処理できない",
+            "description": "* [40304] Wi-Fi is off so the request cannot be handled",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "404": {
-            "description": "* [40401] 指定された SSID と暗号化方式のアクセスポイントは登録されていない",
+            "description": "* [40401] No access point registered for the given SSID and encryption method",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2849,7 +2849,7 @@
       },
       "delete": {
         "tags": [
-          "設定-無線設定"
+          "Settings - Wireless Settings"
         ],
         "schemes": [
           "https"
@@ -2860,7 +2860,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "登録済みアクセスポイントの削除\n",
+        "description": "Delete registered access points\n",
         "parameters": [
           {
             "name": "ssid",
@@ -2879,16 +2879,16 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "403": {
-            "description": "* [40304] Wi-Fi が OFF なので処理できない",
+            "description": "* [40304] Wi-Fi is off so the request cannot be handled",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "404": {
-            "description": "* [40401] 指定された SSID と暗号化方式のアクセスポイントは登録されていない",
+            "description": "* [40401] No access point registered for the given SSID and encryption method",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2899,7 +2899,7 @@
     "/system/configs/certificates": {
       "delete": {
         "tags": [
-          "設定-無線設定"
+          "Settings - Wireless Settings"
         ],
         "schemes": [
           "https"
@@ -2907,10 +2907,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "登録済み EAP 用各種証明書(CA 証明書、TLS クライアント証明書)を全て削除する\n",
+        "description": "Delete all registered EAP certificates (CA certificate, TLS client certificate)\n",
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           }
         }
       }
@@ -2918,7 +2918,7 @@
     "/system/configs/certificates/ca": {
       "get": {
         "tags": [
-          "設定-無線設定"
+          "Settings - Wireless Settings"
         ],
         "schemes": [
           "https"
@@ -2926,10 +2926,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "登録済み EAP 用 CA 証明書の名前一覧を取得する\n",
+        "description": "Get a list of registered CA certificate names for EAP\n",
         "responses": {
           "200": {
-            "description": "証明書名のリスト",
+            "description": "List of certificate names",
             "schema": {
               "$ref": "#/definitions/commonCertificatesListObject"
             }
@@ -2938,7 +2938,7 @@
       },
       "post": {
         "tags": [
-          "設定-無線設定"
+          "Settings - Wireless Settings"
         ],
         "schemes": [
           "https"
@@ -2963,10 +2963,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40003] Base64のデコードに失敗した\n* [40006] 証明書ファイルのデータ中に適切な証明書情報が見つからない\n* [40013] ファイル名の拡張子が、対応していない形式を指定された\n* [40014] 証明書のインストールに失敗した",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40003] Base64のデコードに失敗した\n* [40006] 証明書ファイルのデータ中に適切な証明書情報が見つからない\n* [40013] ファイル名の拡張子が、対応していない形式を指定された\n* [40014] 証明書のインストールに失敗した",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2977,7 +2977,7 @@
     "/system/configs/certificates/client": {
       "get": {
         "tags": [
-          "設定-無線設定"
+          "Settings - Wireless Settings"
         ],
         "schemes": [
           "https"
@@ -2988,7 +2988,7 @@
         "description": "登録済み EAP 用 TLS クライアント証明書の名前一覧を取得する\n",
         "responses": {
           "200": {
-            "description": "証明書名のリスト",
+            "description": "List of certificate names",
             "schema": {
               "$ref": "#/definitions/commonCertificatesListObject"
             }
@@ -2997,7 +2997,7 @@
       },
       "post": {
         "tags": [
-          "設定-無線設定"
+          "Settings - Wireless Settings"
         ],
         "schemes": [
           "https"
@@ -3022,10 +3022,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40003] Base64のデコードに失敗した\n* [40006] 証明書ファイルのデータ中に適切な証明書情報が見つからない\n* [40013] ファイル名の拡張子が、対応していない形式を指定された\n* [40014] 証明書のインストールに失敗した",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40003] Base64のデコードに失敗した\n* [40006] 証明書ファイルのデータ中に適切な証明書情報が見つからない\n* [40013] ファイル名の拡張子が、対応していない形式を指定された\n* [40014] 証明書のインストールに失敗した",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3042,7 +3042,7 @@
     "/system/status/wifi_state": {
       "get": {
         "tags": [
-          "設定-無線状態取得"
+          "Settings - Get Wireless Status"
         ],
         "schemes": [
           "https"
@@ -3059,7 +3059,7 @@
             }
           },
           "403": {
-            "description": "* [40304] Wi-Fi が OFF なので処理できない",
+            "description": "* [40304] Wi-Fi is off so the request cannot be handled",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3070,7 +3070,7 @@
     "/system/status/wps_state": {
       "get": {
         "tags": [
-          "設定-無線状態取得"
+          "Settings - Get Wireless Status"
         ],
         "schemes": [
           "https"
@@ -3087,7 +3087,7 @@
             }
           },
           "403": {
-            "description": "* [40304] Wi-Fi が OFF なので処理できない",
+            "description": "* [40304] Wi-Fi is off so the request cannot be handled",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3115,19 +3115,19 @@
             }
           },
           "403": {
-            "description": "* [40304] Wi-Fi が OFF なので処理できない",
+            "description": "* [40304] Wi-Fi is off so the request cannot be handled",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "408": {
-            "description": "* [40800] 処理が想定時間内に完了しなかった(60秒)",
+            "description": "* [40800] Processing did not complete within expected time (60 seconds)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "503": {
-            "description": "* [50301] 同時にできない処理を実行中で、要求に応じられない",
+            "description": "* [50301] Processing cannot be performed in parallel.",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3155,7 +3155,7 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
             "description": "* [40000] Failed to parse JSON \n * [40001] mandatory parameter was not specified \n * [40002] Numeric parameter was not recognized as numerical value \n * 40003] Failed to decode Base64 \n * [40005] A character string other than the prescribed option was specified \n * [40006] Incorrect parameter value was specified \n * [40008] Registerable access The maximum number of points has been reached ",
@@ -3372,7 +3372,7 @@
             }
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40003] Base64のデコードに失敗した",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40003] Base64のデコードに失敗した",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3421,7 +3421,7 @@
             }
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40003] Base64のデコードに失敗した",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40003] Base64のデコードに失敗した",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3545,7 +3545,7 @@
             }
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40003] Base64のデコードに失敗した",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40003] Base64のデコードに失敗した",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3594,7 +3594,7 @@
             }
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40003] Base64のデコードに失敗した",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40003] Base64のデコードに失敗した",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3640,7 +3640,7 @@
             "description": "登録完了"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40003] Base64のデコードに失敗した",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40003] Base64のデコードに失敗した",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3741,7 +3741,7 @@
             "description": "認証に成功"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3906,7 +3906,7 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
             "description": "指定されたパラメータが不正",
@@ -3981,7 +3981,7 @@
             "description": "認証に成功"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -4015,7 +4015,7 @@
         "description": "Test mode UI display",
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "403": {
             "description": "* [40300] テストモードとして規定された手順以外でアクセスした",
@@ -4040,7 +4040,7 @@
         "description": "Restart main unit in recovery mode",
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "403": {
             "description": "* [40300] テストモードとして規定された手順以外でアクセスした",
@@ -4132,7 +4132,7 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
             "description": "* [40006] パラメータに不正なパスが指定された\n* [40010] ファイル指定なのに、ファイル実体が指定されていない",
@@ -4170,7 +4170,7 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
             "description": "* [40006] パラメータに不正なパスが指定された",
@@ -4251,7 +4251,7 @@
             "description": "認証に成功"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -4296,10 +4296,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40002] 数値指定のパラメータが数値として認識できなかった\n* [40006] パラメータに不正な内容が指定された",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40002] Numeric parameter was not recognized as numerical value\n* [40006] パラメータに不正な内容が指定された",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -4328,7 +4328,7 @@
         "description": "キッティングの手順の一環として、本体をシャットダウンする",
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "403": {
             "description": "* [40300] キッティングとして規定された手順以外でアクセスした",
@@ -4484,10 +4484,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40005] 規定された選択肢以外の文字列が指定された",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40005] An option not in the specifications was provided",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -4523,10 +4523,10 @@
         ],
         "responses": {
           "204": {
-            "description": "成功"
+            "description": "Success"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した\n* [40001] 必須パラメータが指定されていなかった\n* [40005] 規定された選択肢以外の文字列が指定された",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40005] An option not in the specifications was provided",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -4614,7 +4614,7 @@
       ],
       "properties": {
         "folder_id": {
-          "description": "フォルダーID",
+          "description": "Folder ID",
           "type": "string"
         }
       }
@@ -4672,7 +4672,7 @@
           "type": "string"
         },
         "entry_name": {
-          "description": "エントリー名 (ファイル名/フォルダー名)",
+          "description": "Entry name (Filename / Folder name)",
           "type": "string"
         },
         "entry_path": {
@@ -4680,7 +4680,7 @@
           "type": "string"
         },
         "entry_type": {
-          "description": "エントリー項目の種別（ファイル:'document', フォルダー:'folder'）",
+          "description": "Type of entry item (file: 'document', folder: 'folder')",
           "type": "string"
         },
         "created_date": {
@@ -5466,7 +5466,7 @@
           "type": "string"
         },
         "entry_name": {
-          "description": "エントリー名 (ファイル名/フォルダー名)",
+          "description": "Entry name (Filename / Folder name)",
           "type": "string"
         },
         "entry_path": {
@@ -5474,7 +5474,7 @@
           "type": "string"
         },
         "entry_type": {
-          "description": "エントリー項目の種別（ファイル:'document', フォルダー:'folder'）",
+          "description": "Type of entry item (file: 'document', folder: 'folder')",
           "type": "string"
         },
         "created_date": {
