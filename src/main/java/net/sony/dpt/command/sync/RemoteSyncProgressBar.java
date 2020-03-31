@@ -16,6 +16,7 @@ public class RemoteSyncProgressBar implements ProgressBar {
     private String currentTask;
 
     private String dialogText;
+    private boolean animate;
 
     public RemoteSyncProgressBar(DigitalPaperEndpoint digitalPaperEndpoint) {
         this.digitalPaperEndpoint = digitalPaperEndpoint;
@@ -23,6 +24,7 @@ public class RemoteSyncProgressBar implements ProgressBar {
         percentDone = 0;
         dialogUUID = UUID.randomUUID();
         dialogText = "Synchronization will start soon";
+        animate = true;
     }
 
     @Override
@@ -44,12 +46,15 @@ public class RemoteSyncProgressBar implements ProgressBar {
     @Override
     public void start() {
         dialogText = "Synchronization preparing...";
+        animate = true;
         repaint();
     }
 
     @Override
     public void stop() {
-        // TODO: auto hide the dialog
+        currentTask = "Synchronization complete !";
+        animate = false;
+        repaint();
     }
 
     @Override
@@ -66,7 +71,7 @@ public class RemoteSyncProgressBar implements ProgressBar {
 
     private void paint() {
         try {
-            digitalPaperEndpoint.showDialog(dialogUUID.toString(), "Synchronization in progress", dialogText, "Hide", true);
+            digitalPaperEndpoint.showDialog(dialogUUID.toString(), "Synchronization in progress", dialogText, "Hide", animate);
         } catch (Exception ignored) {
         }
     }

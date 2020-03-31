@@ -243,7 +243,7 @@ public class SyncCommand {
     }
 
     private void runAllTasks() throws IOException, InterruptedException {
-        int totalElementsToHandle = toFetch.size() + toSend.size() + toDeleteLocally.size() + toDeleteRemotely.size();
+        totalElementsToHandle = toFetch.size() + toSend.size() + toDeleteLocally.size() + toDeleteRemotely.size();
 
         if (progressBar != null) {
             progressBar.progressed(0, totalElementsToHandle);
@@ -258,7 +258,6 @@ public class SyncCommand {
         int progress = 0;
         int localProgress = 0;
         for (Path path : toFetch) {
-            fetchRemoteFile(path);
             localProgress += 1;
             progress += 1;
             notifyProgress(
@@ -268,11 +267,11 @@ public class SyncCommand {
                     progress,
                     totalElementsToHandle
             );
+            fetchRemoteFile(path);
         }
 
         localProgress = 0;
         for (Path path : toSend) {
-            sendLocalFile(path);
             localProgress += 1;
             progress += 1;
             notifyProgress(
@@ -282,11 +281,11 @@ public class SyncCommand {
                     progress,
                     totalElementsToHandle
             );
+            sendLocalFile(path);
         }
 
         localProgress = 0;
         for (Path path : toDeleteLocally) {
-            deleteLocalFile(path);
             localProgress += 1;
             progress += 1;
             notifyProgress(
@@ -296,11 +295,14 @@ public class SyncCommand {
                     progress,
                     totalElementsToHandle
             );
+
+            deleteLocalFile(path);
         }
 
         localProgress = 0;
         for (Path path : toDeleteRemotely) {
-            deleteRemoteFile(path);
+            localProgress += 1;
+            progress += 1;
             notifyProgress(
                     "Deleting on the DPT " + path.getFileName(),
                     "Deleting on the DPT",
@@ -308,7 +310,9 @@ public class SyncCommand {
                     progress,
                     totalElementsToHandle
             );
+            deleteRemoteFile(path);
         }
+        progressBar.stop();
     }
 
     private void sendLocalFile(Path path) throws IOException, InterruptedException {
@@ -328,7 +332,8 @@ public class SyncCommand {
             )) {
                 Files.copy(
                         inputStream,
-                        localRoot.resolve(path)
+                        localRoot.resolve(path),
+                        StandardCopyOption.REPLACE_EXISTING
                 );
             }
         }
