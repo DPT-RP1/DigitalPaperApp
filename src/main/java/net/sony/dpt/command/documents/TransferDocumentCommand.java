@@ -20,6 +20,7 @@ public class TransferDocumentCommand {
     }
 
     public InputStream download(Path remotePath) throws IOException, InterruptedException {
+        remotePath = resolveRemotePath(remotePath);
         String remoteId = digitalPaperEndpoint.resolveObjectByPath(remotePath);
 
         InputStream file = digitalPaperEndpoint.downloadByRemoteId(remoteId);
@@ -31,6 +32,7 @@ public class TransferDocumentCommand {
     }
 
     public void delete(Path path) throws IOException, InterruptedException {
+        path = resolveRemotePath(path);
         String remoteId = digitalPaperEndpoint.resolveObjectByPath(path);
         if (remoteId != null) {
             digitalPaperEndpoint.deleteByDocumentId(remoteId);
@@ -54,6 +56,7 @@ public class TransferDocumentCommand {
     }
 
     public void deleteFolder(Path remotePath) throws IOException, InterruptedException {
+        remotePath = resolveRemotePath(remotePath);
         String remoteId = digitalPaperEndpoint.resolveObjectByPath(remotePath);
         digitalPaperEndpoint.deleteFolderByRemoteId(remoteId);
     }
