@@ -66,26 +66,48 @@ public class TransferDocumentCommand {
         return digitalPaperEndpoint.uploadFile(localPath, parentId);
     }
 
-    public void moveDocument(Path oldPath, Path newPath) throws IOException, InterruptedException {
-        String oldId = digitalPaperEndpoint.resolveObjectByPath(oldPath);
+    public void move(Path from, Path to) throws IOException, InterruptedException {
+        String oldId = digitalPaperEndpoint.resolveObjectByPath(from);
 
         String newParentFolderId;
         // We assume here we'll only transfer extension-suffixed files
         PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.*");
-        if (matcher.matches(newPath.getFileName())) {
+        if (matcher.matches(to.getFileName())) {
             // We have a file
-            newParentFolderId = createFolderRecursively(newPath.getParent());
+            newParentFolderId = createFolderRecursively(to.getParent());
         } else {
             // We have a folder
-            newParentFolderId = createFolderRecursively(newPath);
-            newPath = newPath.resolve(oldPath.getFileName());
+            newParentFolderId = createFolderRecursively(to);
+            to = to.resolve(from.getFileName());
         }
 
         String newFileName = null;
-        if (!oldPath.getFileName().equals(newPath.getFileName())) {
-            newFileName = newPath.getFileName().toString();
+        if (!from.getFileName().equals(to.getFileName())) {
+            newFileName = to.getFileName().toString();
         }
         digitalPaperEndpoint.setFileInfo(oldId, newParentFolderId, newFileName);
     }
 
+    public void copy(Path from, Path to) throws IOException, InterruptedException {
+        String fromId = digitalPaperEndpoint.resolveObjectByPath(from);
+
+        String toFolder;
+        // We assume here we'll only transfer extension-suffixed files
+        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.*");
+        if (matcher.matches(to.getFileName())) {
+            // We have a file
+            toFolder = createFolderRecursively(to.getParent());
+        } else {
+            // We have a folder
+            toFolder = createFolderRecursively(to);
+            to = to.resolve(from.getFileName());
+        }
+
+        String toFilename = null;
+        if (!from.getFileName().equals(to.getFileName())) {
+            toFilename = to.getFileName().toString();
+        }
+
+        digitalPaperEndpoint.copy(fromId, toFolder, toFilename);
+    }
 }

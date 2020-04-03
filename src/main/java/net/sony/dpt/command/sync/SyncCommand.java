@@ -21,10 +21,9 @@ public class SyncCommand {
     private final SyncStore syncStore;
     private final LogWriter logWriter;
     private final Path localRoot;
-    private Map<Path, DocumentEntry> localFileMap;
-    private Map<Path, DocumentEntry> remoteFileMap;
-    private PathMatcher pdfMatcher = FileSystems.getDefault().getPathMatcher("glob:**.pdf");
-    private boolean dryrun = true;
+    private final Map<Path, DocumentEntry> localFileMap;
+    private final Map<Path, DocumentEntry> remoteFileMap;
+    private final PathMatcher pdfMatcher = FileSystems.getDefault().getPathMatcher("glob:**.pdf");
     private final TransferDocumentCommand transferDocumentCommand;
     private final ListDocumentsCommand listDocumentsCommand;
 
@@ -103,7 +102,6 @@ public class SyncCommand {
 
     /**
      * @param dryrun If true, only displays what would happen, but do not transfer/delete anything
-     * @throws IOException
      */
     public void sync(boolean dryrun) throws IOException, InterruptedException {
         long start = System.currentTimeMillis();
@@ -116,8 +114,8 @@ public class SyncCommand {
         if (dryrun) {
             logWriter.log("Synchronization dry-run starting...");
         }
-        this.dryrun = dryrun;
-        sync(lastSyncDate);
+
+        sync(lastSyncDate, dryrun);
 
         if (!dryrun) {
             syncStore.storeLastSyncDate(new Date());
@@ -132,7 +130,7 @@ public class SyncCommand {
         }
     }
 
-    public void sync(Date lastSync) throws IOException, InterruptedException {
+    public void sync(Date lastSync, boolean dryrun) throws IOException, InterruptedException {
         // We are in initialization mode for the remote
         if (remoteFileMap.isEmpty() && !localFileMap.isEmpty()) {
             logWriter.log("Initial sync, sending all to remote...");
@@ -152,7 +150,7 @@ public class SyncCommand {
         }
         calculateStatistics();
 
-        runAllTasks();
+        runAllTasks(dryrun);
     }
 
     private void handleExistOnlyInLocal(Map<Path, DocumentEntry> localFileMap, Map<Path, DocumentEntry> remoteFileMap, Date lastSync) {
@@ -180,7 +178,7 @@ public class SyncCommand {
     }
 
 
-    private void handleExistOnlyInRemote(Map<Path, DocumentEntry> localFileMap, Map<Path, DocumentEntry> remoteFileMap, Date lastSync) throws IOException, InterruptedException {
+    private void handleExistOnlyInRemote(Map<Path, DocumentEntry> localFileMap, Map<Path, DocumentEntry> remoteFileMap, Date lastSync) {
         Set<Path> onlyRemote = new HashSet<>(remoteFileMap.keySet());
         onlyRemote.removeAll(localFileMap.keySet());
 
@@ -253,7 +251,7 @@ public class SyncCommand {
         }
     }
 
-    private void runAllTasks() throws IOException, InterruptedException {
+    private void runAllTasks(boolean dryrun) throws IOException, InterruptedException {
 
         if (progressBar != null) {
             progressBar.progressed(0, documentsToSyncCount);
@@ -280,7 +278,7 @@ public class SyncCommand {
                     (int) remoteFileMap.get(path).getFileSize(),
                     documentsToSyncSizeMB
             );
-            fetchRemoteFile(path);
+            fetchRemoteFile(path, dryrun);
         }
 
         localProgress = 0;
@@ -296,7 +294,7 @@ public class SyncCommand {
                     (int) localFileMap.get(path).getFileSize(),
                     documentsToSyncSizeMB
             );
-            sendLocalFile(path);
+            sendLocalFile(path, dryrun);
         }
 
         localProgress = 0;
@@ -313,7 +311,7 @@ public class SyncCommand {
                     documentsToSyncSizeMB
             );
 
-            deleteLocalFile(path);
+            deleteLocalFile(path, dryrun);
         }
 
         localProgress = 0;
@@ -329,20 +327,18 @@ public class SyncCommand {
                     0,
                     documentsToSyncSizeMB
             );
-            deleteRemoteFile(path);
+            deleteRemoteFile(path, dryrun);
         }
-        progressBar.stop();
+        if (progressBar != null) progressBar.stop();
     }
 
-    private void sendLocalFile(Path path) throws IOException, InterruptedException {
+    private void sendLocalFile(Path path, boolean dryrun) throws IOException, InterruptedException {
         if (!dryrun) {
-            transferDocumentCommand.upload(path, remoteRoot.resolve(path));
-        } else {
-            Thread.sleep(200);
+            transferDocumentCommand.upload(localRoot.resolve(path), remoteRoot.resolve(path));
         }
     }
 
-    private void fetchRemoteFile(Path path) throws IOException, InterruptedException {
+    private void fetchRemoteFile(Path path, boolean dryrun) throws IOException, InterruptedException {
         if (!dryrun) {
             Path target = localRoot.resolve(path);
             Files.createDirectories(target.getParent());
@@ -355,24 +351,18 @@ public class SyncCommand {
                         StandardCopyOption.REPLACE_EXISTING
                 );
             }
-        } else {
-            Thread.sleep(200);
         }
     }
 
-    private void deleteRemoteFile(Path path) throws IOException, InterruptedException {
+    private void deleteRemoteFile(Path path, boolean dryrun) throws IOException, InterruptedException {
         if (!dryrun) {
             digitalPaperEndpoint.deleteByDocumentId(remoteFileMap.get(path).getEntryId());
-        } else {
-            Thread.sleep(200);
         }
     }
 
-    private void deleteLocalFile(Path path) throws IOException, InterruptedException {
+    private void deleteLocalFile(Path path, boolean dryrun) throws IOException, InterruptedException {
         if (!dryrun) {
             Files.delete(localRoot.resolve(path));
-        } else {
-            Thread.sleep(200);
         }
     }
 

@@ -91,7 +91,7 @@ public class DigitalPaperCLI {
         } else {
             // Before trying autoconfig, we can try loading the last ip
             String lastIp = deviceInfoStore.retrieveLastIp();
-            if (lastIp != null && new PingCommand(simpleHttpClient).pingIp(lastIp)) {
+            if (lastIp != null && new PingCommand().pingIp(lastIp)) {
                 addr = lastIp;
             } else {
                 String matchSerial = null;
@@ -107,6 +107,10 @@ public class DigitalPaperCLI {
         return addr;
     }
 
+    private void printHelp() {
+        System.out.println("dtp command -args");
+    }
+
     public void execute(String[] args) throws Exception {
         CommandLine commandLine = parser.parse(options, args);
 
@@ -115,6 +119,7 @@ public class DigitalPaperCLI {
 
         // The arguments have to be ordered: command param1 param2 etc.
         List<String> arguments = commandLine.getArgList();
+        if (arguments == null || arguments.isEmpty()) {printHelp(); return; }
         String command = arguments.get(0);
 
         if (!registrationTokenStore.registered()) {
@@ -162,6 +167,8 @@ public class DigitalPaperCLI {
             case "move-document":
                 moveDocument(arguments.get(1), arguments.get(2));
                 break;
+            case "copy-document":
+                copyDocument(arguments.get(1), arguments.get(2));
             case "wifi-scan":
                 wifiScan();
                 break;
@@ -187,7 +194,6 @@ public class DigitalPaperCLI {
             case "ping":
                 ping();
                 break;
-            case "copy-document":
             case "wifi-add":
             case "wifi-del":
             case "wifi":
@@ -199,6 +205,10 @@ public class DigitalPaperCLI {
 
         }
 
+    }
+
+    private void copyDocument(String from, String to) throws IOException, InterruptedException {
+        new TransferDocumentCommand(digitalPaperEndpoint).copy(Path.of(from), Path.of(to));
     }
 
     private void ping() throws IOException, URISyntaxException {
@@ -285,7 +295,7 @@ public class DigitalPaperCLI {
     }
 
     private void moveDocument(String oldPath, String newPath) throws IOException, InterruptedException {
-        new TransferDocumentCommand(digitalPaperEndpoint).moveDocument(Path.of(oldPath), Path.of(newPath));
+        new TransferDocumentCommand(digitalPaperEndpoint).move(Path.of(oldPath), Path.of(newPath));
     }
 
     private void takeScreenshot(String target) throws IOException, InterruptedException {

@@ -8,19 +8,14 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 
 public class PingCommand {
 
-    private SimpleHttpClient simpleHttpClient;
     private DigitalPaperEndpoint digitalPaperEndpoint;
     private LogWriter logWriter;
 
-    public PingCommand(final SimpleHttpClient simpleHttpClient) {
-        this.simpleHttpClient = simpleHttpClient;
+    public PingCommand() {
     }
-
-
 
     public PingCommand(final DigitalPaperEndpoint digitalPaperEndpoint, final LogWriter logWriter) {
         this.digitalPaperEndpoint = digitalPaperEndpoint;
@@ -30,10 +25,9 @@ public class PingCommand {
     /**
      * This command returns true if we're still authenticated
      *
-     * @param digitalPaperEndpoint
      * @return
      */
-    public boolean pingAuth(DigitalPaperEndpoint digitalPaperEndpoint) {
+    public boolean pingAuth() {
         throw new UnsupportedOperationException("Authenticated ping not implemented");
     }
 

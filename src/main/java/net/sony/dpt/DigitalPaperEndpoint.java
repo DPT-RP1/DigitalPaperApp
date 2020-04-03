@@ -190,4 +190,16 @@ public class DigitalPaperEndpoint {
     public void setOwnerName(String escapedName) throws IOException, InterruptedException {
         simpleHttpClient.putCommonValue(secureBaseUrl + ownerNameSetUrl, escapedName);
     }
+
+    private static final String copyUrl = "/documents/${document_id}/copy";
+    public void copy(String from, String toFolder, String toFilename) throws IOException, InterruptedException {
+        simpleHttpClient.post(secured(resolve(copyUrl, variable("document_id", from))), new HashMap<>() {{
+            put("parent_folder_id", toFolder);
+            if (toFilename != null) put("file_name", toFilename);
+        }});
+    }
+
+    public String secured(String path) {
+        return secureBaseUrl + path;
+    }
 }

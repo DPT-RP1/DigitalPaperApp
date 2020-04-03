@@ -4896,11 +4896,11 @@
       ],
       "properties": {
         "parent_folder_id": {
-          "description": "複製先の親フォルダーのID ※ルートフォルダーは'root'と指定する。",
+          "description": "ID of the parent folder of the copy destination ※ Specify the root folder as 'root'.",
           "type": "string"
         },
         "file_name": {
-          "description": "コピー後のドキュメントのファイル名 ※NULLの場合はコピー元のファイル名をそのまま使用する",
+          "description": "File name of document after copying ※ If NULL, use the original file name",
           "type": "string"
         }
       }
