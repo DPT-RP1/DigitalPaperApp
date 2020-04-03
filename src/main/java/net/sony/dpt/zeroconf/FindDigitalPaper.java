@@ -61,9 +61,13 @@ public class FindDigitalPaper {
     public String findOneIpv4() throws IOException, InterruptedException {
         Map<InetAddress, ServiceEvent> inetAddresses = find(20000, true);
         if (!inetAddresses.isEmpty()) {
-            Inet4Address inet4Address = (Inet4Address) inetAddresses.keySet().iterator().next();
-            logWriter.log("Found a Digital Paper at " + inet4Address.getHostAddress());
-            return inet4Address.getHostAddress();
+            for (InetAddress inetAddress : inetAddresses.keySet()) {
+                if (inetAddress instanceof Inet4Address) {
+                    Inet4Address inet4Address = (Inet4Address) inetAddress;
+                    logWriter.log("Found a Digital Paper at " + inet4Address.getHostAddress());
+                    return inet4Address.getHostAddress();
+                }
+            }
         }
         return null;
     }

@@ -15,11 +15,8 @@ public class DeviceInfoStore {
     }
 
     public void storeLastIp(String lastIp) throws IOException {
-        try {
-            Files.createFile(storagePath.resolve(lastSyncPath));
-        } catch (IOException ignored) {
-        }
-
+        Files.createDirectories(storagePath);
+        try { Files.createFile(storagePath.resolve(lastSyncPath));} catch (IOException ignored) {};
         Files.write(storagePath.resolve(lastSyncPath), lastIp.getBytes(StandardCharsets.UTF_8));
     }
 

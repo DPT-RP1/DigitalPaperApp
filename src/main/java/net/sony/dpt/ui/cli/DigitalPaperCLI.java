@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
@@ -115,14 +116,16 @@ public class DigitalPaperCLI {
         // The arguments have to be ordered: command param1 param2 etc.
         List<String> arguments = commandLine.getArgList();
         String command = arguments.get(0);
-        if (command.equals("register")) {
+
+        if (!registrationTokenStore.registered()) {
             register(addr);
-            return;
         }
 
         auth();
 
         switch (command) {
+            case "register":
+                return;
             case "list-documents":
                 listDocuments();
                 break;
@@ -181,6 +184,9 @@ public class DigitalPaperCLI {
             case "set-owner":
                 setOwner(arguments.get(1));
                 break;
+            case "ping":
+                ping();
+                break;
             case "copy-document":
             case "wifi-add":
             case "wifi-del":
@@ -193,6 +199,10 @@ public class DigitalPaperCLI {
 
         }
 
+    }
+
+    private void ping() throws IOException, URISyntaxException {
+        new PingCommand(digitalPaperEndpoint, logWriter).ping();
     }
 
     private void showDialog(String title, String text, String buttonText) throws IOException, InterruptedException {
