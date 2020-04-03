@@ -164,11 +164,14 @@ public class DigitalPaperCLI {
             case "new-folder":
                 newFolder(arguments.get(1));
                 break;
+            case "move":
             case "move-document":
                 moveDocument(arguments.get(1), arguments.get(2));
                 break;
+            case "copy":
             case "copy-document":
                 copyDocument(arguments.get(1), arguments.get(2));
+                break;
             case "wifi-scan":
                 wifiScan();
                 break;

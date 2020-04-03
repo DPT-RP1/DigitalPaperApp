@@ -66,7 +66,17 @@ public class TransferDocumentCommand {
         return digitalPaperEndpoint.uploadFile(localPath, parentId);
     }
 
+    private static final Path REMOTE_ROOT = Path.of("Document");
+    private Path resolveRemotePath(Path remotePath) {
+        if (!remotePath.startsWith(REMOTE_ROOT)) {
+            return REMOTE_ROOT.resolve(remotePath);
+        }
+        return remotePath;
+    }
+
     public void move(Path from, Path to) throws IOException, InterruptedException {
+        from = resolveRemotePath(from);
+        to = resolveRemotePath(to);
         String oldId = digitalPaperEndpoint.resolveObjectByPath(from);
 
         String newParentFolderId;
@@ -89,6 +99,9 @@ public class TransferDocumentCommand {
     }
 
     public void copy(Path from, Path to) throws IOException, InterruptedException {
+        from = resolveRemotePath(from);
+        to = resolveRemotePath(to);
+
         String fromId = digitalPaperEndpoint.resolveObjectByPath(from);
 
         String toFolder;
