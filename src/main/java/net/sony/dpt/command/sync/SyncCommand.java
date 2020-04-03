@@ -35,7 +35,20 @@ public class SyncCommand {
 
     private final ProgressBar progressBar;
 
-    int totalElementsToHandle;
+    int documentsToSyncCount;
+    int documentsToSyncSizeMB;
+    private int handledSoFarMB = 0;
+
+    public Map<Path, DocumentEntry> loadRemoteDocuments(DocumentListResponse documentListResponse) {
+        remoteFileMap.clear();
+
+        documentListResponse.getEntryList().forEach(documentEntry -> {
+            Path relativePath = remoteRoot.relativize(Path.of(documentEntry.getEntryPath()));
+            remoteFileMap.put(relativePath, documentEntry);
+        });
+
+        return remoteFileMap;
+    }
 
     public SyncCommand(final Path localRoot,
                        final ListDocumentsCommand listDocumentsCommand,
@@ -61,22 +74,14 @@ public class SyncCommand {
         toDeleteLocally = new ArrayList<>();
 
         this.progressBar = progressBar;
-        totalElementsToHandle = 0;
-    }
-
-    public Map<Path, DocumentEntry> loadRemoteDocuments(DocumentListResponse documentListResponse) {
-        remoteFileMap.clear();
-
-        documentListResponse.getEntryList().forEach(documentEntry -> {
-            Path relativePath = remoteRoot.relativize(Path.of(documentEntry.getEntryPath()));
-            remoteFileMap.put(relativePath, documentEntry);
-        });
-
-        return remoteFileMap;
+        documentsToSyncCount = 0;
+        documentsToSyncSizeMB = 0;
     }
 
     public Map<Path, DocumentEntry> loadLocalDocuments(Path localRoot) throws IOException {
         localFileMap.clear();
+
+        if (!Files.exists(localRoot)) Files.createDirectories(localRoot);
 
         Files.walk(localRoot, FileVisitOption.FOLLOW_LINKS).forEach(path -> {
             if (!pdfMatcher.matches(path)) return; // We only ever want to upload pdfs.
@@ -120,10 +125,10 @@ public class SyncCommand {
 
         long delay = System.currentTimeMillis() - start;
 
-        if (totalElementsToHandle == 0) {
+        if (documentsToSyncCount == 0) {
             logWriter.log("Nothing to synchronize: both sides are identical.");
         } else {
-            logWriter.log("Synchronized " + totalElementsToHandle + " files in " + delay / 1000 + " seconds.");
+            logWriter.log("Synchronized " + documentsToSyncCount + " files in " + delay / 1000 + " seconds.");
         }
     }
 
@@ -144,18 +149,10 @@ public class SyncCommand {
             handleExistOnlyInRemote(localFileMap, remoteFileMap, lastSync);
             handleExistOnlyInLocal(localFileMap, remoteFileMap, lastSync);
             handleFileDifference(localFileMap, remoteFileMap);
-
-            printStatistics();
-
-            runAllTasks();
         }
-    }
+        calculateStatistics();
 
-    private void printStatistics() {
-        logWriter.log("We will send " + toSend.size() + " files to the Digital Paper");
-        logWriter.log("We will receive " + toFetch.size() + " files from the Digital Paper");
-        logWriter.log("We will delete " + toDeleteLocally.size() + " files locally");
-        logWriter.log("We will delete " + toDeleteRemotely.size() + " files remotely");
+        runAllTasks();
     }
 
     private void handleExistOnlyInLocal(Map<Path, DocumentEntry> localFileMap, Map<Path, DocumentEntry> remoteFileMap, Date lastSync) {
@@ -233,9 +230,23 @@ public class SyncCommand {
         }
     }
 
-    private void notifyProgress(String currentTask, String group, int groupRemaining, int handledSoFar, int totalElementsToHandle) {
+    private void calculateStatistics() {
+        logWriter.log("We will send " + toSend.size() + " files to the Digital Paper");
+        logWriter.log("We will receive " + toFetch.size() + " files from the Digital Paper");
+        logWriter.log("We will delete " + toDeleteLocally.size() + " files locally");
+        logWriter.log("We will delete " + toDeleteRemotely.size() + " files remotely");
+
+        documentsToSyncCount = toFetch.size() + toSend.size() + toDeleteLocally.size() + toDeleteRemotely.size();
+        toFetch.forEach(path -> documentsToSyncSizeMB += remoteFileMap.get(path).getFileSize() / 1024 / 1024);
+        toSend.forEach(path -> documentsToSyncSizeMB += localFileMap.get(path).getFileSize() / 1024 / 1024);
+
+    }
+
+    private void notifyProgress(String currentTask, String group, int groupRemaining, int handledSoFar, int totalElementsToHandle, int newSizeBytes, int documentsToSyncSizeMB) {
+        this.handledSoFarMB += newSizeBytes / 1024 / 1024;
         if (progressBar != null) {
             progressBar.progressed(handledSoFar, totalElementsToHandle);
+            progressBar.progressedSize(this.handledSoFarMB, documentsToSyncSizeMB);
             progressBar.current(currentTask);
             progressBar.remaining(group, groupRemaining);
             progressBar.repaint();
@@ -243,10 +254,10 @@ public class SyncCommand {
     }
 
     private void runAllTasks() throws IOException, InterruptedException {
-        totalElementsToHandle = toFetch.size() + toSend.size() + toDeleteLocally.size() + toDeleteRemotely.size();
 
         if (progressBar != null) {
-            progressBar.progressed(0, totalElementsToHandle);
+            progressBar.progressed(0, documentsToSyncCount);
+            progressBar.progressed(0, documentsToSyncSizeMB);
             progressBar.remaining("Fetching from DPT", toFetch.size());
             progressBar.remaining("Sending to DPT", toSend.size());
             progressBar.remaining("Deleting locally", toDeleteLocally.size());
@@ -265,7 +276,9 @@ public class SyncCommand {
                     "Fetching from DPT",
                     toFetch.size() - localProgress,
                     progress,
-                    totalElementsToHandle
+                    documentsToSyncCount,
+                    (int) remoteFileMap.get(path).getFileSize(),
+                    documentsToSyncSizeMB
             );
             fetchRemoteFile(path);
         }
@@ -279,7 +292,9 @@ public class SyncCommand {
                     "Sending to DPT",
                     toSend.size() - localProgress,
                     progress,
-                    totalElementsToHandle
+                    documentsToSyncCount,
+                    (int) localFileMap.get(path).getFileSize(),
+                    documentsToSyncSizeMB
             );
             sendLocalFile(path);
         }
@@ -293,7 +308,9 @@ public class SyncCommand {
                     "Deleting locally",
                     toDeleteLocally.size() - localProgress,
                     progress,
-                    totalElementsToHandle
+                    documentsToSyncCount,
+                    0,
+                    documentsToSyncSizeMB
             );
 
             deleteLocalFile(path);
@@ -308,7 +325,9 @@ public class SyncCommand {
                     "Deleting on the DPT",
                     toDeleteRemotely.size() - localProgress,
                     progress,
-                    totalElementsToHandle
+                    documentsToSyncCount,
+                    0,
+                    documentsToSyncSizeMB
             );
             deleteRemoteFile(path);
         }
@@ -316,14 +335,14 @@ public class SyncCommand {
     }
 
     private void sendLocalFile(Path path) throws IOException, InterruptedException {
-        logWriter.log("Sending " + path);
         if (!dryrun) {
             transferDocumentCommand.upload(path, remoteRoot.resolve(path));
+        } else {
+            Thread.sleep(200);
         }
     }
 
     private void fetchRemoteFile(Path path) throws IOException, InterruptedException {
-        logWriter.log("Fetching " + path);
         if (!dryrun) {
             Path target = localRoot.resolve(path);
             Files.createDirectories(target.getParent());
@@ -336,20 +355,24 @@ public class SyncCommand {
                         StandardCopyOption.REPLACE_EXISTING
                 );
             }
+        } else {
+            Thread.sleep(200);
         }
     }
 
     private void deleteRemoteFile(Path path) throws IOException, InterruptedException {
-        logWriter.log("Deleting remotely " + path);
         if (!dryrun) {
             digitalPaperEndpoint.deleteByDocumentId(remoteFileMap.get(path).getEntryId());
+        } else {
+            Thread.sleep(200);
         }
     }
 
-    private void deleteLocalFile(Path path) throws IOException {
-        logWriter.log("Deleting locally " + path);
+    private void deleteLocalFile(Path path) throws IOException, InterruptedException {
         if (!dryrun) {
             Files.delete(localRoot.resolve(path));
+        } else {
+            Thread.sleep(200);
         }
     }
 

@@ -3,10 +3,15 @@ package net.sony.dpt.command.sync;
 import net.sony.dpt.DigitalPaperEndpoint;
 import net.sony.util.ProgressBar;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Basically unusable since modal management is subpar - the DPT can track and "reuse" a modal,
+ * but needs to make it reappear non stop.
+ */
 public class RemoteSyncProgressBar implements ProgressBar {
 
     private final DigitalPaperEndpoint digitalPaperEndpoint;
@@ -17,20 +22,30 @@ public class RemoteSyncProgressBar implements ProgressBar {
 
     private String dialogText;
     private boolean animate;
+    // The DPT cannot handle enough refreshing too often, repaints should staggered
+    private static final int REFRESH_DELAY_MS = 10000;
+    private final ProgressStyle style;
+    private long lastRepaintMs = 0;
 
-    public RemoteSyncProgressBar(DigitalPaperEndpoint digitalPaperEndpoint) {
+    public RemoteSyncProgressBar(final DigitalPaperEndpoint digitalPaperEndpoint, final ProgressStyle style) {
         this.digitalPaperEndpoint = digitalPaperEndpoint;
         remainingPerGroup = new HashMap<>();
         percentDone = 0;
         dialogUUID = UUID.randomUUID();
         dialogText = "Synchronization will start soon";
-        animate = true;
+        animate = false;
+        this.style = style;
     }
 
     @Override
     public void progressed(int unit, int total) {
         if (total == 0) percentDone = 100;
-        else percentDone = unit / total * 100;
+        else percentDone = (int) (((double) unit / (double) total) * 100);
+    }
+
+    @Override
+    public void progressedSize(int unit, int total) {
+
     }
 
     @Override
@@ -46,27 +61,31 @@ public class RemoteSyncProgressBar implements ProgressBar {
     @Override
     public void start() {
         dialogText = "Synchronization preparing...";
-        animate = true;
+        animate = false;
         repaint();
     }
 
     @Override
     public void stop() {
         currentTask = "Synchronization complete !";
+        lastRepaintMs = 0;
         animate = false;
         repaint();
     }
 
     @Override
     public void repaint() {
-        dialogText = "Synchronizing your Digital Paper... " + percentDone + "%\n";
+        dialogText = style.generateSequence(percentDone, 24) + " " + percentDone + "%\n";
         for (String group : remainingPerGroup.keySet()) {
-            dialogText += group + ": " + remainingPerGroup.get(group) + "\n";
+            dialogText += group + ": " + remainingPerGroup.get(group) + " remaining\n";
         }
         if (currentTask != null && !currentTask.isEmpty()) {
             dialogText += currentTask;
         }
-        paint();
+        if (lastRepaintMs == 0 || lastRepaintMs + REFRESH_DELAY_MS <= new Date().getTime()) {
+            paint();
+            lastRepaintMs = new Date().getTime();
+        }
     }
 
     private void paint() {

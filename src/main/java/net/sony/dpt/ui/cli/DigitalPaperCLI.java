@@ -12,6 +12,7 @@ import net.sony.dpt.command.documents.TransferDocumentCommand;
 import net.sony.dpt.command.ping.PingCommand;
 import net.sony.dpt.command.register.RegisterCommand;
 import net.sony.dpt.command.register.RegistrationResponse;
+import net.sony.dpt.command.sync.LocalSyncProgressBar;
 import net.sony.dpt.command.sync.RemoteSyncProgressBar;
 import net.sony.dpt.command.sync.SyncCommand;
 import net.sony.dpt.command.wifi.AccessPointList;
@@ -296,7 +297,7 @@ public class DigitalPaperCLI {
                 digitalPaperEndpoint,
                 logWriter,
                 syncStore,
-                new RemoteSyncProgressBar(digitalPaperEndpoint)
+                new LocalSyncProgressBar(logWriter, RemoteSyncProgressBar.ProgressStyle.RECTANGLES_1)
         ).sync(dryrun);
     }
 
