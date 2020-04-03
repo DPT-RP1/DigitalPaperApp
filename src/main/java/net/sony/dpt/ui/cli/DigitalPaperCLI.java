@@ -82,6 +82,7 @@ public class DigitalPaperCLI {
         options.addOption("addr", "addr", true, "The ip address of the Digital Paper");
         options.addOption("serial", "serial", true, "The serial number of the Digital Paper we want to auto discover");
         options.addOption("dryrun", "dryrun", false, "For commands that can run in dry mode, simulate their action");
+        options.addOption("interactive", "interactive", false, "For commands that can run in dry mode, simulate their action");
     }
 
     private String findAddress(CommandLine commandLine) throws IOException, InterruptedException {
@@ -198,16 +199,35 @@ public class DigitalPaperCLI {
                 ping();
                 break;
             case "wifi-add":
+                addWifi(arguments.get(1), !options.hasOption("interactive") ? arguments.get(2) : null );
+                break;
             case "wifi-del":
-            case "wifi":
+                deleteWifi(arguments.get(1));
+                break;
             case "wifi-enable":
             case "wifi-disable":
+
+            case "wifi":
             case "update-firmware":
             case "command-help":
                 throw new UnsupportedOperationException(command);
 
         }
 
+    }
+
+    private void addWifi(String SSID, String password) throws IOException, InterruptedException {
+        WifiCommand wifiCommand = new WifiCommand(digitalPaperEndpoint, inputReader, logWriter);
+        if (password == null) {
+            wifiCommand.addInteractive(SSID);
+        } else {
+            wifiCommand.add(SSID, password);
+        }
+    }
+
+    public void deleteWifi(String SSID) throws IOException, InterruptedException {
+        WifiCommand wifiCommand = new WifiCommand(digitalPaperEndpoint, inputReader, logWriter);
+        wifiCommand.delete(SSID);
     }
 
     private void copyDocument(String from, String to) throws IOException, InterruptedException {
@@ -247,13 +267,13 @@ public class DigitalPaperCLI {
     }
 
     private void wifiList() throws IOException, InterruptedException {
-        WifiCommand wifiCommand = new WifiCommand(digitalPaperEndpoint);
+        WifiCommand wifiCommand = new WifiCommand(digitalPaperEndpoint, inputReader, logWriter);
         AccessPointList accessPointList = wifiCommand.list();
         accessPointList.getAccessPoints().forEach(accessPoint -> logWriter.log(accessPoint.getDecodedSSID()));
     }
 
     private void wifiScan() throws IOException, InterruptedException {
-        WifiCommand wifiCommand = new WifiCommand(digitalPaperEndpoint);
+        WifiCommand wifiCommand = new WifiCommand(digitalPaperEndpoint, inputReader, logWriter);
         AccessPointList accessPointList = wifiCommand.scan();
         accessPointList.getAccessPoints().forEach(accessPoint -> logWriter.log(accessPoint.getDecodedSSID()));
     }

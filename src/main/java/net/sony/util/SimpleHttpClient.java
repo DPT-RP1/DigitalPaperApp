@@ -21,6 +21,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -91,6 +92,14 @@ public class SimpleHttpClient {
             put("value", rawBody);
         }};
         return put(url, commonValueParam);
+    }
+
+    public HttpResponse<String> putWithResponse(String url, Object serializable) throws IOException, InterruptedException {
+        HttpRequest request = requestBuilder()
+                .uri(URI.create(url))
+                .method("PUT", HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(serializable)))
+                .build();
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     public HttpResponse<String> putWithResponse(String url, Map<String, Object> jsonBody) throws IOException, InterruptedException {
@@ -182,7 +191,16 @@ public class SimpleHttpClient {
     public String delete(String url) throws IOException, InterruptedException {
         HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
+                .timeout(Duration.ofSeconds(15))
                 .method("DELETE", HttpRequest.BodyPublishers.ofString(""))
+                .build();
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+    }
+
+    public String delete(String url, Map<String, Object> jsonBody) throws IOException, InterruptedException {
+        HttpRequest request = requestBuilder()
+                .uri(URI.create(url))
+                .method("DELETE", HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(jsonBody)))
                 .build();
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
     }

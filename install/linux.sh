@@ -8,4 +8,4 @@ mkdir -p ~/.local/bin
 cp target/DigitalPaperApp*.jar ~/.local/share/dpt/DigitalPaperApp.jar
 echo "java -jar ~/.local/share/dpt/DigitalPaperApp.jar \"\$@\"" > ~/.local/bin/dpt
 chmod +x ~/.local/bin/dpt
-export PATH=$PATH:~/.local/bin
+[[ ":$PATH:" != *":~/.local/bin:"* ]] && export PATH="${PATH}:~/.local/bin"

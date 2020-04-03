@@ -2,6 +2,8 @@ package net.sony.dpt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sony.dpt.command.documents.EntryType;
+import net.sony.dpt.command.wifi.AccessPoint;
+import net.sony.dpt.command.wifi.AccessPointCreationRequest;
 import net.sony.util.SimpleHttpClient;
 import org.apache.commons.text.StringSubstitutor;
 
@@ -36,7 +38,13 @@ public class DigitalPaperEndpoint {
     private static final int INSECURE_PORT = 8080;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-
+    private static final String showDialogUrl = "/system/controls/indicate";
+    private static final String showDialogWithUUID = "/system/controls/indicate/${indication_id}";
+    private static final String ownerNameGetUrl = "/system/configs/owner";
+    private static final String ownerNameSetUrl = "/system/configs/owner";
+    private static final String copyUrl = "/documents/${document_id}/copy";
+    private static final String wifiRegister = "/system/controls/wifi_accesspoints/register";
+    private static final String wifiRemoveUrl = "/system/configs/wifi_accesspoints/${ssid}/${security}";
     private final SimpleHttpClient simpleHttpClient;
     private final String secureBaseUrl;
     private final String insecureBaseUrl;
@@ -49,6 +57,21 @@ public class DigitalPaperEndpoint {
         this.simpleHttpClient = simpleHttpClient;
     }
 
+    private static String resolve(String template, Map<String, String>... variables) {
+        Map<String, String> finalMap = new HashMap<>();
+        for (Map<String, String> variable : variables) {
+            finalMap.putAll(variable);
+        }
+        StringSubstitutor stringSubstitutor = new StringSubstitutor(finalMap);
+        return stringSubstitutor.replace(template);
+    }
+
+    private static Map<String, String> variable(String name, String value) {
+        return new HashMap<>() {{
+            put(name, value);
+        }};
+    }
+
     public String getNonce(String clientId) throws IOException, InterruptedException {
         return fromJSON(simpleHttpClient.get(secureBaseUrl + "/auth/nonce/" + clientId)).get("nonce");
     }
@@ -59,17 +82,6 @@ public class DigitalPaperEndpoint {
 
     public String listDocuments(EntryType entryType) throws IOException, InterruptedException {
         return simpleHttpClient.get(secureBaseUrl + "/documents2?entry_type=" + entryType);
-    }
-
-    private static String resolve(String template, Map<String, String> variables) {
-        StringSubstitutor stringSubstitutor = new StringSubstitutor(variables);
-        return stringSubstitutor.replace(template);
-    }
-
-    private static Map<String, String> variable(String name, String value) {
-        return new HashMap<>() {{
-            put(name, value);
-        }};
     }
 
     public URI getURI() throws URISyntaxException {
@@ -101,10 +113,6 @@ public class DigitalPaperEndpoint {
         simpleHttpClient.delete(secureBaseUrl + resolve(deleteByDocumentIdUrl, variable("doc_id", remoteId)));
     }
 
-    private static final String showDialogUrl = "/system/controls/indicate";
-    private static final String showDialogWithUUID = "/system/controls/indicate/${indication_id}";
-
-
     public void deleteFolderByRemoteId(String remoteId) throws IOException, InterruptedException {
         simpleHttpClient.delete(secureBaseUrl + resolve(deleteFolderUrl, variable("folder_id", remoteId)));
     }
@@ -117,13 +125,9 @@ public class DigitalPaperEndpoint {
         return simpleHttpClient.post(secureBaseUrl + wifiScanUrl);
     }
 
-    private static final String ownerNameGetUrl = "/system/configs/owner";
-
     public InputStream takeScreenshot() throws IOException, InterruptedException {
         return simpleHttpClient.getFile(secureBaseUrl + takeScreenshotUrl);
     }
-
-    private static final String ownerNameSetUrl = "/system/configs/owner";
 
     public String createDirectory(Path directory, String parentId) throws IOException, InterruptedException {
         Map<String, Object> body = new HashMap<>() {{
@@ -191,7 +195,6 @@ public class DigitalPaperEndpoint {
         simpleHttpClient.putCommonValue(secureBaseUrl + ownerNameSetUrl, escapedName);
     }
 
-    private static final String copyUrl = "/documents/${document_id}/copy";
     public void copy(String from, String toFolder, String toFilename) throws IOException, InterruptedException {
         simpleHttpClient.post(secured(resolve(copyUrl, variable("document_id", from))), new HashMap<>() {{
             put("parent_folder_id", toFolder);
@@ -201,5 +204,21 @@ public class DigitalPaperEndpoint {
 
     public String secured(String path) {
         return secureBaseUrl + path;
+    }
+
+    public void addWifi(AccessPointCreationRequest found) throws IOException, InterruptedException {
+        simpleHttpClient.putWithResponse(secured(wifiRegister), found);
+    }
+
+    public void removeWifi(AccessPoint found) throws IOException, InterruptedException {
+        simpleHttpClient.delete(
+            secured(
+                resolve(
+                    wifiRemoveUrl,
+                    variable("ssid", found.getDecodedSSID()),
+                    variable("security", found.getSecurity())
+                )
+            )
+        );
     }
 }
