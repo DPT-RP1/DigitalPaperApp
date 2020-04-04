@@ -226,6 +226,20 @@ public class SimpleHttpClient {
         httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
     }
 
+    public void putBytes(String url, String filename, String mimeType, byte[] content) throws IOException, InterruptedException {
+        MimeMultipartData mimeMultipartData = MimeMultipartData.newBuilder()
+                .withCharset(StandardCharsets.UTF_8)
+                .addBlob(filename, filename, content, mimeType)
+                .build();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .header("Content-Type", mimeMultipartData.getContentType())
+                .PUT(mimeMultipartData.getBodyPublisher())
+                .uri(URI.create(url))
+                .build();
+        httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+    }
+
     public void delete(String url) throws IOException, InterruptedException {
         HttpRequest request = requestBuilder()
                 .uri(URI.create(url))

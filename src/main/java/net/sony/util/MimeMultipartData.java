@@ -36,6 +36,7 @@ public class MimeMultipartData {
 
         private final String boundary;
         private final List<MimedFile> files = new ArrayList<>();
+        private final List<MimedBytes> blobs = new ArrayList<>();
         private Charset charset = StandardCharsets.UTF_8;
 
         private Builder() {
@@ -49,6 +50,11 @@ public class MimeMultipartData {
 
         public Builder addFile(String name, Path path, String mimeType) {
             this.files.add(new MimedFile(name, path, mimeType));
+            return this;
+        }
+
+        public Builder addBlob(String name, String fileName, byte[] content, String mimeType) {
+            this.blobs.add(new MimedBytes(name, content, mimeType, fileName));
             return this;
         }
 
@@ -70,6 +76,18 @@ public class MimeMultipartData {
                 byteArrayOutputStream.write(newline);
             }
 
+            for (var b : blobs) {
+                byteArrayOutputStream.write(("--" + boundary).getBytes(charset));
+                byteArrayOutputStream.write(newline);
+                byteArrayOutputStream.write(("Content-Disposition: form-data; name=\"" + b.name + "\"; filename=\"" + b.fileName + "\"").getBytes(charset));
+                byteArrayOutputStream.write(newline);
+                byteArrayOutputStream.write(("Content-Type: " + b.mimeType).getBytes(charset));
+                byteArrayOutputStream.write(newline);
+                byteArrayOutputStream.write(newline);
+                byteArrayOutputStream.write(b.content);
+                byteArrayOutputStream.write(newline);
+            }
+
             byteArrayOutputStream.write(("--" + boundary + "--").getBytes(charset));
 
             mimeMultipartData.bodyPublisher = HttpRequest.BodyPublishers.ofByteArray(byteArrayOutputStream.toByteArray());
@@ -86,6 +104,21 @@ public class MimeMultipartData {
                 this.name = name;
                 this.path = path;
                 this.mimeType = mimeType;
+            }
+        }
+
+        public static class MimedBytes {
+
+            public final String name;
+            public final byte[] content;
+            public final String mimeType;
+            public final String fileName;
+
+            public MimedBytes(String name, byte[] content, String mimeType, String fileName) {
+                this.name = name;
+                this.content = content;
+                this.mimeType = mimeType;
+                this.fileName = fileName;
             }
         }
     }

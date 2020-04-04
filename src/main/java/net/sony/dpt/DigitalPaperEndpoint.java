@@ -47,6 +47,7 @@ public class DigitalPaperEndpoint {
     private static final String wifiRemoveUrl = "/system/configs/wifi_accesspoints/${ssid}/${security}";
 
     private static final String FIRMWARE_VERSION_URL = "/system/status/firmware_version";
+    private static final String FIRMWARE_PUT_ON_DEVICE_URL = "/system/controls/update_firmware/file";
 
     private static final int SECURE_PORT = 8443;
     private static final int INSECURE_PORT = 8080;
@@ -245,5 +246,9 @@ public class DigitalPaperEndpoint {
 
     public FirmwareVersionResponse checkVersion() throws IOException, InterruptedException {
         return fromJSON(simpleHttpClient.get(secured(FIRMWARE_VERSION_URL)), FirmwareVersionResponse.class);
+    }
+
+    public void putFirmwareOnDevice(byte[] firmware) throws IOException, InterruptedException {
+        simpleHttpClient.putBytes(secured(FIRMWARE_PUT_ON_DEVICE_URL), "FwUpdater.pkg", "application/x-newton-compatible-pkg", firmware);
     }
 }

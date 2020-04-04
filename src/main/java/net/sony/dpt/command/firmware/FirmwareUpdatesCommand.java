@@ -139,8 +139,10 @@ public class FirmwareUpdatesCommand {
         byte[] firmwareData = downloadAndVerify(firmware(parsedXml, modelTag));
 
         // 4. Put on device
+        digitalPaperEndpoint.putFirmwareOnDevice(firmwareData);
 
         // 5. Run precheck and verify
+
 
         // 6. Trigger upgrade
 
