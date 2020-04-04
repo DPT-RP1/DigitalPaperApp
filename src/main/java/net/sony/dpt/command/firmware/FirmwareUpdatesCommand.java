@@ -128,6 +128,7 @@ public class FirmwareUpdatesCommand {
         logWriter.log("The device version is [v" + firmwareVersionResponse.getValue() + "]\nThe latest version online is [v" + onlineVersion + "]");
         if (!force && onlineVersion.equals(firmwareVersionResponse.getValue())) {
             logWriter.log("No difference, no upgrade will happen");
+            return;
         }
 
         if (force) {
