@@ -35,6 +35,7 @@ public class DigitalPaperEndpoint {
     private static final String fileInfoUrl = "/documents/${file_id}";
     private static final String authenticateUrl = "/auth";
     private static final String takeScreenshotUrl = "/system/controls/screen_shot";
+    private static final String takeFastScreenshotUrl = "/system/controls/screen_shot2?query=jpeg";
 
     private static final int SECURE_PORT = 8443;
     private static final int INSECURE_PORT = 8080;
@@ -131,12 +132,17 @@ public class DigitalPaperEndpoint {
     }
 
     private static final String WIFI_STATE_URL = "/system/status/wifi_state";
+
     public AccessPoint wifiState() throws IOException, InterruptedException {
         return objectMapper.readValue(simpleHttpClient.get(secured(WIFI_STATE_URL)), AccessPoint.class);
     }
 
     public InputStream takeScreenshot() throws IOException, InterruptedException {
-        return simpleHttpClient.getFile(secureBaseUrl + takeScreenshotUrl);
+        return simpleHttpClient.getFile(secured(takeScreenshotUrl));
+    }
+
+    public InputStream takeFastScreenshot() throws IOException, InterruptedException {
+        return simpleHttpClient.getFile(secured(takeFastScreenshotUrl));
     }
 
     public String createDirectory(Path directory, String parentId) throws IOException, InterruptedException {

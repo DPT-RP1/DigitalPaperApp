@@ -131,7 +131,7 @@ public class DigitalPaperCLI {
         RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
 
         SimpleHttpClient secureHttpClient = FindDigitalPaper.ZEROCONF_HOST.equals(addr)
-                ? SimpleHttpClient.secure(registrationResponse.getPemCertificate(), registrationResponse.getPrivateKey())
+                ? SimpleHttpClient.secureNoHostVerification()
                 : SimpleHttpClient.secureNoHostVerification();
 
         digitalPaperEndpoint = new DigitalPaperEndpoint(

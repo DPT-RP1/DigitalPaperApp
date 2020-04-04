@@ -26,4 +26,14 @@ public class TakeScreenshotCommand {
         }
     }
 
+    /**
+     * Takes a jpeg, with not screenshot animation. Used by the official app to do their
+     * capture whiteboard
+     *
+     * @return
+     */
+    public InputStream fastScreenshot() throws IOException, InterruptedException {
+        return digitalPaperEndpoint.takeFastScreenshot();
+    }
+
 }
