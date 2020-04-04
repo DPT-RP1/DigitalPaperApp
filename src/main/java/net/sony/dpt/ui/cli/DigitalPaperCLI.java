@@ -9,6 +9,7 @@ import net.sony.dpt.command.dialog.DialogCommand;
 import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.documents.ListDocumentsCommand;
 import net.sony.dpt.command.documents.TransferDocumentCommand;
+import net.sony.dpt.command.firmware.FirmwareUpdatesCommand;
 import net.sony.dpt.command.ping.PingCommand;
 import net.sony.dpt.command.register.RegisterCommand;
 import net.sony.dpt.command.register.RegistrationResponse;
@@ -28,10 +29,13 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.IOUtils;
+import org.xml.sax.SAXException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -79,7 +83,9 @@ public class DigitalPaperCLI {
         options.addOption("addr", "addr", true, "The ip address of the Digital Paper");
         options.addOption("serial", "serial", true, "The serial number of the Digital Paper we want to auto discover");
         options.addOption("dryrun", "dryrun", false, "For commands that can run in dry mode, simulate their action");
-        options.addOption("interactive", "interactive", false, "For commands that can run in dry mode, simulate their action");
+        options.addOption("interactive", "interactive", false, "For commands that can run in interactive mode, stop the process to ask for user input");
+        options.addOption("force", "force", false, "For commands that can run in force mode, continue despite validation errors");
+
     }
 
     private String findAddress(CommandLine commandLine) throws IOException, InterruptedException {
@@ -115,6 +121,9 @@ public class DigitalPaperCLI {
 
     public void execute(String[] args) throws Exception {
         CommandLine commandLine = parser.parse(options, args);
+
+        boolean dryrun = commandLine.hasOption("dryrun");
+        boolean force = commandLine.hasOption("force");
 
         String addr = findAddress(commandLine);
 
@@ -197,7 +206,7 @@ public class DigitalPaperCLI {
                 new Whiteboard(new TakeScreenshotCommand(digitalPaperEndpoint));
                 break;
             case "sync":
-                sync(arguments.get(1), commandLine.hasOption("dryrun"));
+                sync(arguments.get(1), dryrun);
                 break;
             case "dialog":
                 showDialog(arguments.get(1), arguments.get(2), arguments.get(3));
@@ -227,13 +236,25 @@ public class DigitalPaperCLI {
             case "wifi-disable":
                 turnWifiOff();
                 break;
-
             case "update-firmware":
+                update(force, dryrun);
+                break;
             case "command-help":
                 throw new UnsupportedOperationException(command);
 
         }
 
+    }
+
+    private void update(boolean force, boolean dryrun) throws IOException, InterruptedException, XPathExpressionException, SAXException, ParserConfigurationException {
+        new FirmwareUpdatesCommand(
+                new LocalSyncProgressBar(
+                        System.out,
+                        ProgressBar.ProgressStyle.RECTANGLES_1
+                ),
+                digitalPaperEndpoint,
+                logWriter
+        ).update(force, dryrun);
     }
 
     private void wifiState() throws IOException, InterruptedException {
@@ -364,7 +385,7 @@ public class DigitalPaperCLI {
                 digitalPaperEndpoint,
                 logWriter,
                 syncStore,
-                new LocalSyncProgressBar(RemoteSyncProgressBar.ProgressStyle.RECTANGLES_1)
+                new LocalSyncProgressBar(System.out, RemoteSyncProgressBar.ProgressStyle.RECTANGLES_1)
         ).sync(dryrun);
     }
 

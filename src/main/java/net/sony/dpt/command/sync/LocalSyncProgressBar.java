@@ -2,11 +2,17 @@ package net.sony.dpt.command.sync;
 
 import net.sony.util.ProgressBar;
 
+import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Basically unusable since modal management is subpar
  */
 public class LocalSyncProgressBar implements ProgressBar {
 
+    private final PrintStream printStream;
+    private final Map<String, Integer> remainingPerGroup;
     private final ProgressStyle style;
     private int percentDone;
     private String currentTask;
@@ -14,7 +20,9 @@ public class LocalSyncProgressBar implements ProgressBar {
     private int totalSizeMB;
     private int doneSizeMB;
 
-    public LocalSyncProgressBar(final ProgressStyle style) {
+    public LocalSyncProgressBar(final PrintStream printStream, final ProgressStyle style) {
+        this.printStream = printStream;
+        remainingPerGroup = new HashMap<>();
         percentDone = 0;
         this.style = style;
     }
@@ -60,6 +68,6 @@ public class LocalSyncProgressBar implements ProgressBar {
     }
 
     private void paint() {
-        System.out.print(dialogText + "\r");
+        printStream.print(dialogText + "\r");
     }
 }

@@ -17,7 +17,9 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.*;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.HashMap;
@@ -87,9 +89,13 @@ public class SimpleHttpClient {
         return new SimpleHttpClient(null);
     }
 
-    public static SimpleHttpClient secure(String certPem, String privateKeyPem, CryptographyUtil cryptographyUtil) throws GeneralSecurityException, IOException {
+    public static SimpleHttpClient secure(String certPem, String privateKeyPem, CryptographyUtil cryptographyUtil) throws KeyManagementException, NoSuchAlgorithmException {
         initCookieManager();
-        return new SimpleHttpClient(new SSLFactory(certPem, privateKeyPem, cryptographyUtil).getSslContext());
+        try {
+            return new SimpleHttpClient(new SSLFactory(certPem, privateKeyPem, cryptographyUtil).getSslContext());
+        } catch (Exception e) {
+            return secureNoHostVerification();
+        }
     }
 
     public static SimpleHttpClient secureNoHostVerification() throws NoSuchAlgorithmException, KeyManagementException {
@@ -106,11 +112,6 @@ public class SimpleHttpClient {
 
     public static <T> boolean ok(HttpResponse<T> response) {
         return response.statusCode() >= 200 && response.statusCode() < 300;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Map<String, Object> fromJSON(String json) throws IOException {
-        return (Map<String, Object>) mapper.readValue(json, Map.class);
     }
 
     public HttpRequest.Builder requestBuilder() {
@@ -196,6 +197,15 @@ public class SimpleHttpClient {
                 .method("GET", HttpRequest.BodyPublishers.ofString(""))
                 .build();
         return httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream()).body();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> fromJSON(String json) throws IOException {
+        return (Map<String, Object>) mapper.readValue(json, Map.class);
+    }
+
+    public static <T> T fromJSON(String json, Class<T> clazz) throws IOException {
+        return mapper.readValue(json, clazz);
     }
 
     public void addDefaultHeader(String header, String value) {

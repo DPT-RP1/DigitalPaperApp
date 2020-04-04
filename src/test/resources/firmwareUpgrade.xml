@@ -1,0 +1,108 @@
+eaid:ENC0001
+        daid:HAS0002
+        digest:6e18178cc1cb66a837005a1b9fa4fcfe
+
+        <?xml version="1.0" encoding="UTF-8"?>
+<InformationFile LastUpdate="2018-02-15T18:36:22Z" Noop="false" Version="1.0">
+    <ControlConditions DefaultServiceStatus="open" DefaultVariance="0"/>
+    <ApplyConditions>
+        <ApplyCondition ApplyOrder="1" Force="false">
+            <Rules>
+                <Rule Type="System" Key="FirmwareVersion" Value="1.6.50.14130" Operator="LessThan"/>
+                <Rule Type="System" Key="Model" Value="DPT-RP1" Operator="Equal"/>
+            </Rules>
+            <Distributions>
+                <Distribution ID="Firmware" InstallParams="" InstallType="binary" MAC="dba7b3c37097d67bb06626f3ae990a5e"
+                              Size="215910245" Type=""
+                              URI="https://www.sony.net/Products/DigitalPaperSystem/Software/DP/FwUpdater.pkg"
+                              Version="1.6.50.14130"/>
+                <Distribution ID="EULA" InstallParams="" InstallType="EULA" MAC="a0d35f5ff938f313d22644a8a0f07e28"
+                              Size="61783" Type=""
+                              URI="https://www.sony.net/Products/DigitalPaperSystem/Software/DP/eula.xml"
+                              Version="1.6.50.14130"/>
+                <Distribution ID="disclaimer" InstallParams="" InstallType="notice"
+                              MAC="305cbaee3724c661fb8fb501854746e3" Size="3826" Type=""
+                              URI="https://www.sony.net/Products/DigitalPaperSystem/Software/DP/disclaimer.xml"
+                              Version="1.6.50.14130"/>
+            </Distributions>
+            <Descriptions DefaultLang="English">
+                <Description Lang="Japanese" Title="Updater for Digital Paper">
+                    <![CDATA[
+- 以下の機能を追加。
+　- Wi-Fi アクセスポイントを Digital Paper 端末からも設定可能
+　- 手書きのUndo/Redo
+
+- 不具合を修正。
+                ]]>
+                </Description>
+                <Description Lang="English" Title="Updater for Digital Paper">
+                    <![CDATA[
+- Added the following features.
+　- Performing undo and redo with annotations
+　- Adding/deleting a network configuration in Wi-Fi Settings on Digital Paper unit
+
+- Modified the bugs.
+                ]]>
+                </Description>
+                <Description Lang="Chinese(Simplified)" Title="Updater for Digital Paper">
+                    <![CDATA[
+-增加了以下功能。
+　-可以撤销和重做注释
+　-在电子纸的设置中新增了添加/删除WIFI网络配置的功能
+
+-修改了bug。
+                ]]>
+                </Description>
+            </Descriptions>
+        </ApplyCondition>
+        <ApplyCondition ApplyOrder="2" Force="false">
+            <Rules>
+                <Rule Type="System" Key="FirmwareVersion" Value="1.6.50.14130" Operator="LessThan"/>
+                <Rule Type="System" Key="Model" Value="DPT-CP1" Operator="Equal"/>
+            </Rules>
+            <Distributions>
+                <Distribution ID="Firmware" InstallParams="" InstallType="binary" MAC="dba7b3c37097d67bb06626f3ae990a5e"
+                              Size="215910245" Type=""
+                              URI="https://www.sony.net/Products/DigitalPaperSystem/Software/DP/FwUpdater.pkg"
+                              Version="1.6.50.14130"/>
+                <Distribution ID="EULA" InstallParams="" InstallType="EULA" MAC="a0d35f5ff938f313d22644a8a0f07e28"
+                              Size="61783" Type=""
+                              URI="https://www.sony.net/Products/DigitalPaperSystem/Software/DP/eula.xml"
+                              Version="1.6.50.14130"/>
+                <Distribution ID="disclaimer" InstallParams="" InstallType="notice"
+                              MAC="305cbaee3724c661fb8fb501854746e3" Size="3826" Type=""
+                              URI="https://www.sony.net/Products/DigitalPaperSystem/Software/DP/disclaimer.xml"
+                              Version="1.6.50.14130"/>
+            </Distributions>
+            <Descriptions DefaultLang="English">
+                <Description Lang="Japanese" Title="Updater for Digital Paper">
+                    <![CDATA[
+- 以下の機能を追加。
+　- Wi-Fi アクセスポイントを Digital Paper 端末からも設定可能
+　- 手書きのUndo/Redo
+
+- 不具合を修正。
+                ]]>
+                </Description>
+                <Description Lang="English" Title="Updater for Digital Paper">
+                    <![CDATA[
+- Added the following features.
+　- Performing undo and redo with annotations
+　- Adding/deleting a network configuration in Wi-Fi Settings on Digital Paper unit
+
+- Modified the bugs.
+                ]]>
+                </Description>
+                <Description Lang="Chinese(Simplified)" Title="Updater for Digital Paper">
+                    <![CDATA[
+-增加了以下功能。
+　-可以撤销和重做注释
+　-在电子纸的设置中新增了添加/删除WIFI网络配置的功能
+
+-修改了bug。
+                ]]>
+                </Description>
+            </Descriptions>
+        </ApplyCondition>
+    </ApplyConditions>
+</InformationFile>

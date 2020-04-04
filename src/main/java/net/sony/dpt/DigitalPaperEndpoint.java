@@ -2,6 +2,7 @@ package net.sony.dpt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sony.dpt.command.documents.EntryType;
+import net.sony.dpt.command.firmware.FirmwareVersionResponse;
 import net.sony.dpt.command.wifi.AccessPoint;
 import net.sony.dpt.command.wifi.AccessPointCreationRequest;
 import net.sony.util.SimpleHttpClient;
@@ -21,6 +22,8 @@ import java.util.Map;
 
 import static net.sony.util.SimpleHttpClient.fromJSON;
 import static net.sony.util.SimpleHttpClient.ok;
+import static net.sony.util.StringUtils.resolve;
+import static net.sony.util.StringUtils.variable;
 
 public class DigitalPaperEndpoint {
 
@@ -42,13 +45,16 @@ public class DigitalPaperEndpoint {
     private static final String copyUrl = "/documents/${document_id}/copy";
     private static final String wifiRegister = "/system/controls/wifi_accesspoints/register";
     private static final String wifiRemoveUrl = "/system/configs/wifi_accesspoints/${ssid}/${security}";
-    private static final String WIFI_ON_OFF_URL = "/system/configs/wifi";
-    private static final String WIFI_STATE_URL = "/system/status/wifi_state";
+
+    private static final String FIRMWARE_VERSION_URL = "/system/status/firmware_version";
 
     private static final int SECURE_PORT = 8443;
     private static final int INSECURE_PORT = 8080;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final String WIFI_ON_OFF_URL = "/system/configs/wifi";
+    private static final String WIFI_STATE_URL = "/system/status/wifi_state";
 
     private final SimpleHttpClient simpleHttpClient;
     private final String secureBaseUrl;
@@ -60,22 +66,6 @@ public class DigitalPaperEndpoint {
         this.secureBaseUrl = "https://" + addr + ":" + SECURE_PORT;
         this.insecureBaseUrl = "http://" + addr + ":" + INSECURE_PORT;
         this.simpleHttpClient = simpleHttpClient;
-    }
-
-    @SafeVarargs
-    private static String resolve(String template, Map<String, String>... variables) {
-        Map<String, String> finalMap = new HashMap<>();
-        for (Map<String, String> variable : variables) {
-            finalMap.putAll(variable);
-        }
-        StringSubstitutor stringSubstitutor = new StringSubstitutor(finalMap);
-        return stringSubstitutor.replace(template);
-    }
-
-    private static Map<String, String> variable(String name, String value) {
-        return new HashMap<>() {{
-            put(name, value);
-        }};
     }
 
     public String getNonce(String clientId) throws IOException, InterruptedException {
@@ -249,6 +239,11 @@ public class DigitalPaperEndpoint {
             simpleHttpClient.put(secured(WIFI_ON_OFF_URL), new HashMap<>() {{
                 put("value", enabled ? "on" : "off");
             }});
-        } catch (HttpTimeoutException ignored) { }
+        } catch (HttpTimeoutException ignored) {
+        }
+    }
+
+    public FirmwareVersionResponse checkVersion() throws IOException, InterruptedException {
+        return fromJSON(simpleHttpClient.get(secured(FIRMWARE_VERSION_URL)), FirmwareVersionResponse.class);
     }
 }
