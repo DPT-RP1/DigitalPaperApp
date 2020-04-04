@@ -7,6 +7,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static java.awt.Image.SCALE_DEFAULT;
 
@@ -15,12 +18,11 @@ import static java.awt.Image.SCALE_DEFAULT;
  */
 public class Whiteboard {
 
-    private TakeScreenshotCommand takeScreenshotCommand;
-    private JFrame frame;
-    private JLabel label;
-
     private static final int DEVICE_WIDTH = 1650;
     private static final int DEVICE_HEIGHT = 2200;
+    private final TakeScreenshotCommand takeScreenshotCommand;
+    private final JFrame frame;
+    private final JLabel label;
 
     public Whiteboard(TakeScreenshotCommand takeScreenshotCommand) throws IOException, InterruptedException {
         this.takeScreenshotCommand = takeScreenshotCommand;
@@ -39,18 +41,13 @@ public class Whiteboard {
         redraw();
         frame.setVisible(true);
 
-        Thread backgroundQueryThread = new Thread(() -> {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(() -> {
             try {
-                while (true) {
-                    redraw();
-                    Thread.sleep(1000);
-                }
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
+                redraw();
+            } catch (IOException | InterruptedException ignored) {
             }
-        });
-
-        backgroundQueryThread.start();
+        }, 0, 1000, TimeUnit.MILLISECONDS);
 
     }
 

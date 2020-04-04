@@ -7,8 +7,6 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
 import static net.sony.util.SimpleHttpClient.ok;
@@ -21,37 +19,35 @@ import static org.mockserver.model.HttpResponse.response;
 
 public class SimpleHttpClientTest {
 
-    @Rule
-    public MockServerRule mockServerRule = new MockServerRule(this);
-
-    private MockServerClient mockServerClient;
-    private String baseUrl;
-
     private static final String JUNIT = "JUNIT";
     private static final String JSON = "{\"test\": \"junit\"}";
+    @Rule
+    public final MockServerRule mockServerRule = new MockServerRule(this);
+    private MockServerClient mockServerClient;
+    private String baseUrl;
 
     @Before
     public void setup() {
         baseUrl = "http://localhost:" + mockServerRule.getPort();
         mockServerClient
-            .when(
-                    request()
-                            .withMethod("GET").withPath("/junit")
-            ).respond(
+                .when(
+                        request()
+                                .withMethod("GET").withPath("/junit")
+                ).respond(
                 response()
-                    .withBody(JUNIT)
-            );
+                        .withBody(JUNIT)
+        );
 
         mockServerClient
-            .when(request()
-                .withMethod("PUT")
-                .withPath("/junitPut")
-            ).respond(response().withBody(JSON)
+                .when(request()
+                        .withMethod("PUT")
+                        .withPath("/junitPut")
+                ).respond(response().withBody(JSON)
         );
     }
 
     @Test
-    public void verifyGetSendsStringBody() throws NoSuchAlgorithmException, KeyManagementException, IOException, InterruptedException {
+    public void verifyGetSendsStringBody() throws IOException, InterruptedException {
         SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
         String response = simpleHttpClient.get(baseUrl + "/junit");
 
@@ -79,7 +75,7 @@ public class SimpleHttpClientTest {
     }
 
     @Test
-    public void verifyGetWithResponseReturnsResponse() throws NoSuchAlgorithmException, KeyManagementException, IOException, InterruptedException {
+    public void verifyGetWithResponseReturnsResponse() throws IOException, InterruptedException {
         SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
         java.net.http.HttpResponse<String> response = simpleHttpClient.getWithResponse(baseUrl + "/junit");
 
@@ -87,9 +83,9 @@ public class SimpleHttpClientTest {
     }
 
     @Test
-    public void verifyPutWithBodyReturnsStringBody() throws IOException, InterruptedException, NoSuchAlgorithmException, KeyManagementException {
+    public void verifyPutWithBodyReturnsStringBody() throws IOException, InterruptedException {
         SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
-        String response = simpleHttpClient.put(baseUrl + "/junitPut", new HashMap<>(){{
+        String response = simpleHttpClient.put(baseUrl + "/junitPut", new HashMap<>() {{
             put("param1", "value1");
         }});
 
@@ -97,7 +93,7 @@ public class SimpleHttpClientTest {
     }
 
     @Test
-    public void verifyPutReturnsStringBody() throws IOException, InterruptedException, NoSuchAlgorithmException, KeyManagementException {
+    public void verifyPutReturnsStringBody() throws IOException, InterruptedException {
         SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
         String response = simpleHttpClient.put(baseUrl + "/junitPut");
 

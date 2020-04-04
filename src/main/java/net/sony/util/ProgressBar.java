@@ -6,6 +6,16 @@ public interface ProgressBar {
 
     void progressed(int unit, int total);
 
+    void remaining(String group, int remaining);
+
+    void current(String current);
+
+    void start();
+
+    void stop();
+
+    void repaint();
+
     enum ProgressStyle {
         RAISING_FILLED("▁▂▃▄▅▆▇█"),
         RAISING_DOTS("⣀⣄⣤⣦⣶⣷⣿"),
@@ -23,7 +33,7 @@ public interface ProgressBar {
         CIRCLES_2("⚪⚫"),
         BLOCKS(" ▏▎▍▌▋▊▉█");
 
-        private String sequence;
+        private final String sequence;
 
         ProgressStyle(String sequence) {
             this.sequence = sequence;
@@ -31,7 +41,7 @@ public interface ProgressBar {
 
         public String generateSequence(int progress, int stringLength) {
             String emptySymbol = sequence.substring(0, 1);
-            String fullSymbol = sequence.substring(sequence.length() - 1, sequence.length());
+            String fullSymbol = sequence.substring(sequence.length() - 1);
 
             if (progress == 0) return emptySymbol.repeat(stringLength);
             if (progress == 100) return fullSymbol.repeat(stringLength);
@@ -50,14 +60,4 @@ public interface ProgressBar {
             return fullSymbol.repeat((int) full) + middleChar + emptySymbol.repeat(stringLength - (int) full - 1);
         }
     }
-
-    void remaining(String group, int remaining);
-
-    void current(String current);
-
-    void start();
-
-    void stop();
-
-    void repaint();
 }

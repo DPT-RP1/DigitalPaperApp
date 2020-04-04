@@ -6,7 +6,6 @@ import net.sony.dpt.persistence.SyncStore;
 import net.sony.dpt.ui.cli.DigitalPaperCLI;
 import net.sony.util.CryptographyUtil;
 import net.sony.util.DiffieHelman;
-import net.sony.util.SimpleHttpClient;
 
 import java.nio.file.Path;
 import java.util.Scanner;

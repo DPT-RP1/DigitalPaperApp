@@ -184,15 +184,26 @@ public class CryptographyUtilTest {
         CryptographyUtil cryptographyUtil = new CryptographyUtil();
 
         PublicKey publicKey = new PublicKey() {
-            @Override public String getAlgorithm() { return "RSA"; }
-            @Override public String getFormat() { return "NA"; }
-            @Override public byte[] getEncoded() { return hexToByte("AABBCCDDEEFF001122445533557899ABCDDE"); }
+            @Override
+            public String getAlgorithm() {
+                return "RSA";
+            }
+
+            @Override
+            public String getFormat() {
+                return "NA";
+            }
+
+            @Override
+            public byte[] getEncoded() {
+                return hexToByte("AABBCCDDEEFF001122445533557899ABCDDE");
+            }
         };
         String pem = cryptographyUtil.exportPublicKeyToPEM(publicKey);
         assertEquals(
                 "-----BEGIN PUBLIC KEY-----\n" +
-                "qrvM3e7/ABEiRFUzVXiZq83e\n" +
-                "-----END PUBLIC KEY-----\n", pem);
+                        "qrvM3e7/ABEiRFUzVXiZq83e\n" +
+                        "-----END PUBLIC KEY-----\n", pem);
     }
 
     @Test
@@ -216,7 +227,12 @@ public class CryptographyUtilTest {
 
         byte[] input = hexToByte("AABBCCDDEEABCDE12457896321456987ACCDEB");
 
-        CryptographyUtil cryptographyUtil = new CryptographyUtil() { @Override public byte[] pemToPrivateKey(String pem) { return privateKey; }};
+        CryptographyUtil cryptographyUtil = new CryptographyUtil() {
+            @Override
+            public byte[] pemToPrivateKey(String pem) {
+                return privateKey;
+            }
+        };
 
         String actual = bytesToHex(cryptographyUtil.signSHA256RSA(input, null));
 

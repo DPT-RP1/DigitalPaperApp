@@ -1,30 +1,20 @@
 package net.sony.dpt.command.sync;
 
-import net.sony.util.LogWriter;
 import net.sony.util.ProgressBar;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Basically unusable since modal management is subpar
  */
 public class LocalSyncProgressBar implements ProgressBar {
 
-    private final LogWriter logWriter;
-    private final Map<String, Integer> remainingPerGroup;
     private final ProgressStyle style;
     private int percentDone;
     private String currentTask;
     private String dialogText;
-    private boolean animate;
-    private long lastRepaintMs = 0;
     private int totalSizeMB;
     private int doneSizeMB;
 
-    public LocalSyncProgressBar(LogWriter logWriter, final ProgressStyle style) {
-        this.logWriter = logWriter;
-        remainingPerGroup = new HashMap<>();
+    public LocalSyncProgressBar(final ProgressStyle style) {
         percentDone = 0;
         this.style = style;
     }
@@ -43,7 +33,6 @@ public class LocalSyncProgressBar implements ProgressBar {
 
     @Override
     public void remaining(String group, int remaining) {
-        remainingPerGroup.put(group, remaining);
     }
 
     @Override
@@ -54,14 +43,11 @@ public class LocalSyncProgressBar implements ProgressBar {
     @Override
     public void start() {
         dialogText = "Synchronization preparing...";
-        animate = false;
     }
 
     @Override
     public void stop() {
         currentTask = "Synchronization complete !";
-        lastRepaintMs = 0;
-        animate = false;
         repaint();
     }
 

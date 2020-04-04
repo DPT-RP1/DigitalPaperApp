@@ -42,7 +42,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
@@ -55,9 +54,9 @@ public class DigitalPaperCLI {
     private final LogWriter logWriter;
     private final InputReader inputReader;
     private final RegistrationTokenStore registrationTokenStore;
-    private DigitalPaperEndpoint digitalPaperEndpoint;
     private final SyncStore syncStore;
     private final DeviceInfoStore deviceInfoStore;
+    private DigitalPaperEndpoint digitalPaperEndpoint;
 
     public DigitalPaperCLI(DiffieHelman diffieHelman,
                            CryptographyUtil cryptographyUtil,
@@ -83,7 +82,7 @@ public class DigitalPaperCLI {
         options.addOption("interactive", "interactive", false, "For commands that can run in dry mode, simulate their action");
     }
 
-    private String findAddress(CommandLine commandLine) throws IOException, InterruptedException, NoSuchAlgorithmException, KeyManagementException {
+    private String findAddress(CommandLine commandLine) throws IOException, InterruptedException {
         String addr;
         if (commandLine.hasOption("addr")) {
             addr = commandLine.getOptionValue("addr");
@@ -121,7 +120,10 @@ public class DigitalPaperCLI {
 
         // The arguments have to be ordered: command param1 param2 etc.
         List<String> arguments = commandLine.getArgList();
-        if (arguments == null || arguments.isEmpty()) {printHelp(); return; }
+        if (arguments == null || arguments.isEmpty()) {
+            printHelp();
+            return;
+        }
         String command = arguments.get(0);
 
         if (!registrationTokenStore.registered()) {
@@ -131,12 +133,12 @@ public class DigitalPaperCLI {
         RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
 
         SimpleHttpClient secureHttpClient = FindDigitalPaper.ZEROCONF_HOST.equals(addr)
-                ? SimpleHttpClient.secureNoHostVerification()
+                ? SimpleHttpClient.secure(registrationResponse.getPemCertificate(), registrationResponse.getPrivateKey())
                 : SimpleHttpClient.secureNoHostVerification();
 
         digitalPaperEndpoint = new DigitalPaperEndpoint(
-            addr,
-            secureHttpClient
+                addr,
+                secureHttpClient
         );
 
         auth(secureHttpClient);
@@ -211,7 +213,7 @@ public class DigitalPaperCLI {
                 ping();
                 break;
             case "wifi-add":
-                addWifi(arguments.get(1), !options.hasOption("interactive") ? arguments.get(2) : null );
+                addWifi(arguments.get(1), !options.hasOption("interactive") ? arguments.get(2) : null);
                 break;
             case "wifi-del":
                 deleteWifi(arguments.get(1));
@@ -269,7 +271,7 @@ public class DigitalPaperCLI {
     private void auth(SimpleHttpClient simpleHttpClient) throws Exception {
         RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
         AuthenticationCookie authenticationCookie = new AuthenticateCommand(digitalPaperEndpoint, cryptographyUtil).authenticate(registrationResponse);
-        authenticationCookie.insertInCookieManager(digitalPaperEndpoint.getURI(), (CookieManager) CookieHandler.getDefault());
+        authenticationCookie.insertInCookieManager(digitalPaperEndpoint.getSecuredURI(), (CookieManager) CookieHandler.getDefault());
         authenticationCookie.insertInRequest(simpleHttpClient::addDefaultHeader);
     }
 
@@ -359,7 +361,7 @@ public class DigitalPaperCLI {
                 digitalPaperEndpoint,
                 logWriter,
                 syncStore,
-                new LocalSyncProgressBar(logWriter, RemoteSyncProgressBar.ProgressStyle.RECTANGLES_1)
+                new LocalSyncProgressBar(RemoteSyncProgressBar.ProgressStyle.RECTANGLES_1)
         ).sync(dryrun);
     }
 

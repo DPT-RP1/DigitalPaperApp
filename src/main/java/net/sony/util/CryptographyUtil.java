@@ -48,11 +48,11 @@ public class CryptographyUtil {
     }
 
     public HashRequest generateHash(byte[] sharedKey,
-                                byte[] nonce1,
-                                byte[] mac,
-                                byte[] otherContribution,
-                                byte[] nonce2,
-                                byte[] publicKey
+                                    byte[] nonce1,
+                                    byte[] mac,
+                                    byte[] otherContribution,
+                                    byte[] nonce2,
+                                    byte[] publicKey
     ) throws NoSuchAlgorithmException, InvalidKeyException {
 
         byte[] salt = Bytes.concat(nonce1, mac, nonce2);
@@ -82,8 +82,8 @@ public class CryptographyUtil {
         cipher.init(Cipher.ENCRYPT_MODE, skey, ivSpec);
 
         return Bytes.concat(
-            cipher.doFinal(Bytes.concat(data, kwa)),
-            iv
+                cipher.doFinal(Bytes.concat(data, kwa)),
+                iv
         );
     }
 

@@ -7,9 +7,8 @@ import java.io.IOException;
 
 public class ListDocumentsCommand {
 
-    private final DigitalPaperEndpoint digitalPaperEndpoint;
-
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final DigitalPaperEndpoint digitalPaperEndpoint;
 
     public ListDocumentsCommand(DigitalPaperEndpoint digitalPaperEndpoint) {
         this.digitalPaperEndpoint = digitalPaperEndpoint;

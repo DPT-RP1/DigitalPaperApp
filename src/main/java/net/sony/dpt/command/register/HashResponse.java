@@ -20,6 +20,15 @@ public class HashResponse {
         this.m3hmac = m3hmac;
     }
 
+    public static HashResponse fromJson(String json) throws IOException {
+        Map<String, Object> response = fromJSON(json);
+        byte[] returnedNonce2 = Base64.decode((String) response.get("a"));
+        byte[] eHash = Base64.decode((String) response.get("b"));
+        byte[] m3hmac = Base64.decode((String) response.get("e"));
+
+        return new HashResponse(returnedNonce2, eHash, m3hmac);
+    }
+
     public byte[] getReturnedNonce2() {
         return returnedNonce2;
     }
@@ -30,15 +39,6 @@ public class HashResponse {
 
     public byte[] getM3hmac() {
         return m3hmac;
-    }
-
-    public static HashResponse fromJson(String json) throws IOException {
-        Map<String, Object> response = fromJSON(json);
-        byte[] returnedNonce2 = Base64.decode((String) response.get("a"));
-        byte[] eHash = Base64.decode((String) response.get("b"));
-        byte[] m3hmac = Base64.decode((String) response.get("e"));
-
-        return new HashResponse(returnedNonce2, eHash, m3hmac);
     }
 
     public HashRequest getHashRequest() {

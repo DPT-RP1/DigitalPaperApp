@@ -1,31 +1,27 @@
 package net.sony.dpt.command.wifi;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 /**
  * {
- *   "ssid": "string",
- *   "security": "string",
- *   "passwd": "string",
- *   "dhcp": "string",
- *   "static_address": "string",
- *   "gateway": "string",
- *   "network_mask": "string",
- *   "dns1": "string",
- *   "dns2": "string",
- *   "proxy": "string",
- *   "proxy_host": "string",
- *   "proxy_port": "string",
- *   "eap": "string",
- *   "eap_phase2": "string",
- *   "eap_id": "string",
- *   "eap_anid": "string",
- *   "eap_cacert": "string",
- *   "eap_cert": "string"
+ * "ssid": "string",
+ * "security": "string",
+ * "passwd": "string",
+ * "dhcp": "string",
+ * "static_address": "string",
+ * "gateway": "string",
+ * "network_mask": "string",
+ * "dns1": "string",
+ * "dns2": "string",
+ * "proxy": "string",
+ * "proxy_host": "string",
+ * "proxy_port": "string",
+ * "eap": "string",
+ * "eap_phase2": "string",
+ * "eap_id": "string",
+ * "eap_anid": "string",
+ * "eap_cacert": "string",
+ * "eap_cert": "string"
  * }
  */
 public class AccessPointCreationRequest {
@@ -82,11 +78,11 @@ public class AccessPointCreationRequest {
         this.ssid = ssid;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

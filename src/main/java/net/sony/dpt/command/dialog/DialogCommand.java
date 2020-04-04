@@ -14,7 +14,7 @@ public class DialogCommand {
     }
 
     public void show(String title, String text, String buttonText) throws IOException, InterruptedException {
-        digitalPaperEndpoint.showDialog(title, text, buttonText, true);
+        digitalPaperEndpoint.showDialog(title, text, buttonText);
     }
 
     /**

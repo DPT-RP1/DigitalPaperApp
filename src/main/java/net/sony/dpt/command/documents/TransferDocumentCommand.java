@@ -13,6 +13,7 @@ import java.nio.file.PathMatcher;
 
 public class TransferDocumentCommand {
 
+    private static final Path REMOTE_ROOT = Path.of("Document");
     private final DigitalPaperEndpoint digitalPaperEndpoint;
 
     public TransferDocumentCommand(DigitalPaperEndpoint digitalPaperEndpoint) {
@@ -38,7 +39,6 @@ public class TransferDocumentCommand {
             digitalPaperEndpoint.deleteByDocumentId(remoteId);
         }
     }
-
 
     public String createFolderRecursively(Path folderPath) throws IOException, InterruptedException {
         String parentId = "root";
@@ -69,7 +69,6 @@ public class TransferDocumentCommand {
         return digitalPaperEndpoint.uploadFile(localPath, parentId);
     }
 
-    private static final Path REMOTE_ROOT = Path.of("Document");
     private Path resolveRemotePath(Path remotePath) {
         if (!remotePath.startsWith(REMOTE_ROOT)) {
             return REMOTE_ROOT.resolve(remotePath);

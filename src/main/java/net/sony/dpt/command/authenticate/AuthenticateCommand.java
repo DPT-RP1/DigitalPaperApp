@@ -3,9 +3,7 @@ package net.sony.dpt.command.authenticate;
 import net.sony.dpt.DigitalPaperEndpoint;
 import net.sony.dpt.command.register.RegistrationResponse;
 import net.sony.util.CryptographyUtil;
-import net.sony.util.SimpleHttpClient;
 
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
 public class AuthenticateCommand {

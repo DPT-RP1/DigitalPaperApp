@@ -28,33 +28,9 @@ import java.util.Properties;
 public class SimpleHttpClient {
 
     private static final ObjectMapper mapper = new ObjectMapper();
-
-    private HttpClient httpClient;
     private static Map<String, String> defaultHeaders;
     private static CookieManager cookieManager;
-    private boolean downgradedSSL = false;
-
-    public static SimpleHttpClient insecure() {
-        initCookieManager();
-        return new SimpleHttpClient(null);
-    }
-
-    public static SimpleHttpClient secure(String certPem, String privateKeyPem) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, ConfigurationException, KeyManagementException {
-        initCookieManager();
-        return new SimpleHttpClient(new SSLFactory(certPem, privateKeyPem).getSslContext());
-    }
-
-    public static SimpleHttpClient secureNoHostVerification() throws NoSuchAlgorithmException, KeyManagementException {
-        initCookieManager();
-        return new SimpleHttpClient();
-    }
-
-    public static void initCookieManager() {
-        if (cookieManager == null) {
-            cookieManager = new CookieManager();
-            CookieHandler.setDefault(cookieManager);
-        }
-    }
+    private final HttpClient httpClient;
 
     private SimpleHttpClient(SSLContext sslContext) {
         defaultHeaders = new HashMap<>();
@@ -71,7 +47,6 @@ public class SimpleHttpClient {
         defaultHeaders = new HashMap<>();
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
-
                     @Override
                     public void checkClientTrusted(X509Certificate[] chain, String authType) {
                     }
@@ -104,7 +79,37 @@ public class SimpleHttpClient {
                 .sslContext(sslContext)
                 .sslParameters(sslParameters)
                 .build();
-        downgradedSSL = true;
+    }
+
+    public static SimpleHttpClient insecure() {
+        initCookieManager();
+        return new SimpleHttpClient(null);
+    }
+
+    public static SimpleHttpClient secure(String certPem, String privateKeyPem) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, ConfigurationException, KeyManagementException {
+        initCookieManager();
+        return new SimpleHttpClient(new SSLFactory(certPem, privateKeyPem).getSslContext());
+    }
+
+    public static SimpleHttpClient secureNoHostVerification() throws NoSuchAlgorithmException, KeyManagementException {
+        initCookieManager();
+        return new SimpleHttpClient();
+    }
+
+    public static void initCookieManager() {
+        if (cookieManager == null) {
+            cookieManager = new CookieManager();
+            CookieHandler.setDefault(cookieManager);
+        }
+    }
+
+    public static <T> boolean ok(HttpResponse<T> response) {
+        return response.statusCode() >= 200 && response.statusCode() < 300;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> fromJSON(String json) throws IOException {
+        return (Map<String, Object>) mapper.readValue(json, Map.class);
     }
 
     public HttpRequest.Builder requestBuilder() {
@@ -121,10 +126,6 @@ public class SimpleHttpClient {
                 .method("GET", HttpRequest.BodyPublishers.ofString(""))
                 .build();
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
-    }
-
-    public static <T> boolean ok(HttpResponse<T> response) {
-        return response.statusCode() >= 200 && response.statusCode() < 300;
     }
 
     public HttpResponse<String> getWithResponse(String url) throws IOException, InterruptedException {
@@ -147,19 +148,19 @@ public class SimpleHttpClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
     }
 
-    public String putCommonValue(String url, String rawBody) throws IOException, InterruptedException {
+    public void putCommonValue(String url, String rawBody) throws IOException, InterruptedException {
         Map<String, Object> commonValueParam = new HashMap<>() {{
             put("value", rawBody);
         }};
-        return put(url, commonValueParam);
+        put(url, commonValueParam);
     }
 
-    public HttpResponse<String> putWithResponse(String url, Object serializable) throws IOException, InterruptedException {
+    public void putWithResponse(String url, Object serializable) throws IOException, InterruptedException {
         HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
                 .method("PUT", HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(serializable)))
                 .build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     public HttpResponse<String> putWithResponse(String url, Map<String, Object> jsonBody) throws IOException, InterruptedException {
@@ -195,16 +196,11 @@ public class SimpleHttpClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream()).body();
     }
 
-    @SuppressWarnings("unchecked")
-    public static Map<String, Object> fromJSON(String json) throws IOException {
-        return (Map<String, Object>) mapper.readValue(json, Map.class);
-    }
-
     public void addDefaultHeader(String header, String value) {
         defaultHeaders.put(header, value);
     }
 
-    public String putFile(String url, Path localFile) throws IOException, InterruptedException {
+    public void putFile(String url, Path localFile) throws IOException, InterruptedException {
         MimeMultipartData mimeMultipartData = MimeMultipartData.newBuilder()
                 .withCharset(StandardCharsets.UTF_8)
                 .addFile(localFile.getFileName().toString(), localFile, Files.probeContentType(localFile))
@@ -215,23 +211,15 @@ public class SimpleHttpClient {
                 .PUT(mimeMultipartData.getBodyPublisher())
                 .uri(URI.create(url))
                 .build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
     }
 
-    public String delete(String url) throws IOException, InterruptedException {
+    public void delete(String url) throws IOException, InterruptedException {
         HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(15))
                 .method("DELETE", HttpRequest.BodyPublishers.ofString(""))
                 .build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
-    }
-
-    public String delete(String url, Map<String, Object> jsonBody) throws IOException, InterruptedException {
-        HttpRequest request = requestBuilder()
-                .uri(URI.create(url))
-                .method("DELETE", HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(jsonBody)))
-                .build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
     }
 }

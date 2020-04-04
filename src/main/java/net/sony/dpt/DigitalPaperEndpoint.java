@@ -15,8 +15,6 @@ import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,11 +34,6 @@ public class DigitalPaperEndpoint {
     private static final String authenticateUrl = "/auth";
     private static final String takeScreenshotUrl = "/system/controls/screen_shot";
     private static final String takeFastScreenshotUrl = "/system/controls/screen_shot2?query=jpeg";
-
-    private static final int SECURE_PORT = 8443;
-    private static final int INSECURE_PORT = 8080;
-
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String showDialogUrl = "/system/controls/indicate";
     private static final String showDialogWithUUID = "/system/controls/indicate/${indication_id}";
     private static final String ownerNameGetUrl = "/system/configs/owner";
@@ -48,21 +41,25 @@ public class DigitalPaperEndpoint {
     private static final String copyUrl = "/documents/${document_id}/copy";
     private static final String wifiRegister = "/system/controls/wifi_accesspoints/register";
     private static final String wifiRemoveUrl = "/system/configs/wifi_accesspoints/${ssid}/${security}";
+
+    private static final int SECURE_PORT = 8443;
+    private static final int INSECURE_PORT = 8080;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String WIFI_STATE_URL = "/system/status/wifi_state";
     private final SimpleHttpClient simpleHttpClient;
     private final String secureBaseUrl;
     private final String insecureBaseUrl;
-    private final String ip;
+    private final String addr;
 
-    // TODO: might be smarter to even detect the cert host, but it should always be this one
-    private static final String ZEROCONF_HOST = "digitalpaper.local";
-
-    public DigitalPaperEndpoint(String ip, SimpleHttpClient simpleHttpClient) throws KeyManagementException, NoSuchAlgorithmException {
-        this.ip = ip;
-        this.secureBaseUrl = "https://" + ip + ":" + SECURE_PORT;
-        this.insecureBaseUrl = "http://" + ip + ":" + INSECURE_PORT;
+    public DigitalPaperEndpoint(String addr, SimpleHttpClient simpleHttpClient) {
+        this.addr = addr;
+        this.secureBaseUrl = "https://" + addr + ":" + SECURE_PORT;
+        this.insecureBaseUrl = "http://" + addr + ":" + INSECURE_PORT;
         this.simpleHttpClient = simpleHttpClient;
     }
 
+    @SafeVarargs
     private static String resolve(String template, Map<String, String>... variables) {
         Map<String, String> finalMap = new HashMap<>();
         for (Map<String, String> variable : variables) {
@@ -79,19 +76,27 @@ public class DigitalPaperEndpoint {
     }
 
     public String getNonce(String clientId) throws IOException, InterruptedException {
-        return (String) fromJSON(simpleHttpClient.get(secureBaseUrl + "/auth/nonce/" + clientId)).get("nonce");
+        return (String) fromJSON(simpleHttpClient.get(secured("/auth/nonce/" + clientId))).get("nonce");
     }
 
     public String listDocuments() throws IOException, InterruptedException {
-        return simpleHttpClient.get(secureBaseUrl + "/documents2");
+        return simpleHttpClient.get(secured("/documents2"));
     }
 
     public String listDocuments(EntryType entryType) throws IOException, InterruptedException {
-        return simpleHttpClient.get(secureBaseUrl + "/documents2?entry_type=" + entryType);
+        return simpleHttpClient.get(secured("/documents2?entry_type=" + entryType));
     }
 
-    public URI getURI() throws URISyntaxException {
+    public URI getSecuredURI() throws URISyntaxException {
         return new URI(secureBaseUrl);
+    }
+
+    public URI getInsecureURI() throws URISyntaxException {
+        return new URI(insecureBaseUrl);
+    }
+
+    public String getAddr() {
+        return addr;
     }
 
     public InputStream downloadByRemoteId(String remoteId) throws IOException, InterruptedException {
@@ -101,12 +106,12 @@ public class DigitalPaperEndpoint {
         StringSubstitutor stringSubstitutor = new StringSubstitutor(resolution);
         String downloadUrl = stringSubstitutor.replace(downloadRemoteIdUrl);
 
-        return simpleHttpClient.getFile(secureBaseUrl + downloadUrl);
+        return simpleHttpClient.getFile(secured(downloadUrl));
     }
 
     public String resolveObjectByPath(Path path) throws IOException, InterruptedException {
         String encodedPath = URLEncoder.encode(path.toString(), StandardCharsets.UTF_8);
-        String url = secureBaseUrl + resolve(resolveObjectByPathUrl, variable("enc_path", encodedPath));
+        String url = secured(resolve(resolveObjectByPathUrl, variable("enc_path", encodedPath)));
 
         HttpResponse<String> result = simpleHttpClient.getWithResponse(url);
         if (ok(result)) {
@@ -116,22 +121,20 @@ public class DigitalPaperEndpoint {
     }
 
     public void deleteByDocumentId(String remoteId) throws IOException, InterruptedException {
-        simpleHttpClient.delete(secureBaseUrl + resolve(deleteByDocumentIdUrl, variable("doc_id", remoteId)));
+        simpleHttpClient.delete(secured(resolve(deleteByDocumentIdUrl, variable("doc_id", remoteId))));
     }
 
     public void deleteFolderByRemoteId(String remoteId) throws IOException, InterruptedException {
-        simpleHttpClient.delete(secureBaseUrl + resolve(deleteFolderUrl, variable("folder_id", remoteId)));
+        simpleHttpClient.delete(secured(resolve(deleteFolderUrl, variable("folder_id", remoteId))));
     }
 
     public String listWifi() throws IOException, InterruptedException {
-        return simpleHttpClient.get(secureBaseUrl + wifiAccessPointsUrl);
+        return simpleHttpClient.get(secured(wifiAccessPointsUrl));
     }
 
     public String scanWifi() throws IOException, InterruptedException {
-        return simpleHttpClient.post(secureBaseUrl + wifiScanUrl);
+        return simpleHttpClient.post(secured(wifiScanUrl));
     }
-
-    private static final String WIFI_STATE_URL = "/system/status/wifi_state";
 
     public AccessPoint wifiState() throws IOException, InterruptedException {
         return objectMapper.readValue(simpleHttpClient.get(secured(WIFI_STATE_URL)), AccessPoint.class);
@@ -150,7 +153,7 @@ public class DigitalPaperEndpoint {
             put("folder_name", directory.getFileName().toString());
             put("parent_folder_id", parentId);
         }};
-        simpleHttpClient.post(secureBaseUrl + "/folders2", body);
+        simpleHttpClient.post(secured("/folders2"), body);
         return resolveObjectByPath(directory);
     }
 
@@ -160,8 +163,8 @@ public class DigitalPaperEndpoint {
             put("parent_folder_id", parentId);
             put("document_source", "");
         }};
-        String documentId = (String) fromJSON(simpleHttpClient.post(secureBaseUrl + "/documents2", touchParam)).get("document_id");
-        String documentUrl = secureBaseUrl + resolve(filePathUrl, variable("doc_id", documentId));
+        String documentId = (String) fromJSON(simpleHttpClient.post(secured("/documents2"), touchParam)).get("document_id");
+        String documentUrl = secured(resolve(filePathUrl, variable("doc_id", documentId)));
         simpleHttpClient.putFile(documentUrl, filePath);
         return documentId;
     }
@@ -172,15 +175,15 @@ public class DigitalPaperEndpoint {
         if (newFilename != null) {
             moveParam.put("file_name", newFilename);
         }
-        simpleHttpClient.put(secureBaseUrl + resolve(fileInfoUrl, variable("file_id", remoteId)), moveParam);
+        simpleHttpClient.put(secured(resolve(fileInfoUrl, variable("file_id", remoteId))), moveParam);
     }
 
     public String authenticate(Map<String, Object> params) throws IOException, InterruptedException {
-        HttpResponse<String> response = simpleHttpClient.putWithResponse(secureBaseUrl + authenticateUrl, params);
+        HttpResponse<String> response = simpleHttpClient.putWithResponse(secured(authenticateUrl), params);
         return response.headers().map().get("set-cookie").get(0).split("; ")[0].split("=")[1];
     }
 
-    public void showDialog(String title, String text, String buttonText, boolean animate) throws IOException, InterruptedException {
+    public void showDialog(String title, String text, String buttonText) throws IOException, InterruptedException {
         Map<String, Object> params = new HashMap<>() {{
             put("dialog_params", new HashMap<>() {{
                 put("title", title);
@@ -188,7 +191,7 @@ public class DigitalPaperEndpoint {
                 put("button_caption", buttonText);
             }});
         }};
-        simpleHttpClient.post(secureBaseUrl + showDialogUrl, params);
+        simpleHttpClient.post(secured(showDialogUrl), params);
     }
 
     public void showDialog(String UUID, String title, String text, String buttonText, boolean animate) throws IOException, InterruptedException {
@@ -200,15 +203,15 @@ public class DigitalPaperEndpoint {
             }});
             put("show_animation", animate);
         }};
-        simpleHttpClient.put(secureBaseUrl + resolve(showDialogWithUUID, variable("indication_id", UUID)), params);
+        simpleHttpClient.put(secured(resolve(showDialogWithUUID, variable("indication_id", UUID))), params);
     }
 
     public String getOwnerName() throws IOException, InterruptedException {
-        return (String) fromJSON(simpleHttpClient.get(secureBaseUrl + ownerNameGetUrl)).get("value");
+        return (String) fromJSON(simpleHttpClient.get(secured(ownerNameGetUrl))).get("value");
     }
 
     public void setOwnerName(String escapedName) throws IOException, InterruptedException {
-        simpleHttpClient.putCommonValue(secureBaseUrl + ownerNameSetUrl, escapedName);
+        simpleHttpClient.putCommonValue(secured(ownerNameSetUrl), escapedName);
     }
 
     public void copy(String from, String toFolder, String toFilename) throws IOException, InterruptedException {
@@ -228,13 +231,13 @@ public class DigitalPaperEndpoint {
 
     public void removeWifi(AccessPoint found) throws IOException, InterruptedException {
         simpleHttpClient.delete(
-            secured(
-                resolve(
-                    wifiRemoveUrl,
-                    variable("ssid", found.getDecodedSSID()),
-                    variable("security", found.getSecurity())
+                secured(
+                        resolve(
+                                wifiRemoveUrl,
+                                variable("ssid", found.getDecodedSSID()),
+                                variable("security", found.getSecurity())
+                        )
                 )
-            )
         );
     }
 }

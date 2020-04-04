@@ -38,17 +38,6 @@ public class SyncCommand {
     int documentsToSyncSizeMB;
     private int handledSoFarMB = 0;
 
-    public Map<Path, DocumentEntry> loadRemoteDocuments(DocumentListResponse documentListResponse) {
-        remoteFileMap.clear();
-
-        documentListResponse.getEntryList().forEach(documentEntry -> {
-            Path relativePath = remoteRoot.relativize(Path.of(documentEntry.getEntryPath()));
-            remoteFileMap.put(relativePath, documentEntry);
-        });
-
-        return remoteFileMap;
-    }
-
     public SyncCommand(final Path localRoot,
                        final ListDocumentsCommand listDocumentsCommand,
                        final TransferDocumentCommand transferDocumentCommand,
@@ -75,6 +64,17 @@ public class SyncCommand {
         this.progressBar = progressBar;
         documentsToSyncCount = 0;
         documentsToSyncSizeMB = 0;
+    }
+
+    public Map<Path, DocumentEntry> loadRemoteDocuments(DocumentListResponse documentListResponse) {
+        remoteFileMap.clear();
+
+        documentListResponse.getEntryList().forEach(documentEntry -> {
+            Path relativePath = remoteRoot.relativize(Path.of(documentEntry.getEntryPath()));
+            remoteFileMap.put(relativePath, documentEntry);
+        });
+
+        return remoteFileMap;
     }
 
     public Map<Path, DocumentEntry> loadLocalDocuments(Path localRoot) throws IOException {
@@ -360,7 +360,7 @@ public class SyncCommand {
         }
     }
 
-    private void deleteLocalFile(Path path, boolean dryrun) throws IOException, InterruptedException {
+    private void deleteLocalFile(Path path, boolean dryrun) throws IOException {
         if (!dryrun) {
             Files.delete(localRoot.resolve(path));
         }

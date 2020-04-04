@@ -30,7 +30,7 @@ public class TakeScreenshotCommand {
      * Takes a jpeg, with not screenshot animation. Used by the official app to do their
      * capture whiteboard
      *
-     * @return
+     * @return A JPEG stream, directly from the server, without memory copy.
      */
     public InputStream fastScreenshot() throws IOException, InterruptedException {
         return digitalPaperEndpoint.takeFastScreenshot();

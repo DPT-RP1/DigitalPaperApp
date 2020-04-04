@@ -10,10 +10,9 @@ import java.net.URISyntaxException;
 
 public class PingCommand {
 
+    private static final int TIMEOUT = 5000;
     private DigitalPaperEndpoint digitalPaperEndpoint;
     private LogWriter logWriter;
-
-    private static final int TIMEOUT = 5000;
 
     public PingCommand() {
     }
@@ -23,22 +22,13 @@ public class PingCommand {
         this.logWriter = logWriter;
     }
 
-    /**
-     * This command returns true if we're still authenticated
-     *
-     * @return
-     */
-    public boolean pingAuth() {
-        throw new UnsupportedOperationException("Authenticated ping not implemented");
-    }
-
     public boolean ping(String ip) throws IOException {
         InetAddress deviceIp = InetAddress.getByName(ip);
         return deviceIp.isReachable(TIMEOUT);
     }
 
     public boolean ping() throws URISyntaxException, IOException {
-        URI uri = digitalPaperEndpoint.getURI();
+        URI uri = digitalPaperEndpoint.getSecuredURI();
         boolean reachable = ping(uri.getHost());
         if (reachable) {
             logWriter.log("Discovered a Digital Paper at " + uri);

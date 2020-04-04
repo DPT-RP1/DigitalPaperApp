@@ -3137,10 +3137,18 @@
     },
     "/system/controls/wifi_accesspoints/register": {
       "put": {
-        "tags": [ "Setting - wireless control" ],
-        "schemes": [ "https" ],
-        "consumes": [ "application/json" ],
-        "produces": [ "application/json" ],
+        "tags": [
+          "Setting - wireless control"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "description": "Request to connect to the access point after new Wi-Fi access point registration or change of registered access point setting \n * Access point with the same SSID and same encryption method already registered \n * static_address, gateway, network_mask, dns1, dns2 are mandatory if \n * dhcp is 'false' \n (static_address, network_mask, dns1 is not empty, gateway, dns2 Proxy_port is required (empty character is acceptable) \n * If eap, eap_phase 2, eap_id, eap_idid, eap_cacert, eap_cert are required if security is 'eap'. \n * If proxy is 'true', proxy_host and proxy_port are required (Null character is acceptable.) \n * When changing the setting of registered access point, specify all items that have not been changed \n * exceptionally passwd only, unmodified or empty character 'no change' Interpret",
         "parameters": [
           {

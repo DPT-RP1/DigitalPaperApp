@@ -33,18 +33,18 @@ public class AuthenticationCookie {
         manager.getCookieStore().add(uri, httpCookie);
     }
 
+    @Override
+    public String toString() {
+        return "AuthenticationCookie{" +
+                "credentials='" + credentials + '\'' +
+                '}';
+    }
+
     /**
      * This allow to pass a lambda to write the cookie
      */
     @FunctionalInterface
     public interface Request {
         void setHeader(String header, String value);
-    }
-
-    @Override
-    public String toString() {
-        return "AuthenticationCookie{" +
-                "credentials='" + credentials + '\'' +
-                '}';
     }
 }

@@ -14,17 +14,16 @@ import java.util.UUID;
  */
 public class RemoteSyncProgressBar implements ProgressBar {
 
+    // The DPT cannot handle enough refreshing too often, repaints should staggered
+    private static final int REFRESH_DELAY_MS = 10000;
     private final DigitalPaperEndpoint digitalPaperEndpoint;
     private final Map<String, Integer> remainingPerGroup;
     private final UUID dialogUUID;
+    private final ProgressStyle style;
     private int percentDone;
     private String currentTask;
-
     private String dialogText;
     private boolean animate;
-    // The DPT cannot handle enough refreshing too often, repaints should staggered
-    private static final int REFRESH_DELAY_MS = 10000;
-    private final ProgressStyle style;
     private long lastRepaintMs = 0;
 
     public RemoteSyncProgressBar(final DigitalPaperEndpoint digitalPaperEndpoint, final ProgressStyle style) {
@@ -76,9 +75,11 @@ public class RemoteSyncProgressBar implements ProgressBar {
     @Override
     public void repaint() {
         dialogText = style.generateSequence(percentDone, 24) + " " + percentDone + "%\n";
+        StringBuilder remaining = new StringBuilder();
         for (String group : remainingPerGroup.keySet()) {
-            dialogText += group + ": " + remainingPerGroup.get(group) + " remaining\n";
+             remaining.append(group).append(": ").append(remainingPerGroup.get(group)).append(" remaining\n");
         }
+        dialogText += remaining;
         if (currentTask != null && !currentTask.isEmpty()) {
             dialogText += currentTask;
         }

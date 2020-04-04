@@ -7,7 +7,6 @@ import net.sony.util.LogWriter;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 public class WifiCommand {
 
@@ -48,7 +47,7 @@ public class WifiCommand {
             found.setPassword(password);
             found.setDhcp(true);
             digitalPaperEndpoint.addWifi(
-                new AccessPointCreationRequest(found)
+                    new AccessPointCreationRequest(found)
             );
         } else {
             logWriter.log(SSID + " is not currently visible.");

@@ -16,14 +16,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class FindDigitalPaper {
+    public final static String ZEROCONF_HOST = "digitalpaper.local";
     private final static int TIMEOUT_SLICES_MS = 500;
     private final static String SERVICE_TYPE = "_digitalpaper._tcp.local.";
     private static final String BIND_IP = "0.0.0.0";
     private static final String SERVICE_NAME = "Digital Paper DPT-RP1";
     private final LogWriter logWriter;
     private final DigitalPaperServiceListener digitalPaperServiceListener;
-
-    public final static String ZEROCONF_HOST = "digitalpaper.local";
 
     public FindDigitalPaper(LogWriter logWriter, SimpleHttpClient simpleHttpClient, String matchSerial) {
         this.logWriter = logWriter;

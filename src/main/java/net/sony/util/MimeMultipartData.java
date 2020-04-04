@@ -35,8 +35,8 @@ public class MimeMultipartData {
     public static class Builder {
 
         private final String boundary;
-        private Charset charset = StandardCharsets.UTF_8;
         private final List<MimedFile> files = new ArrayList<>();
+        private Charset charset = StandardCharsets.UTF_8;
 
         private Builder() {
             this.boundary = new BigInteger(128, new Random()).toString();

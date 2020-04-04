@@ -18,8 +18,8 @@ public class SSLFactory {
 
     private static final String TEMPORARY_KEY_PASSWORD = "changeit";
 
-    private SSLContext sslContext;
-    private SSLSocketFactory sslSocketFactory;
+    private final SSLContext sslContext;
+    private final SSLSocketFactory sslSocketFactory;
 
     public SSLFactory(String certificatePem, String privateKeyPem) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, ConfigurationException, UnrecoverableKeyException {
         KeyStore keyStore = getKeyStore(certificatePem, privateKeyPem);
@@ -35,6 +35,22 @@ public class SSLFactory {
         sslContext = SSLContext.getInstance("TLS");
         sslContext.init(keyManagers, trustManagers, null);
         sslSocketFactory = sslContext.getSocketFactory();
+    }
+
+    private static PrivateKey pemLoadPrivateKeyEncoded(String privateKeyPem) throws GeneralSecurityException {
+        // PKCS#8 format
+        final String PEM_PRIVATE_START = "-----BEGIN PRIVATE KEY-----";
+        final String PEM_PRIVATE_END = "-----END PRIVATE KEY-----";
+
+        if (privateKeyPem.contains(PEM_PRIVATE_START)) { // PKCS#8 format
+            privateKeyPem = privateKeyPem.replace(PEM_PRIVATE_START, "").replace(PEM_PRIVATE_END, "");
+            privateKeyPem = privateKeyPem.replaceAll("\\s", "");
+            byte[] pkcs8EncodedKey = Base64.getDecoder().decode(privateKeyPem);
+            KeyFactory factory = KeyFactory.getInstance("RSA");
+            return factory.generatePrivate(new PKCS8EncodedKeySpec(pkcs8EncodedKey));
+        }
+
+        throw new GeneralSecurityException("Not supported format of a private key");
     }
 
     private KeyStore getKeyStore(String certificatePem, String privateKeyPem) throws ConfigurationException {
@@ -59,7 +75,7 @@ public class SSLFactory {
         return certificateFactory.generateCertificate(new ByteArrayInputStream(content));
     }
 
-    private PrivateKey loadPrivateKey(String privateKeyPem) throws IOException, GeneralSecurityException {
+    private PrivateKey loadPrivateKey(String privateKeyPem) throws GeneralSecurityException {
         return pemLoadPrivateKeyEncoded(privateKeyPem);
     }
 
@@ -70,22 +86,6 @@ public class SSLFactory {
             content = pemObject.getContent();
         }
         return content;
-    }
-
-    private static PrivateKey pemLoadPrivateKeyEncoded(String privateKeyPem) throws GeneralSecurityException, IOException {
-        // PKCS#8 format
-        final String PEM_PRIVATE_START = "-----BEGIN PRIVATE KEY-----";
-        final String PEM_PRIVATE_END = "-----END PRIVATE KEY-----";
-
-        if (privateKeyPem.contains(PEM_PRIVATE_START)) { // PKCS#8 format
-            privateKeyPem = privateKeyPem.replace(PEM_PRIVATE_START, "").replace(PEM_PRIVATE_END, "");
-            privateKeyPem = privateKeyPem.replaceAll("\\s", "");
-            byte[] pkcs8EncodedKey = Base64.getDecoder().decode(privateKeyPem);
-            KeyFactory factory = KeyFactory.getInstance("RSA");
-            return factory.generatePrivate(new PKCS8EncodedKeySpec(pkcs8EncodedKey));
-        }
-
-        throw new GeneralSecurityException("Not supported format of a private key");
     }
 
     public SSLContext getSslContext() {
