@@ -49,7 +49,7 @@ public class Whiteboard {
 
     }
 
-    public BufferedImage rotateAndScale(BufferedImage image, double angle) {
+    public BufferedImage rotate(BufferedImage image, double angle) {
         angle = Math.toRadians(angle);
         double sin = Math.abs(Math.sin(angle)), cos = Math.abs(Math.cos(angle));
         int width = image.getWidth();
@@ -70,7 +70,7 @@ public class Whiteboard {
 
     public void redraw() throws IOException, InterruptedException {
         BufferedImage img = ImageIO.read(takeScreenshotCommand.fastScreenshot());
-        BufferedImage rotated = rotateAndScale(img, 90);
+        BufferedImage rotated = rotate(img, 90);
 
         ImageIcon icon = new ImageIcon(rotated.getScaledInstance(rotated.getWidth() / 2, rotated.getHeight() / 2, SCALE_DEFAULT));
 
