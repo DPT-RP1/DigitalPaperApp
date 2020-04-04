@@ -19,10 +19,15 @@ public class Whiteboard {
     private JFrame frame;
     private JLabel label;
 
+    private static final int DEVICE_WIDTH = 1650;
+    private static final int DEVICE_HEIGHT = 2200;
+
     public Whiteboard(TakeScreenshotCommand takeScreenshotCommand) throws IOException, InterruptedException {
         this.takeScreenshotCommand = takeScreenshotCommand;
         frame = new JFrame("Whiteboard");
-        frame.setSize(2200 / 2, 1650 / 2);
+
+        // We invert width and height and divide by 2 for rotation + scaling of the screenshots
+        frame.setSize(DEVICE_HEIGHT / 2, DEVICE_WIDTH / 2);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         label = new JLabel();
@@ -74,6 +79,7 @@ public class Whiteboard {
 
         ImageIcon icon = new ImageIcon(rotated.getScaledInstance(rotated.getWidth() / 2, rotated.getHeight() / 2, SCALE_DEFAULT));
 
+        // Callback to the UI thread
         EventQueue.invokeLater(() -> {
             label.setIcon(icon);
             frame.revalidate();
