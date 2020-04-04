@@ -3,10 +3,8 @@ package net.sony.util;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
-import org.mockserver.model.HttpResponse;
 
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -54,7 +52,7 @@ public class SimpleHttpClientTest {
 
     @Test
     public void verifyGetSendsStringBody() throws NoSuchAlgorithmException, KeyManagementException, IOException, InterruptedException {
-        SimpleHttpClient simpleHttpClient = new SimpleHttpClient();
+        SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
         String response = simpleHttpClient.get(baseUrl + "/junit");
 
         assertThat(response, is(JUNIT));
@@ -82,7 +80,7 @@ public class SimpleHttpClientTest {
 
     @Test
     public void verifyGetWithResponseReturnsResponse() throws NoSuchAlgorithmException, KeyManagementException, IOException, InterruptedException {
-        SimpleHttpClient simpleHttpClient = new SimpleHttpClient();
+        SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
         java.net.http.HttpResponse<String> response = simpleHttpClient.getWithResponse(baseUrl + "/junit");
 
         assertThat(response.body(), is(JUNIT));
@@ -90,7 +88,7 @@ public class SimpleHttpClientTest {
 
     @Test
     public void verifyPutWithBodyReturnsStringBody() throws IOException, InterruptedException, NoSuchAlgorithmException, KeyManagementException {
-        SimpleHttpClient simpleHttpClient = new SimpleHttpClient();
+        SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
         String response = simpleHttpClient.put(baseUrl + "/junitPut", new HashMap<>(){{
             put("param1", "value1");
         }});
@@ -100,7 +98,7 @@ public class SimpleHttpClientTest {
 
     @Test
     public void verifyPutReturnsStringBody() throws IOException, InterruptedException, NoSuchAlgorithmException, KeyManagementException {
-        SimpleHttpClient simpleHttpClient = new SimpleHttpClient();
+        SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
         String response = simpleHttpClient.put(baseUrl + "/junitPut");
 
         assertThat(response, is(JSON));

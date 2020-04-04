@@ -23,6 +23,8 @@ public class FindDigitalPaper {
     private final LogWriter logWriter;
     private final DigitalPaperServiceListener digitalPaperServiceListener;
 
+    public final static String ZEROCONF_HOST = "digitalpaper.local";
+
     public FindDigitalPaper(LogWriter logWriter, SimpleHttpClient simpleHttpClient, String matchSerial) {
         this.logWriter = logWriter;
         digitalPaperServiceListener = new DigitalPaperServiceListener(logWriter, simpleHttpClient, matchSerial);

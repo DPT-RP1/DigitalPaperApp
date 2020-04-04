@@ -42,6 +42,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
@@ -49,7 +50,6 @@ public class DigitalPaperCLI {
 
     private final Options options;
     private final CommandLineParser parser;
-    private final SimpleHttpClient simpleHttpClient;
     private final DiffieHelman diffieHelman;
     private final CryptographyUtil cryptographyUtil;
     private final LogWriter logWriter;
@@ -59,8 +59,7 @@ public class DigitalPaperCLI {
     private final SyncStore syncStore;
     private final DeviceInfoStore deviceInfoStore;
 
-    public DigitalPaperCLI(SimpleHttpClient simpleHttpClient,
-                           DiffieHelman diffieHelman,
+    public DigitalPaperCLI(DiffieHelman diffieHelman,
                            CryptographyUtil cryptographyUtil,
                            LogWriter logWriter,
                            InputReader inputReader,
@@ -69,7 +68,6 @@ public class DigitalPaperCLI {
                            DeviceInfoStore deviceInfoStore) {
 
         parser = new DefaultParser();
-        this.simpleHttpClient = simpleHttpClient;
         this.diffieHelman = diffieHelman;
         this.cryptographyUtil = cryptographyUtil;
         this.logWriter = logWriter;
@@ -85,26 +83,30 @@ public class DigitalPaperCLI {
         options.addOption("interactive", "interactive", false, "For commands that can run in dry mode, simulate their action");
     }
 
-    private String findAddress(CommandLine commandLine) throws IOException, InterruptedException {
+    private String findAddress(CommandLine commandLine) throws IOException, InterruptedException, NoSuchAlgorithmException, KeyManagementException {
         String addr;
         if (commandLine.hasOption("addr")) {
             addr = commandLine.getOptionValue("addr");
         } else {
             // Before trying autoconfig, we can try loading the last ip
             String lastIp = deviceInfoStore.retrieveLastIp();
-            if (lastIp != null && new PingCommand().pingIp(lastIp)) {
+            if (lastIp != null && new PingCommand().ping(lastIp)) {
                 addr = lastIp;
             } else {
                 String matchSerial = null;
                 if (commandLine.hasOption("serial")) {
                     matchSerial = commandLine.getOptionValue("serial");
                 }
-                addr = new FindDigitalPaper(logWriter, simpleHttpClient, matchSerial).findOneIpv4();
+                addr = new FindDigitalPaper(logWriter, SimpleHttpClient.insecure(), matchSerial).findOneIpv4();
             }
         }
         if (addr == null || addr.isEmpty()) throw new IllegalStateException("No device found or reachable.");
         // We store the last address
         deviceInfoStore.storeLastIp(addr);
+
+        // We test if the zeroconf digitalpaper.local is setup
+        String zeroconfIp = new PingCommand().pingAndResolve(FindDigitalPaper.ZEROCONF_HOST);
+        if (addr.equals(zeroconfIp)) return "digitalpaper.local";
         return addr;
     }
 
@@ -116,7 +118,6 @@ public class DigitalPaperCLI {
         CommandLine commandLine = parser.parse(options, args);
 
         String addr = findAddress(commandLine);
-        digitalPaperEndpoint = new DigitalPaperEndpoint(addr, simpleHttpClient);
 
         // The arguments have to be ordered: command param1 param2 etc.
         List<String> arguments = commandLine.getArgList();
@@ -124,10 +125,21 @@ public class DigitalPaperCLI {
         String command = arguments.get(0);
 
         if (!registrationTokenStore.registered()) {
-            register(addr);
+            register(SimpleHttpClient.insecure(), addr);
         }
 
-        auth();
+        RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
+
+        SimpleHttpClient secureHttpClient = FindDigitalPaper.ZEROCONF_HOST.equals(addr)
+                ? SimpleHttpClient.secure(registrationResponse.getPemCertificate(), registrationResponse.getPrivateKey())
+                : SimpleHttpClient.secureNoHostVerification();
+
+        digitalPaperEndpoint = new DigitalPaperEndpoint(
+            addr,
+            secureHttpClient
+        );
+
+        auth(secureHttpClient);
 
         switch (command) {
             case "register":
@@ -242,12 +254,12 @@ public class DigitalPaperCLI {
         new DialogCommand(digitalPaperEndpoint).show(title, text, buttonText);
     }
 
-    private void register(String addr) throws IOException, BadPaddingException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, InvalidKeyException {
+    private void register(SimpleHttpClient simpleHttpClient, String addr) throws IOException, BadPaddingException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, InvalidKeyException {
         RegistrationResponse registrationResponse = new RegisterCommand(addr, simpleHttpClient, diffieHelman, cryptographyUtil, logWriter, inputReader).register();
         registrationTokenStore.storeRegistrationToken(registrationResponse);
     }
 
-    private void auth() throws Exception {
+    private void auth(SimpleHttpClient simpleHttpClient) throws Exception {
         RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
         AuthenticationCookie authenticationCookie = new AuthenticateCommand(digitalPaperEndpoint, cryptographyUtil).authenticate(registrationResponse);
         authenticationCookie.insertInCookieManager(digitalPaperEndpoint.getURI(), (CookieManager) CookieHandler.getDefault());

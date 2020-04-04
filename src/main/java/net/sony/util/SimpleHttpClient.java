@@ -2,6 +2,7 @@ package net.sony.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.naming.ConfigurationException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManager;
@@ -17,9 +18,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.HashMap;
@@ -30,21 +29,80 @@ public class SimpleHttpClient {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private final HttpClient httpClient;
-    private SSLContext sslContext;
-    private SSLParameters sslParameters;
+    private HttpClient httpClient;
+    private static Map<String, String> defaultHeaders;
+    private static CookieManager cookieManager;
+    private boolean downgradedSSL = false;
 
-    private final Map<String, String> defaultHeaders;
+    public static SimpleHttpClient insecure() {
+        initCookieManager();
+        return new SimpleHttpClient(null);
+    }
+
+    public static SimpleHttpClient secure(String certPem, String privateKeyPem) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, ConfigurationException, KeyManagementException {
+        initCookieManager();
+        return new SimpleHttpClient(new SSLFactory(certPem, privateKeyPem).getSslContext());
+    }
+
+    public static SimpleHttpClient secureNoHostVerification() throws NoSuchAlgorithmException, KeyManagementException {
+        initCookieManager();
+        return new SimpleHttpClient();
+    }
+
+    public static void initCookieManager() {
+        if (cookieManager == null) {
+            cookieManager = new CookieManager();
+            CookieHandler.setDefault(cookieManager);
+        }
+    }
+
+    private SimpleHttpClient(SSLContext sslContext) {
+        defaultHeaders = new HashMap<>();
+        httpClient = HttpClient
+                .newBuilder()
+                .cookieHandler(CookieHandler.getDefault())
+                .sslContext(sslContext)
+                .build();
+    }
 
     public SimpleHttpClient() throws KeyManagementException, NoSuchAlgorithmException {
-        disableSsl();
-        CookieHandler.setDefault(new CookieManager());
         defaultHeaders = new HashMap<>();
-        httpClient = HttpClient.newBuilder()
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] chain, String authType) {
+                    }
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] chain, String authType) {
+                    }
+
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+                }
+        };
+
+        SSLContext sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(null, trustAllCerts, new SecureRandom());
+
+        SSLParameters sslParameters = new SSLParameters();
+        // This should prevent host validation
+        sslParameters.setEndpointIdentificationAlgorithm("");
+
+        final Properties props = System.getProperties();
+        props.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
+
+
+        httpClient = HttpClient
+                .newBuilder()
                 .cookieHandler(CookieHandler.getDefault())
                 .sslContext(sslContext)
                 .sslParameters(sslParameters)
                 .build();
+        downgradedSSL = true;
     }
 
     public HttpRequest.Builder requestBuilder() {
@@ -138,36 +196,6 @@ public class SimpleHttpClient {
     @SuppressWarnings("unchecked")
     public static Map<String, String> fromJSON(String json) throws IOException {
         return (Map<String, String>) mapper.readValue(json, Map.class);
-    }
-
-    private void disableSsl() throws NoSuchAlgorithmException, KeyManagementException {
-        TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] chain, String authType) {
-                    }
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] chain, String authType) {
-                    }
-
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                }
-        };
-
-        sslContext = SSLContext.getInstance("SSL");
-        sslContext.init(null, trustAllCerts, new SecureRandom());
-
-        sslParameters = new SSLParameters();
-        // This should prevent host validation
-        sslParameters.setEndpointIdentificationAlgorithm("");
-
-        final Properties props = System.getProperties();
-        props.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
     }
 
     public void addDefaultHeader(String header, String value) {

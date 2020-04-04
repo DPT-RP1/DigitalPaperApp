@@ -15,7 +15,6 @@ public class DigitalPaperApp {
 
     public static void main(String[] args) throws Exception {
         DigitalPaperCLI digitalPaperCLI = new DigitalPaperCLI(
-                new SimpleHttpClient(),
                 new DiffieHelman(),
                 new CryptographyUtil(),
                 System.out::println,

@@ -15,6 +15,8 @@ import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +52,10 @@ public class DigitalPaperEndpoint {
     private final String insecureBaseUrl;
     private final String ip;
 
-    public DigitalPaperEndpoint(String ip, SimpleHttpClient simpleHttpClient) {
+    // TODO: might be smarter to even detect the cert host, but it should always be this one
+    private static final String ZEROCONF_HOST = "digitalpaper.local";
+
+    public DigitalPaperEndpoint(String ip, SimpleHttpClient simpleHttpClient) throws KeyManagementException, NoSuchAlgorithmException {
         this.ip = ip;
         this.secureBaseUrl = "https://" + ip + ":" + SECURE_PORT;
         this.insecureBaseUrl = "http://" + ip + ":" + INSECURE_PORT;
