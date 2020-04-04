@@ -106,7 +106,7 @@ public class DigitalPaperCLI {
 
         // We test if the zeroconf digitalpaper.local is setup
         String zeroconfIp = new PingCommand().pingAndResolve(FindDigitalPaper.ZEROCONF_HOST);
-        if (addr.equals(zeroconfIp)) return "digitalpaper.local";
+        if (addr.equals(zeroconfIp)) return FindDigitalPaper.ZEROCONF_HOST;
         return addr;
     }
 
@@ -216,16 +216,23 @@ public class DigitalPaperCLI {
             case "wifi-del":
                 deleteWifi(arguments.get(1));
                 break;
+            case "wifi":
+                wifiState();
+                break;
             case "wifi-enable":
             case "wifi-disable":
 
-            case "wifi":
+
             case "update-firmware":
             case "command-help":
                 throw new UnsupportedOperationException(command);
 
         }
 
+    }
+
+    private void wifiState() throws IOException, InterruptedException {
+        new WifiCommand(digitalPaperEndpoint, inputReader, logWriter).state();
     }
 
     private void addWifi(String SSID, String password) throws IOException, InterruptedException {

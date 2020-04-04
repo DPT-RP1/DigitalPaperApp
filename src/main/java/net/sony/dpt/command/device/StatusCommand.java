@@ -20,7 +20,7 @@ public class StatusCommand {
     }
 
     public String getOwnerName() throws IOException, InterruptedException {
-        return digitalPaperEndpoint.getOwnerName().get("value");
+        return digitalPaperEndpoint.getOwnerName();
     }
 
     public void setOwnerName(String name) throws IOException, InterruptedException {

@@ -65,5 +65,12 @@ public class WifiCommand {
         return objectMapper.readValue(json, AccessPointList.class);
     }
 
-
+    public void state() throws IOException, InterruptedException {
+        AccessPoint ap = digitalPaperEndpoint.wifiState();
+        if (ap != null && "connected".equals(ap.getState())) {
+            logWriter.log("Wifi connected to " + ap.getDecodedSSID());
+        } else {
+            logWriter.log("Wifi not connected");
+        }
+    }
 }

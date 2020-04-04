@@ -21,10 +21,10 @@ public class RegisterCaResponse {
     }
 
     public static RegisterCaResponse fromJson(String json) throws IOException {
-        Map<String, String> m5 = fromJSON(json);
-        byte[] returnedNonce2 = org.bouncycastle.util.encoders.Base64.decode(m5.get("a"));
-        byte[] wrappedEsCert = org.bouncycastle.util.encoders.Base64.decode(m5.get("d"));
-        byte[] m5hmac = Base64.decode(m5.get("e"));
+        Map<String, Object> m5 = fromJSON(json);
+        byte[] returnedNonce2 = org.bouncycastle.util.encoders.Base64.decode((String) m5.get("a"));
+        byte[] wrappedEsCert = org.bouncycastle.util.encoders.Base64.decode((String) m5.get("d"));
+        byte[] m5hmac = Base64.decode((String) m5.get("e"));
 
         return new RegisterCaResponse(returnedNonce2, wrappedEsCert, m5hmac);
     }

@@ -78,7 +78,7 @@ public class DigitalPaperEndpoint {
     }
 
     public String getNonce(String clientId) throws IOException, InterruptedException {
-        return fromJSON(simpleHttpClient.get(secureBaseUrl + "/auth/nonce/" + clientId)).get("nonce");
+        return (String) fromJSON(simpleHttpClient.get(secureBaseUrl + "/auth/nonce/" + clientId)).get("nonce");
     }
 
     public String listDocuments() throws IOException, InterruptedException {
@@ -130,6 +130,11 @@ public class DigitalPaperEndpoint {
         return simpleHttpClient.post(secureBaseUrl + wifiScanUrl);
     }
 
+    private static final String WIFI_STATE_URL = "/system/status/wifi_state";
+    public AccessPoint wifiState() throws IOException, InterruptedException {
+        return objectMapper.readValue(simpleHttpClient.get(secured(WIFI_STATE_URL)), AccessPoint.class);
+    }
+
     public InputStream takeScreenshot() throws IOException, InterruptedException {
         return simpleHttpClient.getFile(secureBaseUrl + takeScreenshotUrl);
     }
@@ -149,7 +154,7 @@ public class DigitalPaperEndpoint {
             put("parent_folder_id", parentId);
             put("document_source", "");
         }};
-        String documentId = fromJSON(simpleHttpClient.post(secureBaseUrl + "/documents2", touchParam)).get("document_id");
+        String documentId = (String) fromJSON(simpleHttpClient.post(secureBaseUrl + "/documents2", touchParam)).get("document_id");
         String documentUrl = secureBaseUrl + resolve(filePathUrl, variable("doc_id", documentId));
         simpleHttpClient.putFile(documentUrl, filePath);
         return documentId;
@@ -192,8 +197,8 @@ public class DigitalPaperEndpoint {
         simpleHttpClient.put(secureBaseUrl + resolve(showDialogWithUUID, variable("indication_id", UUID)), params);
     }
 
-    public Map<String, String> getOwnerName() throws IOException, InterruptedException {
-        return fromJSON(simpleHttpClient.get(secureBaseUrl + ownerNameGetUrl));
+    public String getOwnerName() throws IOException, InterruptedException {
+        return (String) fromJSON(simpleHttpClient.get(secureBaseUrl + ownerNameGetUrl)).get("value");
     }
 
     public void setOwnerName(String escapedName) throws IOException, InterruptedException {

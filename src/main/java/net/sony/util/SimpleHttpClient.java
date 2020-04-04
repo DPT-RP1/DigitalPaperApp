@@ -58,11 +58,13 @@ public class SimpleHttpClient {
 
     private SimpleHttpClient(SSLContext sslContext) {
         defaultHeaders = new HashMap<>();
-        httpClient = HttpClient
+        HttpClient.Builder builder = HttpClient
                 .newBuilder()
-                .cookieHandler(CookieHandler.getDefault())
-                .sslContext(sslContext)
-                .build();
+                .cookieHandler(CookieHandler.getDefault());
+
+        if (sslContext != null) builder = builder.sslContext(sslContext);
+
+        httpClient = builder.build();
     }
 
     public SimpleHttpClient() throws KeyManagementException, NoSuchAlgorithmException {
@@ -194,8 +196,8 @@ public class SimpleHttpClient {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String, String> fromJSON(String json) throws IOException {
-        return (Map<String, String>) mapper.readValue(json, Map.class);
+    public static Map<String, Object> fromJSON(String json) throws IOException {
+        return (Map<String, Object>) mapper.readValue(json, Map.class);
     }
 
     public void addDefaultHeader(String header, String value) {

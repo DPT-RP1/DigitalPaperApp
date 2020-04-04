@@ -23,11 +23,11 @@ public class PinResponse {
     }
 
     public static PinResponse fromJson(String json) throws IOException {
-        Map<String, String> pinResponse = fromJSON(json);
+        Map<String, Object> pinResponse = fromJSON(json);
 
-        byte[] nonce1 = Base64.decode(pinResponse.get("a"));
-        byte[] mac = Base64.decode(pinResponse.get("b"));
-        byte[] rawOtherContribution = Base64.decode(pinResponse.get("c"));
+        byte[] nonce1 = Base64.decode((String) pinResponse.get("a"));
+        byte[] mac = Base64.decode((String) pinResponse.get("b"));
+        byte[] rawOtherContribution = Base64.decode((String) pinResponse.get("c"));
 
         byte[] otherContribution = BigIntegerUtils.projectArray(rawOtherContribution, 256);
         return new PinResponse(nonce1, mac, rawOtherContribution, otherContribution);
