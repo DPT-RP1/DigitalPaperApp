@@ -134,13 +134,16 @@ public class CryptographyUtil {
         return writer.toString();
     }
 
-    public byte[] signSHA256RSA(byte[] input, String privateKeyPem) throws Exception {
-        // Remove markers and new line characters in private key
-        String privateKeyB64 = privateKeyPem
+    public byte[] pemToPrivateKey(String pem) {
+        String privateKeyB64 = pem
                 .replaceAll("-----END PRIVATE KEY-----", "")
                 .replaceAll("-----BEGIN PRIVATE KEY-----", "")
                 .replaceAll("\n", "");
-        byte[] privateKey = Base64.getMimeDecoder().decode(privateKeyB64);
+        return Base64.getMimeDecoder().decode(privateKeyB64);
+    }
+
+    public byte[] signSHA256RSA(byte[] input, String privateKeyPem) throws Exception {
+        byte[] privateKey = pemToPrivateKey(privateKeyPem);
 
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKey);
         KeyFactory kf = KeyFactory.getInstance("RSA");

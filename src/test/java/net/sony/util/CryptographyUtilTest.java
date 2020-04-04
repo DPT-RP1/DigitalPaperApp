@@ -2,18 +2,20 @@ package net.sony.util;
 
 import com.google.common.primitives.Bytes;
 import net.sony.dpt.command.register.HashRequest;
+import org.junit.Assert;
 import org.junit.Test;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.security.*;
+import java.util.*;
 
+import static net.sony.util.ByteUtils.bytesToHex;
 import static net.sony.util.ByteUtils.hexToByte;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 
 public class CryptographyUtilTest {
@@ -118,4 +120,132 @@ public class CryptographyUtilTest {
 
         assertEquals(expectedHmac, actualHmac);
     }
+
+    @Test
+    public void generateNonceShouldBeCorrectSize() {
+        CryptographyUtil cryptographyUtil = new CryptographyUtil();
+        for (int i = 0; i < 2048; i++) {
+            byte[] result = cryptographyUtil.generateNonce(i);
+            assertEquals(i, result.length);
+        }
+    }
+
+    @Test
+    public void generateNonceShouldBeRandom() {
+        CryptographyUtil cryptographyUtil = new CryptographyUtil();
+        Set<String> generatedNonces = new HashSet<>();
+        for (int i = 0; i < 10000; i++) {
+            byte[] result = cryptographyUtil.generateNonce(2048);
+            String descriptor = ByteUtils.bytesToHex(result);
+            assertFalse(generatedNonces.contains(descriptor));
+            generatedNonces.add(descriptor);
+        }
+    }
+
+    @Test
+    public void wrapShouldNotRegress() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+        CryptographyUtil cryptographyUtil = new CryptographyUtil() {
+            @Override
+            public byte[] generateNonce(int size) {
+                return hexToByte("AEEFDDCCDC1545A1454545EFEFEF4544");
+            }
+        };
+        byte[] data = ByteUtils.hexToByte("ABABABABAABABABACCDDEFFFEDDBBBCBCBAAADEEEF");
+        byte[] authKey = ByteUtils.hexToByte("EEFFEAVAAVCDDDEEFFAADEDEDEDFFFAA");
+        byte[] keyWrapKey = ByteUtils.hexToByte("EFEFABABACDCDCBABABEFEFEEFABABAB");
+
+        byte[] result = cryptographyUtil.wrap(data, authKey, keyWrapKey);
+        assertEquals(
+                "F5D9A4759330EB01D439FAABB74740D6551AFB7C28A5E60A4671C27A9F1274ABAEEFDDCCDC1545A1454545EFEFEF4544",
+                bytesToHex(result));
+    }
+
+    @Test
+    public void unwrapShouldRevertWrap() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+        CryptographyUtil cryptographyUtil = new CryptographyUtil() {
+            @Override
+            public byte[] generateNonce(int size) {
+                return hexToByte("AEEFDDCCDC1545A1454545EFEFEF4544");
+            }
+        };
+        byte[] data = ByteUtils.hexToByte("ABABABABAABABABACCDDEFFFEDDBBBCBCBAAADEEEF");
+        byte[] authKey = ByteUtils.hexToByte("EEFFEAVAAVCDDDEEFFAADEDEDEDFFFAA");
+        byte[] keyWrapKey = ByteUtils.hexToByte("EFEFABABACDCDCBABABEFEFEEFABABAB");
+
+        byte[] wrap = cryptographyUtil.wrap(data, authKey, keyWrapKey);
+        byte[] unwrap = cryptographyUtil.unwrap(wrap, authKey, keyWrapKey);
+
+        String actual = bytesToHex(unwrap);
+        assertEquals(bytesToHex(data), actual);
+    }
+
+    @Test
+    public void publickKeyShouldExportToPem() throws IOException {
+        CryptographyUtil cryptographyUtil = new CryptographyUtil();
+
+        PublicKey publicKey = new PublicKey() {
+            @Override public String getAlgorithm() { return "RSA"; }
+            @Override public String getFormat() { return "NA"; }
+            @Override public byte[] getEncoded() { return hexToByte("AABBCCDDEEFF001122445533557899ABCDDE"); }
+        };
+        String pem = cryptographyUtil.exportPublicKeyToPEM(publicKey);
+        assertEquals(
+                "-----BEGIN PUBLIC KEY-----\n" +
+                "qrvM3e7/ABEiRFUzVXiZq83e\n" +
+                "-----END PUBLIC KEY-----\n", pem);
+    }
+
+    @Test
+    public void privateKeyShouldExportToPem() throws IOException, NoSuchAlgorithmException {
+        CryptographyUtil cryptographyUtil = new CryptographyUtil();
+
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(2048); // Default exponent is 65537
+        KeyPair pair = kpg.generateKeyPair();
+        String pem = cryptographyUtil.exportPrivateKeyToPEM(pair.getPrivate());
+        byte[] expectedPrivateKey = pair.getPrivate().getEncoded();
+        byte[] actualPrivateKey = cryptographyUtil.pemToPrivateKey(pem);
+
+        assertArrayEquals(expectedPrivateKey, actualPrivateKey);
+    }
+
+    @Test
+    public void verifySignatureSHA256() throws Exception {
+        String privateKeyHex = "308204BD020100300D06092A864886F70D0101010500048204A7308204A3020100028201010092D1745A32A207B65D781523FBCBCF2DCDDAD174A1A0A89F2A244D7AA8A1EFE0F3F9D32E4F27C333E85D711FD2AABAA37198A230A1BDE398627523F2FE485715F79C31F270025B4EA25F87B6415AC2D1A11FF9B989B376DEBC675C6F33D77D4A3D394F82D1CBB8A97D10121537BE0B19C366F82AF3C7DBBC31B0B716F0AD608B0F29556A48F83D4DE92AED90BA56A493958FD9F12D0861CD544D61796E2776CB8209C1B1E23895F060C8B49A8D93ECC7C4BF1F1456ED6901B58ECD337AB67B6F99EB0749C1666E891DE68591561BF7039CC120A9776EB4198442378A80470F21C78DC9E9CE18E71E1973CC12D2E88661B5E05C11F850021F721740482020DA59020301000102820100591EF7C800D0466A36D6BBCE79FC3FA9083A79C6988E138D7A614AFED7FA64C8629115D6188A847DAFE178D7DE6370A3E242CAC1468D23E8CE6B590519C203CAFBE13E9871D19C67613D27FE4431B9ECD227BCC919836CF6CBDADA4B4E66D2510C550BA4D781187919C7759297A1AECF56C3DC8506321D7A619769AC6D3071574AC27D4E3A3D8BA571A0FB29F47E3B7434D70ACF8B3C4D22944CC128BF2418A557D1478704974B47CBF51E0B3B5DE4F041339954CD72D3E1B686FC0CC08841933DBDE0340C1EDEC0AF1C5E38AD160BD39F18881212624CC5FD86442CEEE496FA3DBCC95498A0BF89873C3DE544A532052AFA36794F7A93F47CF2B502AF40AE6102818100DDAE469F55E53BBFF39AC8257F29996E2EB659C369DF9F704EE4DAC17E45D951A20D49EFE0EA8EAD3A47E1C4095D5E749FC69B8609049DC491592D64F36F0572D792860244B9DED495E85CEA70C7D56C1612C80647FA39D296A5B218AC9CD3FAC0F2CA3B77738391CA82575465B778FFF93121FCA94229366D0D41282D1AD55502818100A98C334CFE0A8333B4A166619E8ED8166162778D4F5ACBC40991D47BAD5655F921C63CBBC32722B85D1AF822252C3821EA4BF5E0F6D8603BA5580F9FCE5ABD5B02F8EE82361D31F98DFF13AE0478407831B96834D8C262D367631570E1633A31D8515C9ECAA61BC84A87BBC067B16D7B15B613CC319EEC565881D16017A7F0F5028180093BFB4123E8DAA652557E44E199300500F923A01A46F0735336014ED21DC2C1BDC863EE1426712F1220706D241EB9928E1D4DD93582F5B77C7E847F920C6BE3AECB31BDE27303AF43575C977F7F338ABF18A5306DCB24A17B1907E4333C8D3002DD9A4303E4D1F43EC55331F6D2BFBD99F9CBFAA46A57212745C8130E5DF1C90281804B7B8087617E5AA51560D9CCD223742E9A9294F913802FC18A25237D2051949B029F58009BC47B9FAACBCBF69FA80D218446E7238DA20D4DE0B1D0DAEBAAD82C81A943BE32CB52A970BF440AB030BD3B05A02EB5805F22524DEFFDE6B06155D245250BE022064BCE22E844FD46ECE5F9EB539182D20097E56527FE881260115502818100A494A1435574C4497D175B94AC4D604172FACB2C21EA7C2FD294A1600960AE92BC1FE1F7D8598075DD28DD43C92AF311D8BA650A3619BEFB4BCF715DE52ECBD99924D73829176E10E15778976928FD079AB35466D7D45E44D3D96F4D851669860C3F12BAA0DEC05F61C6DC853749B7476273CE55FA6DEB3866C6EB6ADAD63FCE";
+        byte[] privateKey = hexToByte(privateKeyHex);
+
+        byte[] input = hexToByte("AABBCCDDEEABCDE12457896321456987ACCDEB");
+
+        CryptographyUtil cryptographyUtil = new CryptographyUtil() { @Override public byte[] pemToPrivateKey(String pem) { return privateKey; }};
+
+        String actual = bytesToHex(cryptographyUtil.signSHA256RSA(input, null));
+
+        assertEquals(
+                "00C58E874270674BE5AA58B6E8DB423EBB5D9703509EF1D212F6B1096C5EC524EA70D36770BF9E6C54CB4C6B429BAA4CDC5DF80699A686B4D0E0529F137F9CA1016066B378E566CADA9DEB051D00BCE58E600057299C78672F5A669B371FB67F28B2528200DD7BC2C32EED87B6015EF874FA1E3B501DDC56DD9228F4CFF3992DDD667BC1596852702AA1A25DD07927E8B4BACF7A2327572D3A4DD5A20960D9D96C0A887880A2C8E3177B97DDEB7FB6983DA37187D8EECEF3F8B09593C0347869054BE6A53D69D1ECB0F633E16E4D1C78A338D4E7E42E74186A12009D02A1DEBF6BCE1D91E1C2AB1984E1850F543900A5261579E6F0ED67644DB65CD8CC4A6FB9",
+                actual
+        );
+    }
+
+    @Test
+    public void unwrappedKwaShouldVerify() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+        CryptographyUtil cryptographyUtil = new CryptographyUtil() {
+            @Override
+            public byte[] generateNonce(int size) {
+                return hexToByte("AEEFDDCCDC1545A1454545EFEFEF4544");
+            }
+        };
+        byte[] data = ByteUtils.hexToByte("ABABABABAABABABACCDDEFFFEDDBBBCBCBAAADEEEF");
+        byte[] authKey = ByteUtils.hexToByte("EEFFEAVAAVCDDDEEFFAADEDEDEDFFFAA");
+        byte[] keyWrapKey = ByteUtils.hexToByte("EFEFABABACDCDCBABABEFEFEEFABABAB");
+
+        byte[] wrap = cryptographyUtil.wrap(data, authKey, keyWrapKey);
+        wrap[0] = ++wrap[0];
+        try {
+            cryptographyUtil.unwrap(wrap, authKey, keyWrapKey);
+            Assert.fail();
+        } catch (IllegalStateException e) {
+            assertEquals("Unwrapped kwa does not match", e.getMessage());
+        }
+    }
+
 }

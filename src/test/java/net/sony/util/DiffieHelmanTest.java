@@ -1,9 +1,11 @@
 package net.sony.util;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Base64;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class DiffieHelmanTest {
@@ -27,6 +29,17 @@ public class DiffieHelmanTest {
 
             assertTrue("The generated value at " + i + " is larger than 256 bytes (" + sharedKey.length + ")",
                     sharedKey.length <= 256 || (sharedKey.length == 257 && sharedKey[0] == 0));
+        }
+    }
+
+    @Test
+    public void wrongContributionShouldNotPassValidation() {
+        DiffieHelman diffieHelman = new DiffieHelman();
+        try {
+            diffieHelman.generateSharedKey(new byte[0]);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {
+            assertEquals("Bad public key from other party", e.getMessage());
         }
     }
 
