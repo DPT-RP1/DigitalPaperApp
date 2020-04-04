@@ -2592,19 +2592,19 @@
         "produces": [
           "application/json"
         ],
-        "description": "本体のファームウェアアップデート開始する",
+        "description": "Start updating the firmware of device",
         "responses": {
           "204": {
-            "description": "ファームウェアアップデート開始"
+            "description": "Firmware update started"
           },
           "403": {
-            "description": "* [40302] 電池残量がファームウェアアップデートするのに十分でない\n* [40303] ファームウェアのイメージファイルが本体に転送されていない",
+            "description": "* [40302] Battery level is not enough to update firmware\n* [40303] Firmware image file is not present on the device",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "503": {
-            "description": "* [50301] 複数同時にできない処理を実行中で、要求に応じられない",
+            "description": "* [50301] Multiple processes that cannot be performed at the same time are being executed",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2626,45 +2626,45 @@
         "produces": [
           "application/json"
         ],
-        "description": "本体にファームウェアのイメージファイルを転送する<br>\n* 分割アップロードが可能\n* offset_bytes に 0 を指定してリクエストした場合、そのクライアントのIDがサーバ側で保持される\n* offset_bytes に 0 より大きい値を指定してリクエストした場合、サーバ側で保持しているIDと一致するクライアントからでなければ 503 応答を返す",
+        "description": "Transfer the firmware image file to the device<br>\n* Split upload is possible\n* When requesting with offset_bytes specified as 0, the client ID is retained on the server side\n* If a request is made by specifying a value greater than 0 in offset_bytes, a 503 response is returned unless the client matches the ID stored on the server",
         "parameters": [
           {
             "name": "file",
             "in": "formData",
-            "description": "ファイル実体",
+            "description": "File data",
             "required": true,
             "type": "file"
           },
           {
             "name": "offset_bytes",
             "in": "query",
-            "description": "分割アップロードの際に指定 ※詳細はInstructionを参照の事",
+            "description": "Specify when split upload ※See Instruction for details",
             "required": true,
             "type": "string"
           },
           {
             "name": "total_bytes",
             "in": "query",
-            "description": "分割アップロードの際に指定 ※詳細はInstructionを参照の事",
+            "description": "Specify for split upload * For details, refer to Instruction",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "受信完了",
+            "description": "Success",
             "schema": {
               "$ref": "#/definitions/commonFileUploadResult"
             }
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40002] Numeric parameter was not recognized as numerical value\n* [40010] ファイルが指定されていない\n* [40011] 分割アップロードで不整合",
+            "description": "* [40001] Required parameter was not specified\n* [40002] Numeric parameter was not recognized as numerical value\n* [40010] File not specified\n* [40011] Inconsistent split upload",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
           },
           "503": {
-            "description": "* [50301] 複数同時にできない処理を実行中で、要求に応じられない",
+            "description": "* [50301] Multiple processes that cannot be performed at the same time are being executed",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }

@@ -2,7 +2,6 @@ package net.sony.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.naming.ConfigurationException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManager;
@@ -31,6 +30,8 @@ public class SimpleHttpClient {
     private static Map<String, String> defaultHeaders;
     private static CookieManager cookieManager;
     private final HttpClient httpClient;
+
+    private static final int TIMEOUT = 10000;
 
     private SimpleHttpClient(SSLContext sslContext) {
         defaultHeaders = new HashMap<>();
@@ -86,9 +87,9 @@ public class SimpleHttpClient {
         return new SimpleHttpClient(null);
     }
 
-    public static SimpleHttpClient secure(String certPem, String privateKeyPem) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, ConfigurationException, KeyManagementException {
+    public static SimpleHttpClient secure(String certPem, String privateKeyPem, CryptographyUtil cryptographyUtil) throws GeneralSecurityException, IOException {
         initCookieManager();
-        return new SimpleHttpClient(new SSLFactory(certPem, privateKeyPem).getSslContext());
+        return new SimpleHttpClient(new SSLFactory(certPem, privateKeyPem, cryptographyUtil).getSslContext());
     }
 
     public static SimpleHttpClient secureNoHostVerification() throws NoSuchAlgorithmException, KeyManagementException {
@@ -167,6 +168,7 @@ public class SimpleHttpClient {
         HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
                 .method("PUT", HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(jsonBody)))
+                .timeout(Duration.ofMillis(TIMEOUT))
                 .build();
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }

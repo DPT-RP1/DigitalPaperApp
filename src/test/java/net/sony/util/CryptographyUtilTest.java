@@ -215,7 +215,7 @@ public class CryptographyUtilTest {
         KeyPair pair = kpg.generateKeyPair();
         String pem = cryptographyUtil.exportPrivateKeyToPEM(pair.getPrivate());
         byte[] expectedPrivateKey = pair.getPrivate().getEncoded();
-        byte[] actualPrivateKey = cryptographyUtil.pemToPrivateKey(pem);
+        byte[] actualPrivateKey = cryptographyUtil.loadPemPrivateKey(pem);
 
         assertArrayEquals(expectedPrivateKey, actualPrivateKey);
     }
@@ -229,7 +229,7 @@ public class CryptographyUtilTest {
 
         CryptographyUtil cryptographyUtil = new CryptographyUtil() {
             @Override
-            public byte[] pemToPrivateKey(String pem) {
+            public byte[] loadPemPrivateKey(String pem) {
                 return privateKey;
             }
         };

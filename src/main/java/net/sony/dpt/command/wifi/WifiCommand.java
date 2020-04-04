@@ -72,4 +72,12 @@ public class WifiCommand {
             logWriter.log("Wifi not connected");
         }
     }
+
+    public void turnOn() throws IOException, InterruptedException {
+        digitalPaperEndpoint.setWifiState(true);
+    }
+
+    public void turnOff() throws IOException, InterruptedException {
+        digitalPaperEndpoint.setWifiState(false);
+    }
 }

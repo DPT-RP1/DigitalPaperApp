@@ -134,7 +134,7 @@ public class CryptographyUtil {
         return writer.toString();
     }
 
-    public byte[] pemToPrivateKey(String pem) {
+    public byte[] loadPemPrivateKey(String pem) {
         String privateKeyB64 = pem
                 .replaceAll("-----END PRIVATE KEY-----", "")
                 .replaceAll("-----BEGIN PRIVATE KEY-----", "")
@@ -143,7 +143,7 @@ public class CryptographyUtil {
     }
 
     public byte[] signSHA256RSA(byte[] input, String privateKeyPem) throws Exception {
-        byte[] privateKey = pemToPrivateKey(privateKeyPem);
+        byte[] privateKey = loadPemPrivateKey(privateKeyPem);
 
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKey);
         KeyFactory kf = KeyFactory.getInstance("RSA");

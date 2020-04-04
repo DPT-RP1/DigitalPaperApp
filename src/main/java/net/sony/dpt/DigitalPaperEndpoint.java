@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -41,12 +42,14 @@ public class DigitalPaperEndpoint {
     private static final String copyUrl = "/documents/${document_id}/copy";
     private static final String wifiRegister = "/system/controls/wifi_accesspoints/register";
     private static final String wifiRemoveUrl = "/system/configs/wifi_accesspoints/${ssid}/${security}";
+    private static final String WIFI_ON_OFF_URL = "/system/configs/wifi";
+    private static final String WIFI_STATE_URL = "/system/status/wifi_state";
 
     private static final int SECURE_PORT = 8443;
     private static final int INSECURE_PORT = 8080;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final String WIFI_STATE_URL = "/system/status/wifi_state";
+
     private final SimpleHttpClient simpleHttpClient;
     private final String secureBaseUrl;
     private final String insecureBaseUrl;
@@ -231,13 +234,21 @@ public class DigitalPaperEndpoint {
 
     public void removeWifi(AccessPoint found) throws IOException, InterruptedException {
         simpleHttpClient.delete(
-                secured(
-                        resolve(
-                                wifiRemoveUrl,
-                                variable("ssid", found.getDecodedSSID()),
-                                variable("security", found.getSecurity())
-                        )
+            secured(
+                resolve(
+                        wifiRemoveUrl,
+                        variable("ssid", found.getDecodedSSID()),
+                        variable("security", found.getSecurity())
                 )
+            )
         );
+    }
+
+    public void setWifiState(boolean enabled) throws IOException, InterruptedException {
+        try {
+            simpleHttpClient.put(secured(WIFI_ON_OFF_URL), new HashMap<>() {{
+                put("value", enabled ? "on" : "off");
+            }});
+        } catch (HttpTimeoutException ignored) { }
     }
 }

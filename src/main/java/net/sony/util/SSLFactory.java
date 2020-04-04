@@ -3,7 +3,6 @@ package net.sony.util;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
-import javax.naming.ConfigurationException;
 import javax.net.ssl.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -12,16 +11,17 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
 
 public class SSLFactory {
 
     private static final String TEMPORARY_KEY_PASSWORD = "changeit";
 
     private final SSLContext sslContext;
-    private final SSLSocketFactory sslSocketFactory;
+    private final CryptographyUtil cryptographyUtil;
 
-    public SSLFactory(String certificatePem, String privateKeyPem) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, ConfigurationException, UnrecoverableKeyException {
+    public SSLFactory(final String certificatePem, final String privateKeyPem, final CryptographyUtil cryptographyUtil) throws GeneralSecurityException, IOException {
+        this.cryptographyUtil = cryptographyUtil;
+
         KeyStore keyStore = getKeyStore(certificatePem, privateKeyPem);
 
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
@@ -34,49 +34,28 @@ public class SSLFactory {
 
         sslContext = SSLContext.getInstance("TLS");
         sslContext.init(keyManagers, trustManagers, null);
-        sslSocketFactory = sslContext.getSocketFactory();
     }
 
-    private static PrivateKey pemLoadPrivateKeyEncoded(String privateKeyPem) throws GeneralSecurityException {
-        // PKCS#8 format
-        final String PEM_PRIVATE_START = "-----BEGIN PRIVATE KEY-----";
-        final String PEM_PRIVATE_END = "-----END PRIVATE KEY-----";
+    private KeyStore getKeyStore(String certificatePem, String privateKeyPem) throws GeneralSecurityException, IOException {
+        KeyFactory factory = KeyFactory.getInstance("RSA");
+        PrivateKey privateKey = factory.generatePrivate(
+            new PKCS8EncodedKeySpec(cryptographyUtil.loadPemPrivateKey(privateKeyPem))
+        );
+        Certificate caCertificate = loadCertificate(certificatePem);
 
-        if (privateKeyPem.contains(PEM_PRIVATE_START)) { // PKCS#8 format
-            privateKeyPem = privateKeyPem.replace(PEM_PRIVATE_START, "").replace(PEM_PRIVATE_END, "");
-            privateKeyPem = privateKeyPem.replaceAll("\\s", "");
-            byte[] pkcs8EncodedKey = Base64.getDecoder().decode(privateKeyPem);
-            KeyFactory factory = KeyFactory.getInstance("RSA");
-            return factory.generatePrivate(new PKCS8EncodedKeySpec(pkcs8EncodedKey));
-        }
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        keyStore.load(null, null);
+        keyStore.setCertificateEntry("ca-cert", caCertificate);
+        keyStore.setCertificateEntry("client-cert", caCertificate);
+        keyStore.setKeyEntry("client-key", privateKey, TEMPORARY_KEY_PASSWORD.toCharArray(), new Certificate[]{caCertificate});
+        return keyStore;
 
-        throw new GeneralSecurityException("Not supported format of a private key");
-    }
-
-    private KeyStore getKeyStore(String certificatePem, String privateKeyPem) throws ConfigurationException {
-        try {
-            PrivateKey privateKey = loadPrivateKey(privateKeyPem);
-            Certificate caCertificate = loadCertificate(certificatePem);
-
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(null, null);
-            keyStore.setCertificateEntry("ca-cert", caCertificate);
-            keyStore.setCertificateEntry("client-cert", caCertificate);
-            keyStore.setKeyEntry("client-key", privateKey, TEMPORARY_KEY_PASSWORD.toCharArray(), new Certificate[]{caCertificate});
-            return keyStore;
-        } catch (GeneralSecurityException | IOException e) {
-            throw new ConfigurationException("Cannot build keystore");
-        }
     }
 
     private Certificate loadCertificate(String certificatePem) throws IOException, GeneralSecurityException {
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
         final byte[] content = readPemContent(certificatePem);
         return certificateFactory.generateCertificate(new ByteArrayInputStream(content));
-    }
-
-    private PrivateKey loadPrivateKey(String privateKeyPem) throws GeneralSecurityException {
-        return pemLoadPrivateKeyEncoded(privateKeyPem);
     }
 
     private byte[] readPemContent(String pem) throws IOException {
@@ -90,9 +69,5 @@ public class SSLFactory {
 
     public SSLContext getSslContext() {
         return sslContext;
-    }
-
-    public SSLSocketFactory getSslSocketFactory() {
-        return sslSocketFactory;
     }
 }

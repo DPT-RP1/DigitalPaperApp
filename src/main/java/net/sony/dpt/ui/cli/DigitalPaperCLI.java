@@ -133,7 +133,7 @@ public class DigitalPaperCLI {
         RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
 
         SimpleHttpClient secureHttpClient = FindDigitalPaper.ZEROCONF_HOST.equals(addr)
-                ? SimpleHttpClient.secure(registrationResponse.getPemCertificate(), registrationResponse.getPrivateKey())
+                ? SimpleHttpClient.secure(registrationResponse.getPemCertificate(), registrationResponse.getPrivateKey(), cryptographyUtil)
                 : SimpleHttpClient.secureNoHostVerification();
 
         digitalPaperEndpoint = new DigitalPaperEndpoint(
@@ -222,8 +222,11 @@ public class DigitalPaperCLI {
                 wifiState();
                 break;
             case "wifi-enable":
+                turnWifiOn();
+                break;
             case "wifi-disable":
-
+                turnWifiOff();
+                break;
 
             case "update-firmware":
             case "command-help":
@@ -371,6 +374,14 @@ public class DigitalPaperCLI {
 
     private void setOwner(String ownerName) throws IOException, InterruptedException {
         new StatusCommand(digitalPaperEndpoint, logWriter).setOwnerName(ownerName);
+    }
+
+    private void turnWifiOff() throws IOException, InterruptedException {
+        new WifiCommand(digitalPaperEndpoint, inputReader, logWriter).turnOff();
+    }
+
+    private void turnWifiOn() throws IOException, InterruptedException {
+        new WifiCommand(digitalPaperEndpoint, inputReader, logWriter).turnOn();
     }
 
 }
