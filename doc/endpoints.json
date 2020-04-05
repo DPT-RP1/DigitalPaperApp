@@ -858,7 +858,7 @@
             "description": "Success"
           },
           "400": {
-            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40002] 数値を期待しているパラメータについて、数値として認識できなかった\n* [40004] 指定パラメータが ISO8601 フォーマットでない\n* [40005] 仕様で定めた選択肢以外のもの指定した\n* [40006] 不正なパラメータ値が指定された",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40002] 数値を期待しているパラメータについて、数値として認識できなかった\n* [40004] The specified parameter is not in ISO8601 format\n* [40005] 仕様で定めた選択肢以外のもの指定した\n* [40006] Invalid parameter value specified",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1860,7 +1860,7 @@
             "description": "Success"
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40002] Numeric parameter was not recognized as numerical value\n* [40006] 不正なパラメータ値が指定された(ページ数が 0 もしくは負の値)",
+            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40002] Numeric parameter was not recognized as numerical value\n* [40006] Invalid parameter value specified(ページ数が 0 もしくは負の値)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1897,10 +1897,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "**端末のドキュメント表示状態を取得**\n * ドキュメント閲覧中でない場合(設定画面になっている等)は、中身がほとんど空の応答が返る。",
+        "description": "** Get document display status of device **\n  * If you are not browsing a document (such as setting screen), you will get a response with empty contents.",
         "responses": {
           "200": {
-            "description": "表示状態情報",
+            "description": "Display status information",
             "schema": {
               "$ref": "#/definitions/viewerStatusCurrentViewingGetResult2"
             }
@@ -1947,10 +1947,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "設定されているタイムゾーンを取得する",
+        "description": "Get the timezone",
         "responses": {
           "200": {
-            "description": "タイムゾーンID ※詳細はInstructionを参照の事",
+            "description": "Time zone ID * See Instruction for details",
             "schema": {
               "$ref": "#/definitions/commonValueObject"
             }
@@ -1970,12 +1970,12 @@
         "produces": [
           "application/json"
         ],
-        "description": "タイムゾーンを設定する",
+        "description": "Set the timezone",
         "parameters": [
           {
             "name": "value",
             "in": "body",
-            "description": "タイムゾーンID ※詳細はInstructionを参照の事",
+            "description": "Time zone ID * See Instruction for details",
             "required": true,
             "schema": {
               "$ref": "#/definitions/commonValueObject"
@@ -2026,7 +2026,7 @@
             "description": "Success"
           },
           "400": {
-            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40004] 指定パラメータが ISO8601 フォーマットでない",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40004] The specified parameter is not in ISO8601 format",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2045,10 +2045,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "設定されている日付表記形式を取得する",
+        "description": "Get the date format",
         "responses": {
           "200": {
-            "description": "日付パターン文字列 ※詳細はInstructionを参照の事",
+            "description": "Date pattern character string * See Instruction for details",
             "schema": {
               "$ref": "#/definitions/commonValueObject"
             }
@@ -2085,7 +2085,7 @@
             "description": "Success"
           },
           "400": {
-            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40006] 不正なパラメータ値が指定された",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40006] Invalid parameter value specified",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -2104,10 +2104,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "設定されている日付表記形式を取得する",
+        "description": "Get the date format",
         "responses": {
           "200": {
-            "description": "以下のどれかの文字列を返却\n * '12hour' : 12時間表記\n * '24hour' : 24時間表記",
+            "description": "Return the following strings:\n * '12hour' \n * '24hour'",
             "schema": {
               "$ref": "#/definitions/commonValueObject"
             }
@@ -2127,12 +2127,12 @@
         "produces": [
           "application/json"
         ],
-        "description": "日付表記形式を設定する",
+        "description": "Set date format",
         "parameters": [
           {
             "name": "value",
             "in": "body",
-            "description": "以下のどれかを文字列で指定する\n * '12hour' : 12時間表記\n * '24hour' : 24時間表記",
+            "description": "Specify one of the following as a character string\n * '12hour' \n * '24hour'",
             "required": true,
             "schema": {
               "$ref": "#/definitions/commonValueObject"
@@ -2163,10 +2163,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "初期設定完了かどうかを取得する",
+        "description": "Get whether initialization is complete",
         "responses": {
           "200": {
-            "description": "初期化済なら 'initialized' 初期化していない場合は 'none'",
+            "description": "'Initialized' if initialized, 'none' if not initialized",
             "schema": {
               "$ref": "#/definitions/commonValueObject"
             }
@@ -2186,7 +2186,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "初期設定完了フラグを設定する",
+        "description": "Set the initialization complete flag",
         "parameters": [
           {
             "name": "value",
@@ -2321,7 +2321,7 @@
             "description": "Success"
           },
           "400": {
-            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40006] 不正なパラメータ値が指定された(桁数オーバーなど)",
+            "description": "* [40000] Failed to parse JSON\n* [40001] Required parameters were not specified\n* [40006] Invalid parameter value specified(桁数オーバーなど)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -5052,7 +5052,7 @@
       ],
       "properties": {
         "document_id": {
-          "description": "開く対象のドキュメントのID",
+          "description": "Document ID to open",
           "type": "string"
         }
       }
@@ -5634,15 +5634,15 @@
       ],
       "properties": {
         "orientation": {
-          "description": "画面の向き ['portlait'/'landscape']",
+          "description": "Screen orientation ['portlait'/'landscape']",
           "type": "string"
         },
         "view_mode": {
-          "description": "表示モード ['single'/'double']",
+          "description": "Display mode ['single'/'double']",
           "type": "string"
         },
         "views": {
-          "description": "各表示面情報のリスト",
+          "description": "List of each display surface information",
           "type": "array",
           "items": {
             "$ref": "#/definitions/viewerStatusViewInfo2"
@@ -5663,43 +5663,43 @@
       ],
       "properties": {
         "entry_id": {
-          "description": "ドキュメントのID",
+          "description": "Document ID",
           "type": "string"
         },
         "entry_path": {
-          "description": "ドキュメントのフルパス ※ルートフォルダーは'Document/'と表現される",
+          "description": "Full path of the document * The root folder is expressed as 'Document /'",
           "type": "string"
         },
         "title": {
-          "description": "ドキュメントのタイトル",
+          "description": "Document title",
           "type": "string"
         },
         "total_page": {
-          "description": "ドキュメントのページ数(整数値)",
+          "description": "Number of pages in total (integer value)",
           "type": "string"
         },
         "current_page": {
-          "description": "ドキュメントの直近で開かれていたページ番号(整数値)",
+          "description": "The page number that was opened most recently in the document (integer value)",
           "type": "string"
         },
         "document_source": {
-          "description": "このエントリーを作成したクライアントの識別子",
+          "description": "The identifier of the client that created this entry",
           "type": "string"
         },
         "ext_id": {
-          "description": "外部ID",
+          "description": "External ID",
           "type": "string"
         },
         "position": {
-          "description": "画面内の表示位置 ['left'/'right'] ※表示モードが'single'の場合はNULL",
+          "description": "Display position in screen ['left' / 'right'] * NULL if display mode is 'single'",
           "type": "string"
         },
         "display_mode": {
-          "description": "ページ描画モード [単ページ:'single' / 見開き:'two_page_spread' / 俯瞰:'thumbnail']",
+          "description": "Page drawing mode [Single page: 'single' / Double page: 'two_page_spread' / Bird's eye view: 'thumbnail']",
           "type": "string"
         },
         "thumbnail_current_page": {
-          "description": "ページ描画モードに応じた基準のページ番号(整数値)",
+          "description": "Reference page number according to page drawing mode (integer value)",
           "type": "string"
         }
       }
@@ -5711,11 +5711,11 @@
       ],
       "properties": {
         "document_id": {
-          "description": "開く対象のドキュメントのID",
+          "description": "Document ID to open",
           "type": "string"
         },
         "page": {
-          "description": "開くページ番号(整数値)",
+          "description": "Page number to open",
           "type": "string"
         }
       }
