@@ -11,6 +11,7 @@ import net.sony.dpt.command.documents.ListDocumentsCommand;
 import net.sony.dpt.command.documents.TransferDocumentCommand;
 import net.sony.dpt.command.firmware.FirmwareUpdatesCommand;
 import net.sony.dpt.command.ping.PingCommand;
+import net.sony.dpt.command.print.PrintCommand;
 import net.sony.dpt.command.register.RegisterCommand;
 import net.sony.dpt.command.register.RegistrationResponse;
 import net.sony.dpt.command.sync.LocalSyncProgressBar;
@@ -239,11 +240,40 @@ public class DigitalPaperCLI {
             case "update-firmware":
                 update(force, dryrun);
                 break;
+            case "print":
+                print(arguments.get(1), arguments.size() > 2 ? arguments.get(2) : null);
+                break;
+            case "watch-print":
+                watchAndPrint(arguments.get(1));
+                break;
             case "command-help":
                 throw new UnsupportedOperationException(command);
-
         }
 
+    }
+
+    private void watchAndPrint(String localFolderToWatch) throws IOException {
+        PrintCommand printCommand = new PrintCommand(
+                digitalPaperEndpoint,
+                new DialogCommand(digitalPaperEndpoint),
+                new TransferDocumentCommand(digitalPaperEndpoint),
+                logWriter,
+                new PingCommand(digitalPaperEndpoint, logWriter)
+        );
+        printCommand.watch(Path.of(localFolderToWatch));
+    }
+
+    private void print(String localPath, String remotePath) throws IOException, InterruptedException {
+        PrintCommand printCommand = new PrintCommand(
+                digitalPaperEndpoint,
+                new DialogCommand(digitalPaperEndpoint),
+                new TransferDocumentCommand(digitalPaperEndpoint),
+                logWriter,
+                new PingCommand(digitalPaperEndpoint, logWriter)
+        );
+        if (remotePath == null) {
+            printCommand.print(Path.of(localPath), false);
+        }
     }
 
     private void update(boolean force, boolean dryrun) throws IOException, InterruptedException, XPathExpressionException, SAXException, ParserConfigurationException {

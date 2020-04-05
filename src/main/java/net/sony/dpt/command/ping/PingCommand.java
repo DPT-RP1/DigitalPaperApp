@@ -38,6 +38,11 @@ public class PingCommand {
         return reachable;
     }
 
+    public boolean pingQuiet() throws IOException, URISyntaxException {
+        URI uri = digitalPaperEndpoint.getSecuredURI();
+        return ping(uri.getHost());
+    }
+
     public String pingAndResolve(String hostname) throws IOException {
         if (ping(hostname)) {
             try {

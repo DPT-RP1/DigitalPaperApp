@@ -26,14 +26,17 @@ public class DialogCommand {
      * @param buttonText The text on the "hide" button
      * @return The UUID of the dialog
      */
-    public UUID show(UUID UUID, String title, String text, String buttonText) throws IOException, InterruptedException {
+    public UUID show(UUID UUID, String title, String text, String buttonText, boolean showLoadingIcon) throws IOException, InterruptedException {
         if (UUID == null) {
             UUID = java.util.UUID.randomUUID();
         }
 
-        digitalPaperEndpoint.showDialog(UUID.toString(), title, text, buttonText, true);
+        digitalPaperEndpoint.showDialog(UUID.toString(), title, text, buttonText, showLoadingIcon);
 
         return UUID;
     }
 
+    public void hide(UUID modalId) throws IOException, InterruptedException {
+        digitalPaperEndpoint.hideDialog(modalId.toString());
+    }
 }

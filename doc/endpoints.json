@@ -968,7 +968,7 @@
             }
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40006] サポートされていないフォルダー名が指定された\n* [40007] 名前重複により処理ができない\n* [40012] parent_folder_id に存在しないフォルダーIDが指定された",
+            "description": "* [40001] Required parameters were not specified\n* [40006] サポートされていないフォルダー名が指定された\n* [40007] 名前重複により処理ができない\n* [40012] parent_folder_id に存在しないフォルダーIDが指定された",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1016,7 +1016,7 @@
             }
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40006] サポートされていないフォルダー名が指定された\n* [40007] 名前重複により処理ができない\n* [40012] parent_folder_id に存在しないフォルダーIDが指定された",
+            "description": "* [40001] Required parameters were not specified\n* [40006] サポートされていないフォルダー名が指定された\n* [40007] 名前重複により処理ができない\n* [40012] parent_folder_id に存在しないフォルダーIDが指定された",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1115,7 +1115,7 @@
             "description": "Successful response"
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40006] サポートされていないフォルダー名が指定された\n* [40007] 名前重複により処理ができない\n* [40012] parent_folder_id に存在しないフォルダーIDが指定された",
+            "description": "* [40001] Required parameters were not specified\n* [40006] サポートされていないフォルダー名が指定された\n* [40007] 名前重複により処理ができない\n* [40012] parent_folder_id に存在しないフォルダーIDが指定された",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1272,7 +1272,7 @@
             "description": "Success"
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40006] サポートされていないフォルダー名が指定された\n* [40007] 名前重複により処理ができない\n* [40012] parent_folder_id に存在しないフォルダーIDが指定された",
+            "description": "* [40001] Required parameters were not specified\n* [40006] サポートされていないフォルダー名が指定された\n* [40007] 名前重複により処理ができない\n* [40012] parent_folder_id に存在しないフォルダーIDが指定された",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1510,7 +1510,7 @@
             }
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40006] サポートされていないファイル名が指定された\n* [40007] 名前重複により処理ができない\n* [40008] 登録可能なノートテンプレート数の上限に達している",
+            "description": "* [40001] Required parameters were not specified\n* [40006] サポートされていないファイル名が指定された\n* [40007] 名前重複により処理ができない\n* [40008] 登録可能なノートテンプレート数の上限に達している",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1609,7 +1609,7 @@
             "description": "Successful response"
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40006] サポートされていないファイル名が指定された\n* [40007] 名前重複により処理ができない\n* [40009] 更新不可であるデフォルトノートテンプレートが指定された",
+            "description": "* [40001] Required parameters were not specified\n* [40006] サポートされていないファイル名が指定された\n* [40007] 名前重複により処理ができない\n* [40009] 更新不可であるデフォルトノートテンプレートが指定された",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1730,7 +1730,7 @@
             }
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40002] Numeric parameter was not recognized as numerical value\n* [40009] 更新不可であるデフォルトノートテンプレートが指定された\n* [40010] ファイルが指定されていない\n* [40011] 分割アップロードで不整合\n* [40013] このファイル形式はサポートしない\n* [40014] このファイルは開く事ができない\n* [40015] このファイルは編集する事できない\n* [40016] このファイルはサイズの規格を満たしていない",
+            "description": "* [40001] Required parameters were not specified\n* [40002] Numeric parameter was not recognized as numerical value\n* [40009] 更新不可であるデフォルトノートテンプレートが指定された\n* [40010] ファイルが指定されていない\n* [40011] 分割アップロードで不整合\n* [40013] このファイル形式はサポートしない\n* [40014] このファイルは開く事ができない\n* [40015] このファイルは編集する事できない\n* [40016] このファイルはサイズの規格を満たしていない",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1809,7 +1809,7 @@
             "description": "Successful response"
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった",
+            "description": "* [40001] Required parameters were not specified",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1843,12 +1843,12 @@
         "produces": [
           "application/json"
         ],
-        "description": "**指定ドキュメントを開く**\n * ページ番号は省略可能。その場合、開かれるページは端末側にオマカセ。\n * ページ番号が 0 もしくは負の値を指定した場合はエラー。\n * ページ番号がそのドキュメントの総ページ数より大きい値の場合は、最終ページが開く。",
+        "description": "** Open specified document **\n  * The page number can be omitted. In that case, the page to be opened is up to the device.\n  * An error occurs if the page number is set to 0 or a negative value.\n  * If the page number is greater than the total number of pages in the document, the last page opens.",
         "parameters": [
           {
             "name": "target_doc_info",
             "in": "body",
-            "description": "開く対象のドキュメントの情報",
+            "description": "Information about the document to open",
             "required": true,
             "schema": {
               "$ref": "#/definitions/viewerControlsOpenPutRequest2"
@@ -1860,7 +1860,7 @@
             "description": "Success"
           },
           "400": {
-            "description": "* [40001] 必須パラメータが指定されていなかった\n* [40002] Numeric parameter was not recognized as numerical value\n* [40006] Invalid parameter value specified(ページ数が 0 もしくは負の値)",
+            "description": "* [40001] Required parameters were not specified\n* [40002] Numeric parameter was not recognized as numerical value\n* [40006] Invalid parameter value specified(Number of pages is 0 or negative)",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3475,7 +3475,7 @@
             "description": "登録完了"
           },
           "400": {
-            "description": "* [40000] JSONのパースに失敗した(もしくは中身が何もなかった)\n* [40001] 必須パラメータが指定されていなかった\n* [40003] Base64のデコードに失敗した",
+            "description": "* [40000] JSONのパースに失敗した(もしくは中身が何もなかった)\n* [40001] Required parameters were not specified\n* [40003] Base64のデコードに失敗した",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -5764,7 +5764,7 @@
       ],
       "properties": {
         "dialog_params": {
-          "description": "ダイアログ各種パラメーター",
+          "description": "Dialog parameters",
           "$ref": "#/definitions/dialogParametersObject"
         },
         "show_animation": {

@@ -39,7 +39,7 @@ public class DigitalPaperEndpoint {
     private static final String takeScreenshotUrl = "/system/controls/screen_shot";
     private static final String takeFastScreenshotUrl = "/system/controls/screen_shot2?query=jpeg";
     private static final String showDialogUrl = "/system/controls/indicate";
-    private static final String showDialogWithUUID = "/system/controls/indicate/${indication_id}";
+    private static final String DIALOG_WITH_ID_URL = "/system/controls/indicate/${indication_id}";
     private static final String ownerNameGetUrl = "/system/configs/owner";
     private static final String ownerNameSetUrl = "/system/configs/owner";
     private static final String copyUrl = "/documents/${document_id}/copy";
@@ -197,7 +197,7 @@ public class DigitalPaperEndpoint {
             }});
             put("show_animation", animate);
         }};
-        simpleHttpClient.put(secured(resolve(showDialogWithUUID, variable("indication_id", UUID))), params);
+        simpleHttpClient.put(secured(resolve(DIALOG_WITH_ID_URL, variable("indication_id", UUID))), params);
     }
 
     public String getOwnerName() throws IOException, InterruptedException {
@@ -250,5 +250,16 @@ public class DigitalPaperEndpoint {
 
     public void putFirmwareOnDevice(byte[] firmware) throws IOException, InterruptedException {
         simpleHttpClient.putBytes(secured(FIRMWARE_PUT_ON_DEVICE_URL), "FwUpdater.pkg", "application/x-newton-compatible-pkg", firmware);
+    }
+
+    public void hideDialog(String dialogId) throws IOException, InterruptedException {
+        simpleHttpClient.delete(secured(resolve(DIALOG_WITH_ID_URL, variable("indication_id", dialogId))));
+    }
+
+    private static final String OPEN_DOCUMENT_URL = "/viewer/controls/open2";
+    public void openDocument(String documentId) throws IOException, InterruptedException {
+        simpleHttpClient.put(secured(OPEN_DOCUMENT_URL), new HashMap<>() {{
+            put("document_id", documentId);
+        }});
     }
 }
