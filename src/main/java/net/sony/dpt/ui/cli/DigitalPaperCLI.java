@@ -80,13 +80,7 @@ public class DigitalPaperCLI {
         this.syncStore = syncStore;
         this.deviceInfoStore = deviceInfoStore;
 
-        options = new Options();
-        options.addOption("addr", "addr", true, "The ip address of the Digital Paper");
-        options.addOption("serial", "serial", true, "The serial number of the Digital Paper we want to auto discover");
-        options.addOption("dryrun", "dryrun", false, "For commands that can run in dry mode, simulate their action");
-        options.addOption("interactive", "interactive", false, "For commands that can run in interactive mode, stop the process to ask for user input");
-        options.addOption("force", "force", false, "For commands that can run in force mode, continue despite validation errors");
-
+        options = CommandOption.options();
     }
 
     private String findAddress(CommandLine commandLine) throws IOException, InterruptedException {
@@ -247,7 +241,7 @@ public class DigitalPaperCLI {
                 watchAndPrint(arguments.get(1));
                 break;
             case "command-help":
-                throw new UnsupportedOperationException(command);
+                logWriter.log(Command.printHelp());
         }
 
     }
