@@ -8,8 +8,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.function.IntFunction;
-import java.util.function.Predicate;
 
 public class RegistrationTokenStore {
 
@@ -83,12 +81,10 @@ public class RegistrationTokenStore {
         String privateKey = Files.readString(storagePath.resolve(lastWorkspace).resolve(privateKeyPath));
         String clientId = Files.readString(storagePath.resolve(lastWorkspace).resolve(clientIdPath));
 
+        String certificate = null;
         // The certificate is optional, as it's only used for SSL with hostname validation
-        Path certFullPath = storagePath.resolve(lastWorkspace).resolve(certificatePath);
-        String certificate =
-                Files.exists(certFullPath)
-                ? Files.readString(certFullPath)
-                : null;
+        if (certificatePath != null)
+            certificate = Files.readString(storagePath.resolve(lastWorkspace).resolve(certificatePath));
 
         return new RegistrationResponse(certificate, privateKey, clientId);
     }
@@ -105,9 +101,9 @@ public class RegistrationTokenStore {
         }
 
         return Files.exists(storagePath)
-                && Files.exists(lastWorkspace)
-                && Files.exists(storagePath.resolve(privateKeyPath))
-                && Files.exists(storagePath.resolve(clientIdPath));
+                && Files.exists(storagePath.resolve(lastWorkspace))
+                && Files.exists(storagePath.resolve(lastWorkspace).resolve(privateKeyPath))
+                && Files.exists(storagePath.resolve(lastWorkspace).resolve(clientIdPath));
     }
 
     public Path findLastWorkspacePath(TokenStoreLocation tokenStoreLocation) throws IOException {

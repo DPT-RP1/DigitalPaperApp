@@ -6,6 +6,10 @@ import org.bouncycastle.crypto.digests.GeneralDigest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
 import org.bouncycastle.util.io.pem.PemObject;
@@ -15,6 +19,7 @@ import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.*;
 import java.security.spec.AlgorithmParameterSpec;
@@ -23,6 +28,11 @@ import java.util.Arrays;
 import java.util.Base64;
 
 public class CryptographyUtil {
+
+    private static final String PKCS_1_PEM_HEADER = "-----BEGIN RSA PRIVATE KEY-----";
+    private static final String PKCS_1_PEM_FOOTER = "-----END RSA PRIVATE KEY-----";
+    private static final String PKCS_8_PEM_HEADER = "-----BEGIN PRIVATE KEY-----";
+    private static final String PKCS_8_PEM_FOOTER = "-----END PRIVATE KEY-----";
 
     public byte[] generateNonce(int size) {
         byte[] nonce = new byte[size];
@@ -134,7 +144,37 @@ public class CryptographyUtil {
         return writer.toString();
     }
 
-    public byte[] loadPemPrivateKey(String pem) {
+    public PrivateKey readPkcs8PrivateKey(String pemFile) throws GeneralSecurityException {
+        String privateKeyB64 = pemFile
+                .replaceAll("-----END PRIVATE KEY-----", "")
+                .replaceAll("-----BEGIN PRIVATE KEY-----", "")
+                .replaceAll("\n", "");
+        byte[] decoded = Base64.getMimeDecoder().decode(privateKeyB64);
+
+        KeyFactory factory = KeyFactory.getInstance("RSA");
+        return factory.generatePrivate(new PKCS8EncodedKeySpec(decoded));
+    }
+
+    public PrivateKey readPkcs1PrivateKey(String pemFile) throws IOException {
+        PEMParser pemParser = new PEMParser(new StringReader(pemFile));
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(new BouncyCastleProvider());
+        Object object = pemParser.readObject();
+        KeyPair kp = converter.getKeyPair((PEMKeyPair) object);
+        return kp.getPrivate();
+    }
+
+    public PrivateKey readPrivateKeyFromPEM(String pemFile) throws GeneralSecurityException, IOException {
+        return readPkcs8PrivateKey(pemFile);
+    }
+
+    @Deprecated
+    public byte[] loadPemPrivateKey(String pem) throws IOException {
+        if (pem.contains(PKCS_1_PEM_HEADER)) {
+            // PKCS#1 mode
+            PrivateKey privateKey = readPkcs1PrivateKey(pem);
+            return privateKey.getEncoded();
+        }
+
         String privateKeyB64 = pem
                 .replaceAll("-----END PRIVATE KEY-----", "")
                 .replaceAll("-----BEGIN PRIVATE KEY-----", "")

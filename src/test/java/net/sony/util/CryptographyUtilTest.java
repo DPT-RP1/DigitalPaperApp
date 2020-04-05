@@ -207,7 +207,7 @@ public class CryptographyUtilTest {
     }
 
     @Test
-    public void privateKeyShouldExportToPem() throws IOException, NoSuchAlgorithmException {
+    public void privateKeyShouldExportToPem() throws IOException, GeneralSecurityException {
         CryptographyUtil cryptographyUtil = new CryptographyUtil();
 
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");

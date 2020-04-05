@@ -7,10 +7,11 @@ import javax.net.ssl.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.security.*;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
-import java.security.spec.PKCS8EncodedKeySpec;
 
 public class SSLFactory {
 
@@ -37,10 +38,8 @@ public class SSLFactory {
     }
 
     private KeyStore getKeyStore(String certificatePem, String privateKeyPem) throws GeneralSecurityException, IOException {
-        KeyFactory factory = KeyFactory.getInstance("RSA");
-        PrivateKey privateKey = factory.generatePrivate(
-            new PKCS8EncodedKeySpec(cryptographyUtil.loadPemPrivateKey(privateKeyPem))
-        );
+        PrivateKey privateKey = cryptographyUtil.readPrivateKeyFromPEM(privateKeyPem);
+
         Certificate caCertificate = loadCertificate(certificatePem);
 
         KeyStore keyStore = KeyStore.getInstance("JKS");
