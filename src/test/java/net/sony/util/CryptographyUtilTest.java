@@ -11,6 +11,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.*;
 
 import static net.sony.util.ByteUtils.bytesToHex;
@@ -215,7 +216,7 @@ public class CryptographyUtilTest {
         KeyPair pair = kpg.generateKeyPair();
         String pem = cryptographyUtil.exportPrivateKeyToPEM(pair.getPrivate());
         byte[] expectedPrivateKey = pair.getPrivate().getEncoded();
-        byte[] actualPrivateKey = cryptographyUtil.loadPemPrivateKey(pem);
+        byte[] actualPrivateKey = cryptographyUtil.readPrivateKeyFromPEM(pem).getEncoded();
 
         assertArrayEquals(expectedPrivateKey, actualPrivateKey);
     }
@@ -229,8 +230,8 @@ public class CryptographyUtilTest {
 
         CryptographyUtil cryptographyUtil = new CryptographyUtil() {
             @Override
-            public byte[] loadPemPrivateKey(String pem) {
-                return privateKey;
+            public PrivateKey readPrivateKeyFromPEM(String pemFile) throws GeneralSecurityException {
+                return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privateKey));
             }
         };
 

@@ -163,31 +163,12 @@ public class CryptographyUtil {
         return kp.getPrivate();
     }
 
-    public PrivateKey readPrivateKeyFromPEM(String pemFile) throws GeneralSecurityException, IOException {
+    public PrivateKey readPrivateKeyFromPEM(String pemFile) throws GeneralSecurityException {
         return readPkcs8PrivateKey(pemFile);
     }
 
-    @Deprecated
-    public byte[] loadPemPrivateKey(String pem) throws IOException {
-        if (pem.contains(PKCS_1_PEM_HEADER)) {
-            // PKCS#1 mode
-            PrivateKey privateKey = readPkcs1PrivateKey(pem);
-            return privateKey.getEncoded();
-        }
-
-        String privateKeyB64 = pem
-                .replaceAll("-----END PRIVATE KEY-----", "")
-                .replaceAll("-----BEGIN PRIVATE KEY-----", "")
-                .replaceAll("\n", "");
-        return Base64.getMimeDecoder().decode(privateKeyB64);
-    }
-
     public byte[] signSHA256RSA(byte[] input, String privateKeyPem) throws Exception {
-        byte[] privateKey = loadPemPrivateKey(privateKeyPem);
-
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKey);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        PrivateKey key = kf.generatePrivate(keySpec);
+        PrivateKey key = readPrivateKeyFromPEM(privateKeyPem);
 
         Signature signature = Signature.getInstance("SHA256withRSA");
         signature.initSign(key);
