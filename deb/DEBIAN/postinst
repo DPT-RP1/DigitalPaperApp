@@ -1,0 +1,3 @@
+#/bin/bash
+service cups start
+lpadmin -p "DPT-RP1" -D "Sony Digital Paper" -v cups-pdf-dpt:/ -E -P /usr/share/cups/model/CUPS-PDF-DPT.ppd

@@ -1,0 +1,10 @@
+Package: dpt
+Version: 1.0-1
+Section: base
+Priority: optional
+Architecture: amd64
+Depends: openjdk-11-jre (>= 11.0.6), cups (>= 2.2.10)
+Maintainer: xpierrohk <xpierro@email.com>
+Description: Digital Paper App
+ Java 11 Application to manage a DPT-RP1
+ Tested on Debian 10 Buster

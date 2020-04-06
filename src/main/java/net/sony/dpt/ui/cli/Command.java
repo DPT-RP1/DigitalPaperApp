@@ -1,6 +1,5 @@
 package net.sony.dpt.ui.cli;
 
-import org.apache.commons.cli.Options;
 
 import java.util.*;
 

@@ -1,0 +1,3 @@
+#!/bin/bash
+mkdir -p ~/.dpt/print
+java -jar /usr/share/dpt/DigitalPaperApp.jar $@
