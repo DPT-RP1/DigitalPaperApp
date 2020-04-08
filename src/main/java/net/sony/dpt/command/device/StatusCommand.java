@@ -5,6 +5,8 @@ import net.sony.util.LogWriter;
 
 import java.io.IOException;
 
+import static net.sony.util.SimpleHttpClient.fromJSON;
+
 public class StatusCommand {
 
     private final DigitalPaperEndpoint digitalPaperEndpoint;
@@ -27,4 +29,19 @@ public class StatusCommand {
         logWriter.log("Configured owner name: " + getOwnerName());
     }
 
+    public BatteryStatus getBatteryStatus() throws IOException, InterruptedException {
+        return fromJSON(digitalPaperEndpoint.getBatteryStatus(), BatteryStatus.class);
+    }
+
+    public void showBatteryStatus() throws IOException, InterruptedException {
+        logWriter.log(getBatteryStatus().toString());
+    }
+
+    public StorageStatus getStorageStatus() throws IOException, InterruptedException {
+        return fromJSON(digitalPaperEndpoint.getStorageStatus(), StorageStatus.class);
+    }
+
+    public void showStorageStatus() throws IOException, InterruptedException {
+        logWriter.log(getStorageStatus().toString());
+    }
 }

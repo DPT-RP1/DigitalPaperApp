@@ -30,6 +30,8 @@ public enum Command {
     WIFI("wifi"),
     WIFI_ENABLE("wifi-enable"),
     WIFI_DISABLE("wifi-disable"),
+    BATTERY("battery", "Shows the battery status informations"),
+    STORAGE("storage", "Shows the storage status informations"),
     UPDATE_FIRMWARE("update-firmware", "BETA - NON FUNCTIONAL"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 

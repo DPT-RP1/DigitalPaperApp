@@ -1,6 +1,7 @@
 package net.sony.dpt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.sony.dpt.command.device.BatteryStatus;
 import net.sony.dpt.command.documents.EntryType;
 import net.sony.dpt.command.firmware.FirmwareVersionResponse;
 import net.sony.dpt.command.wifi.AccessPoint;
@@ -261,5 +262,15 @@ public class DigitalPaperEndpoint {
         simpleHttpClient.put(secured(OPEN_DOCUMENT_URL), new HashMap<>() {{
             put("document_id", documentId);
         }});
+    }
+
+    private static final String BATTERY_STATUS_URL = "/system/status/battery";
+    public String getBatteryStatus() throws IOException, InterruptedException {
+        return simpleHttpClient.get(secured(BATTERY_STATUS_URL));
+    }
+
+    private static final String STORAGE_STATUS_URL = "/system/status/storage";
+    public String getStorageStatus() throws IOException, InterruptedException {
+        return simpleHttpClient.get(secured(STORAGE_STATUS_URL));
     }
 }

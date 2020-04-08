@@ -1767,10 +1767,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "**ハンドライティングのプリセットパターン一覧取得**  \n",
+        "description": "**Get a list of handwriting presets**  \n",
         "responses": {
           "200": {
-            "description": "Successful response (パターンリスト)",
+            "description": "Successful response (pattern list)",
             "schema": {
               "$ref": "#/definitions/viewerStatusPresetMarksGetResult"
             }
@@ -5725,7 +5725,7 @@
       "required": [
         "level",
         "icon_type",
-        "Settings - status",
+        "status",
         "health",
         "plugged",
         "pen"

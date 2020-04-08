@@ -242,8 +242,22 @@ public class DigitalPaperCLI {
             case WATCH_PRINT:
                 watchAndPrint(arguments.get(1));
                 break;
+            case BATTERY:
+                showBatteryStatus();
+                break;
+            case STORAGE:
+                showStorageStatus();
+                break;
         }
 
+    }
+
+    private void showBatteryStatus() throws IOException, InterruptedException {
+        new StatusCommand(digitalPaperEndpoint, logWriter).showBatteryStatus();
+    }
+
+    private void showStorageStatus() throws IOException, InterruptedException {
+        new StatusCommand(digitalPaperEndpoint, logWriter).showStorageStatus();
     }
 
     private void watchAndPrint(String localFolderToWatch) throws IOException {
