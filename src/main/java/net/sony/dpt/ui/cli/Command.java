@@ -4,39 +4,40 @@ package net.sony.dpt.ui.cli;
 import java.util.*;
 
 public enum Command {
-    REGISTER("register"),
-    LIST_DOCUMENTS("list-documents"),
-    DOCUMENT_INFO("document-info"),
-    WIFI_LIST("wifi-list"),
-    UPLOAD("upload", Arrays.asList("local-file", "[remote-file]")),
+    REGISTER("register", Collections.emptyList(), Collections.emptyList(), "Starts the pairing process with the Digital Paper"),
+    PING("ping", "Tests the connection with the Digital Paper"),
+    SYNC("sync", Collections.singletonList(CommandOption.DRYRUN), Collections.singletonList("local-sync-folder"), "Synchronizes a local folder with the Digital paper"),
+    LIST_DOCUMENTS("list-documents", "Lists all documents"),
+    DOCUMENT_INFO("document-info", "Prints all documents and their attributes, raw"),
+    UPLOAD("upload", Collections.emptyList(), Arrays.asList("local-file", "[remote-file]"), "Sends a local file to the Digital Paper"),
     DOWNLOAD("download"),
-    DELETE_FOLDER("delete-folder", Collections.singletonList("remote-file")),
-    DELETE("delete", Collections.singletonList("remote-file")),
-    NEW_FOLDER("new-folder", Collections.singletonList("remote-folder")),
     MOVE(Arrays.asList("move", "move-document"), Arrays.asList("source", "target")),
     COPY(Arrays.asList("copy", "copy-document"), Arrays.asList("source", "target")),
-    WIFI_SCAN("wifi-scan"),
+    NEW_FOLDER("new-folder", Collections.singletonList("remote-folder")),
+    DELETE_FOLDER("delete-folder", Collections.singletonList("remote-file")),
+    DELETE("delete", Collections.singletonList("remote-file")),
+    PRINT("print", Collections.emptyList(), Collections.singletonList("local-file"), "Sends a pdf to the Digital Paper, and opens it immediately"),
+    WATCH_PRINT("watch-print", Collections.emptyList(), Collections.singletonList("local-folder"), "Watches a folder, and print pdfs on creation/modification in this folder"),
     SCREENSHOT("screenshot", Collections.singletonList("png-file")),
-    WHITEBOARD("whiteboard"),
-    SYNC("sync", Collections.singletonList(CommandOption.DRYRUN), Collections.singletonList("local-sync-folder")),
-    DIALOG("dialog"),
+    WHITEBOARD("whiteboard", "Shows a landscape half-scale projection of the digital paper, refreshed every second"),
+    DIALOG("dialog", Collections.emptyList(), Arrays.asList("title", "content", "button"), "Prints a dialog on the Digital Paper"),
     GET_OWNER(Arrays.asList("get-owner", "show-owner")),
     SET_OWNER("set-owner"),
-    PING("ping"),
+    WIFI_LIST("wifi-list"),
+    WIFI_SCAN("wifi-scan"),
     WIFI_ADD("wifi-add"),
     WIFI_DEL("wifi-del"),
     WIFI("wifi"),
     WIFI_ENABLE("wifi-enable"),
     WIFI_DISABLE("wifi-disable"),
-    UPDATE_FIRMWARE("update-firmware"),
-    PRINT("print"),
-    WATCH_PRINT("watch-print"),
-    HELP("command-help");
+    UPDATE_FIRMWARE("update-firmware", "BETA - NON FUNCTIONAL"),
+    HELP(Arrays.asList("help", "command-help"), "Prints this message");
 
-    private List<String> commandNames;
-    private static Map<String, Command> commandMap = new HashMap<>();
-    private List<CommandOption> commandOptions;
-    private List<String> argumentNames;
+    private final List<String> commandNames;
+    private static final Map<String, Command> commandMap = new HashMap<>();
+    private final List<CommandOption> commandOptions;
+    private final List<String> argumentNames;
+    private String description;
 
     static {
         for (Command command : values()) {
@@ -50,10 +51,6 @@ public enum Command {
         this.commandNames = commandNames;
         commandOptions = availableOptions;
         this.argumentNames = arguments;
-    }
-
-    Command(String commandName, List<CommandOption> availableOptions, List<String> arguments) {
-        this(Collections.singletonList(commandName), availableOptions, arguments);
     }
 
     Command(String commandName, List<String> arguments) {
@@ -72,13 +69,36 @@ public enum Command {
         this(commandNames, Collections.emptyList(), argumentNames);
     }
 
-    public static Command find(String[] args) {
+    Command(String command, String description) {
+        this(command);
+        this.description = description;
+    }
+
+    Command(String command, List<CommandOption> availableOptions, List<String> arguments, String description) {
+        this.commandNames = Collections.singletonList(command);
+        this.commandOptions = availableOptions;
+        this.argumentNames = arguments;
+        this.description = description;
+    }
+
+    Command(List<String> commands, List<CommandOption> availableOptions, List<String> arguments, String description) {
+        this.commandNames = commands;
+        this.commandOptions = availableOptions;
+        this.argumentNames = arguments;
+        this.description = description;
+    }
+
+    Command(List<String> commandNames, String description) {
+        this(commandNames, Collections.emptyList(), Collections.emptyList(), description);
+    }
+
+    public static Command parse(String[] args) {
         if (!commandMap.containsKey(args[0])) return HELP;
         return commandMap.get(args[0]);
     }
 
     public static String printHelp() {
-        StringBuilder helpBuilder = new StringBuilder("dpt command [parameters] [-options]\n");
+        StringBuilder helpBuilder = new StringBuilder("dpt command [parameters] [-options] [-addr] [-serial]\n");
         for (Command command : values()) {
             helpBuilder.append("\t").append(command.commandNames.get(0)).append(" ");
             for (String param : command.argumentNames) {
@@ -88,6 +108,7 @@ public enum Command {
                 helpBuilder.append("[-").append(commandOption.getOptionLongName()).append("] ");
             }
             helpBuilder.append("\n");
+            if (command.description != null && !command.description.isEmpty()) helpBuilder.append("\t\t" ).append(command.description).append("\n");
         }
         return helpBuilder.toString();
     }

@@ -111,7 +111,7 @@ public class DigitalPaperCLI {
     }
 
     private void printHelp() {
-        System.out.println("dtp command -args");
+        logWriter.log(Command.printHelp());
     }
 
     public void execute(String[] args) throws Exception {
@@ -120,7 +120,7 @@ public class DigitalPaperCLI {
         boolean dryrun = commandLine.hasOption("dryrun");
         boolean force = commandLine.hasOption("force");
 
-        String addr = findAddress(commandLine);
+
 
         // The arguments have to be ordered: command param1 param2 etc.
         List<String> arguments = commandLine.getArgList();
@@ -128,9 +128,16 @@ public class DigitalPaperCLI {
             printHelp();
             return;
         }
-        String command = arguments.get(0);
+        Command command = Command.parse(args);
 
-        if (!registrationTokenStore.registered()) {
+        if (command == Command.HELP) {
+            printHelp();
+            return;
+        }
+
+        String addr = findAddress(commandLine);
+
+        if (!registrationTokenStore.registered() || command == Command.REGISTER) {
             register(SimpleHttpClient.insecure(), addr);
         }
 
@@ -148,18 +155,16 @@ public class DigitalPaperCLI {
         auth(secureHttpClient);
 
         switch (command) {
-            case "register":
-                return;
-            case "list-documents":
+            case LIST_DOCUMENTS:
                 listDocuments();
                 break;
-            case "document-info":
+            case DOCUMENT_INFO:
                 listDocumentsInfo();
                 break;
-            case "wifi-list":
+            case WIFI_LIST:
                 wifiList();
                 break;
-            case "upload":
+            case UPLOAD:
                 String localPath = arguments.get(1);
                 String remotePath = null;
                 if (arguments.size() > 2) {
@@ -167,81 +172,76 @@ public class DigitalPaperCLI {
                 }
                 upload(localPath, remotePath);
                 break;
-            case "delete-folder":
+            case DELETE_FOLDER:
                 deleteFolder(arguments.get(1));
                 break;
-            case "delete":
+            case DELETE:
                 deleteDocument(arguments.get(1));
                 break;
-            case "download":
+            case DOWNLOAD:
                 String localDownloadPath = null;
                 if (arguments.size() > 2) {
                     localDownloadPath = arguments.get(2);
                 }
                 downloadDocument(arguments.get(1), localDownloadPath);
                 break;
-            case "new-folder":
+            case NEW_FOLDER:
                 newFolder(arguments.get(1));
                 break;
-            case "move":
-            case "move-document":
+            case MOVE:
                 moveDocument(arguments.get(1), arguments.get(2));
                 break;
-            case "copy":
-            case "copy-document":
+            case COPY:
                 copyDocument(arguments.get(1), arguments.get(2));
                 break;
-            case "wifi-scan":
+            case WIFI_SCAN:
                 wifiScan();
                 break;
-            case "screenshot":
+            case SCREENSHOT:
                 takeScreenshot(arguments.get(1));
                 break;
-            case "whiteboard":
+            case WHITEBOARD:
                 new Whiteboard(new TakeScreenshotCommand(digitalPaperEndpoint));
                 break;
-            case "sync":
+            case SYNC:
                 sync(arguments.get(1), dryrun);
                 break;
-            case "dialog":
+            case DIALOG:
                 showDialog(arguments.get(1), arguments.get(2), arguments.get(3));
                 break;
-            case "get-owner":
-            case "show-owner":
+            case GET_OWNER:
                 showOwner();
                 break;
-            case "set-owner":
+            case SET_OWNER:
                 setOwner(arguments.get(1));
                 break;
-            case "ping":
+            case PING:
                 ping();
                 break;
-            case "wifi-add":
+            case WIFI_ADD:
                 addWifi(arguments.get(1), !options.hasOption("interactive") ? arguments.get(2) : null);
                 break;
-            case "wifi-del":
+            case WIFI_DEL:
                 deleteWifi(arguments.get(1));
                 break;
-            case "wifi":
+            case WIFI:
                 wifiState();
                 break;
-            case "wifi-enable":
+            case WIFI_ENABLE:
                 turnWifiOn();
                 break;
-            case "wifi-disable":
+            case WIFI_DISABLE:
                 turnWifiOff();
                 break;
-            case "update-firmware":
+            case UPDATE_FIRMWARE:
                 update(force, dryrun);
                 break;
-            case "print":
+            case PRINT:
                 print(arguments.get(1), arguments.size() > 2 ? arguments.get(2) : null);
                 break;
-            case "watch-print":
+            case WATCH_PRINT:
                 watchAndPrint(arguments.get(1));
                 break;
-            case "command-help":
-                logWriter.log(Command.printHelp());
         }
 
     }
