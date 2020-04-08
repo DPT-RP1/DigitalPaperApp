@@ -3098,7 +3098,7 @@
     "/system/controls/wifi_accesspoints/scan": {
       "post": {
         "tags": [
-          "設定-無線制御"
+          "Settings - Wireless Control"
         ],
         "schemes": [
           "https"
@@ -3138,7 +3138,7 @@
     "/system/controls/wifi_accesspoints/register": {
       "put": {
         "tags": [
-          "Setting - wireless control"
+          "Settings - Wireless Control"
         ],
         "schemes": [
           "https"
@@ -3183,7 +3183,7 @@
     "/system/controls/wps_start/button": {
       "put": {
         "tags": [
-          "Setting - wireless control"
+          "Settings - Wireless Control"
         ],
         "schemes": [
           "https"
@@ -3214,7 +3214,7 @@
     "/system/controls/wps_start/pin": {
       "put": {
         "tags": [
-          "設定-無線制御"
+          "Settings - Wireless Control"
         ],
         "schemes": [
           "https"
@@ -3254,7 +3254,7 @@
     "/system/controls/wps_cancel": {
       "put": {
         "tags": [
-          "設定-無線制御"
+          "Settings - Wireless Control"
         ],
         "schemes": [
           "https"
@@ -3677,7 +3677,7 @@
         "description": "Instruct clearing display of main screen related to client registration sequence",
         "responses": {
           "204": {
-            "description": "結果に依らず応答"
+            "description": "Ignores result and returns success in every case"
           }
         }
       }
@@ -3766,7 +3766,7 @@
     "/extensions/status": {
       "get": {
         "tags": [
-          "拡張アプリ"
+          "Extensions"
         ],
         "schemes": [
           "https"
@@ -3788,7 +3788,7 @@
     "/extensions/status/{item}": {
       "get": {
         "tags": [
-          "拡張アプリ"
+          "Extensions"
         ],
         "schemes": [
           "https"
@@ -3796,7 +3796,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "(拡張アプリ向け) 状態値を取得する",
+        "description": "(Extensions向け) 状態値を取得する",
         "parameters": [
           {
             "name": "item",
@@ -3814,7 +3814,7 @@
             }
           },
           "404": {
-            "description": "* [40401] 拡張アプリには指定された状態項目が存在しない",
+            "description": "* [40401] Extensionsには指定された状態項目が存在しない",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3825,7 +3825,7 @@
     "/extensions/configs": {
       "get": {
         "tags": [
-          "拡張アプリ"
+          "Extensions"
         ],
         "schemes": [
           "https"
@@ -3847,7 +3847,7 @@
     "/extensions/configs/{item}": {
       "get": {
         "tags": [
-          "拡張アプリ"
+          "Extensions"
         ],
         "schemes": [
           "https"
@@ -3855,7 +3855,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "(拡張アプリ向け) 設定値を取得する",
+        "description": "(Extensions向け) 設定値を取得する",
         "parameters": [
           {
             "name": "item",
@@ -3873,7 +3873,7 @@
             }
           },
           "404": {
-            "description": "* [40401] 拡張アプリには指定された設定項目が存在しない",
+            "description": "* [40401] Extensionsには指定された設定項目が存在しない",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3882,7 +3882,7 @@
       },
       "put": {
         "tags": [
-          "拡張アプリ"
+          "Extensions"
         ],
         "schemes": [
           "https"
@@ -3893,7 +3893,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "(拡張アプリ向け) 指定した内容で設定を変更する",
+        "description": "(Extensions向け) 指定した内容で設定を変更する",
         "parameters": [
           {
             "name": "item",
@@ -3923,7 +3923,7 @@
             }
           },
           "404": {
-            "description": "* [40401] 拡張アプリには指定された設定項目が存在しない",
+            "description": "* [40401] Extensionsには指定された設定項目が存在しない",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
