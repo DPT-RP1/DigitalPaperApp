@@ -14,6 +14,7 @@ import net.sony.dpt.command.ping.PingCommand;
 import net.sony.dpt.command.print.PrintCommand;
 import net.sony.dpt.command.register.RegisterCommand;
 import net.sony.dpt.command.register.RegistrationResponse;
+import net.sony.dpt.command.reversing.ReverseEngineeringCommand;
 import net.sony.dpt.command.sync.LocalSyncProgressBar;
 import net.sony.dpt.command.sync.RemoteSyncProgressBar;
 import net.sony.dpt.command.sync.SyncCommand;
@@ -248,8 +249,15 @@ public class DigitalPaperCLI {
             case STORAGE:
                 showStorageStatus();
                 break;
+            case RAW_GET:
+                rawGet(arguments.get(1));
+                break;
         }
 
+    }
+
+    private void rawGet(String url) throws IOException, InterruptedException {
+        new ReverseEngineeringCommand(digitalPaperEndpoint, logWriter).sendGet(url);
     }
 
     private void showBatteryStatus() throws IOException, InterruptedException {

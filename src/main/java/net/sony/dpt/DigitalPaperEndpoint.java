@@ -273,4 +273,8 @@ public class DigitalPaperEndpoint {
     public String getStorageStatus() throws IOException, InterruptedException {
         return simpleHttpClient.get(secured(STORAGE_STATUS_URL));
     }
+
+    public String rawSecuredGet(String url) throws IOException, InterruptedException {
+        return simpleHttpClient.get(secured(url));
+    }
 }

@@ -3898,14 +3898,14 @@
           {
             "name": "item",
             "in": "path",
-            "description": "設定項目名",
+            "description": "Setting item name",
             "required": true,
             "type": "string"
           },
           {
             "name": "config",
             "in": "body",
-            "description": "設定値情報",
+            "description": "Value",
             "required": true,
             "schema": {
               "$ref": "#/definitions/commonValueObject"
@@ -3917,7 +3917,7 @@
             "description": "Success"
           },
           "400": {
-            "description": "指定されたパラメータが不正",
+            "description": "The specified parameter is invalid",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
