@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar ~/.local/share/dpt/DigitalPaperApp.jar $@
+java -jar ~/.local/share/dpt/DigitalPaperApp.jar "$@"

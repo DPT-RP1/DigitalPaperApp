@@ -409,7 +409,7 @@ public class DigitalPaperCLI {
                 digitalPaperEndpoint,
                 logWriter,
                 syncStore,
-                new LocalSyncProgressBar(System.out, RemoteSyncProgressBar.ProgressStyle.RECTANGLES_1)
+                new LocalSyncProgressBar(System.out, ProgressBar.ProgressStyle.RECTANGLES_1)
         ).sync(dryrun);
     }
 

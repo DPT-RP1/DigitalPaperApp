@@ -77,10 +77,14 @@ public class SyncCommand {
         return remoteFileMap;
     }
 
-    public Map<Path, DocumentEntry> loadLocalDocuments(Path localRoot) throws IOException {
+    public Map<Path, DocumentEntry> loadLocalDocuments(Path localRoot, boolean dryrun) throws IOException {
+        logWriter.log("Synchronizing with local folder " + localRoot);
         localFileMap.clear();
 
-        if (!Files.exists(localRoot)) Files.createDirectories(localRoot);
+        if (!Files.exists(localRoot)) {
+            if (dryrun) return localFileMap;
+            Files.createDirectories(localRoot);
+        }
 
         Files.walk(localRoot, FileVisitOption.FOLLOW_LINKS).forEach(path -> {
             if (!pdfMatcher.matches(path)) return; // We only ever want to upload pdfs.
@@ -108,7 +112,7 @@ public class SyncCommand {
         if (progressBar != null) progressBar.start();
 
         loadRemoteDocuments(listDocumentsCommand.listDocuments());
-        loadLocalDocuments(localRoot);
+        loadLocalDocuments(localRoot, dryrun);
 
         Date lastSyncDate = syncStore.retrieveLastSyncDate();
         if (dryrun) {

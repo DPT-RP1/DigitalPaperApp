@@ -55,19 +55,19 @@ public class LocalSyncProgressBar implements ProgressBar {
 
     @Override
     public void stop() {
-        currentTask = "Synchronization complete !";
+        currentTask = "\nSynchronization complete !";
         repaint();
     }
 
     @Override
     public void repaint() {
         dialogText = style.generateSequence(percentDone, 24) + " " + percentDone + "% (" + doneSizeMB + " / " + totalSizeMB + "MB) ";
-        dialogText += currentTask;
+        dialogText += currentTask + "   ";
 
         paint();
     }
 
     private void paint() {
-        printStream.print(dialogText + "\r");
+        printStream.print(dialogText + "\r\033[2K");
     }
 }

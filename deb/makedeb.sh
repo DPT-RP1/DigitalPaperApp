@@ -13,7 +13,7 @@ mkdir "${root_folder}/usr/bin"
 
 echo "Building jar..."
 cd ..
-mvn clean package 1>/dev/null 2>/dev/null
+mvn clean package 1>/dev/null 2>/dev/null || (echo "Build failed...";exit)
 cd deb || exit
 
 jar_name=DigitalPaperApp

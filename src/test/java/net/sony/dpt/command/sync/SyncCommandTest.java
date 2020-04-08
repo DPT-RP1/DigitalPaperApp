@@ -36,7 +36,7 @@ public class SyncCommandTest {
 
         syncCommand.loadLocalDocuments(Path.of(
                 this.getClass().getClassLoader().getResource("empty").getPath())
-        );
+        , true);
 
         syncCommand.loadRemoteDocuments(documentListResponse);
 
@@ -59,7 +59,7 @@ public class SyncCommandTest {
         syncCommand.loadLocalDocuments(
                 Path.of(
                         Objects.requireNonNull(this.getClass().getClassLoader().getResource("sync")).getPath()
-                )
+                ), true
         );
 
         DocumentListResponse empty = new DocumentListResponse();
@@ -83,7 +83,7 @@ public class SyncCommandTest {
         syncCommand.loadLocalDocuments(
                 Path.of(
                         this.getClass().getClassLoader().getResource("empty").getPath()
-                )
+                ), true
         );
 
         DocumentListResponse empty = new DocumentListResponse();
@@ -91,12 +91,12 @@ public class SyncCommandTest {
         syncCommand.loadRemoteDocuments(empty);
 
         syncCommand.sync(null, true);
-        assertThat(messages.size(), is(5));
-        assertThat(messages.get(0), is("There is nothing to synchronize: both your local folder and the device are empty."));
-        assertThat(messages.get(1), is("We will send 0 files to the Digital Paper"));
-        assertThat(messages.get(2), is("We will receive 0 files from the Digital Paper"));
-        assertThat(messages.get(3), is("We will delete 0 files locally"));
-        assertThat(messages.get(4), is("We will delete 0 files remotely"));
+        assertThat(messages.size(), is(6));
+        assertThat(messages.get(1), is("There is nothing to synchronize: both your local folder and the device are empty."));
+        assertThat(messages.get(2), is("We will send 0 files to the Digital Paper"));
+        assertThat(messages.get(3), is("We will receive 0 files from the Digital Paper"));
+        assertThat(messages.get(4), is("We will delete 0 files locally"));
+        assertThat(messages.get(5), is("We will delete 0 files remotely"));
 
     }
 
