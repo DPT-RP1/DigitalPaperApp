@@ -106,7 +106,10 @@ public class FirmwareUpdatesCommand {
         return result;
     }
 
-    public void update(boolean force, boolean dryrun) throws IOException, InterruptedException, ParserConfigurationException, SAXException, XPathExpressionException {
+    private Document parsedXml;
+    private String modelTag;
+
+    public boolean checkForUpdates() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, InterruptedException {
         // 1. Check firmware currently installed
         FirmwareVersionResponse firmwareVersionResponse = digitalPaperEndpoint.checkVersion();
 
@@ -120,17 +123,25 @@ public class FirmwareUpdatesCommand {
 
         String malformedSonyXml = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
         String repairedXml = filterValidXml(malformedSonyXml);
-        Document parsedXml = parseXml(repairedXml);
-        String modelTag = firmwareVersionResponse.getModelName();
+        parsedXml = parseXml(repairedXml);
+        modelTag = firmwareVersionResponse.getModelName();
 
         String onlineVersion = lastestVersion(parsedXml, modelTag);
 
         logWriter.log("The device version is [v" + firmwareVersionResponse.getValue() + "]\nThe latest version online is [v" + onlineVersion + "]");
-        if (!force && onlineVersion.equals(firmwareVersionResponse.getValue())) {
+        boolean different = !onlineVersion.equals(firmwareVersionResponse.getValue());
+        if (different) {
+            logWriter.log("A new version is available !");
+        }
+        return different;
+    }
+
+    public void update(boolean force, boolean dryrun) throws IOException, InterruptedException, ParserConfigurationException, SAXException, XPathExpressionException {
+        boolean different = checkForUpdates();
+        if (!different && !force) {
             logWriter.log("No difference, no upgrade will happen");
             return;
         }
-
         if (force) {
             logWriter.log("Forced mode: the update will proceed");
         }

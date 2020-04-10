@@ -33,7 +33,8 @@ public enum Command {
     WIFI_DISABLE("wifi-disable"),
     BATTERY("battery", "Shows the battery status informations"),
     STORAGE("storage", "Shows the storage status informations"),
-    UPDATE_FIRMWARE("update-firmware", "BETA - NON FUNCTIONAL"),
+    CHECK_FIRMWARE("check-firmware", "Check if a new firmware version has been published"),
+    UPDATE_FIRMWARE("update-firmware", Collections.singletonList(CommandOption.FORCE), Collections.emptyList(), "BETA - NON FUNCTIONAL"),
     RAW_GET("get", Collections.emptyList(), Collections.singletonList("url"), "Sends and display a GET request to the Digital Paper"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 

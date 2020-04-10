@@ -239,6 +239,9 @@ public class DigitalPaperCLI {
             case UPDATE_FIRMWARE:
                 update(force, dryrun);
                 break;
+            case CHECK_FIRMWARE:
+                checkFirmware();
+                break;
             case PRINT:
                 print(arguments.get(1), arguments.size() > 2 ? arguments.get(2) : null);
                 break;
@@ -259,6 +262,10 @@ public class DigitalPaperCLI {
                 break;
         }
 
+    }
+
+    private void checkFirmware() throws InterruptedException, ParserConfigurationException, SAXException, XPathExpressionException, IOException {
+        new FirmwareUpdatesCommand(null, digitalPaperEndpoint, logWriter).checkForUpdates();
     }
 
     private void whiteboardHtml() throws IOException, URISyntaxException {
