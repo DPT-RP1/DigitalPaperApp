@@ -11,7 +11,7 @@ public enum Command {
     UPLOAD("upload", Collections.emptyList(), Arrays.asList("local-file", "[remote-file]"), "Sends a local file to the Digital Paper"),
     DOWNLOAD("download", "Downloads a remote file locally"),
     MOVE(Arrays.asList("move", "move-document"), Collections.emptyList(), Arrays.asList("source", "target"), "Moves a document on the device"),
-    COPY(Arrays.asList("copy", "copy-document"), Collections.emptyList(), Arrays.asList("source", "target"), "COpies a document on the device"),
+    COPY(Arrays.asList("copy", "copy-document"), Collections.emptyList(), Arrays.asList("source", "target"), "Copies a document on the device"),
     NEW_FOLDER("new-folder", Collections.emptyList(), Collections.singletonList("remote-folder"), "Creates a new folder on the device"),
     DELETE_FOLDER("delete-folder", Collections.emptyList(), Collections.singletonList("remote-file"), "Remove a folder on the device"),
     DELETE("delete", Collections.emptyList(), Collections.singletonList("remote-file"), "Deletes a file on the device"),
