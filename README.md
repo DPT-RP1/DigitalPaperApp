@@ -1,4 +1,4 @@
-# dpt-rp1-java
+# dpt
 Inspired by https://github.com/janten/dpt-rp1-py
 
 Script to manage Sony DPT-RP1 without the Digital Paper App. 
@@ -9,7 +9,7 @@ This repository includes:
  - a CUPS driver to use the DPT as a printer
  - a server to proxy whiteboard refreshes to a webpage (dpt whiteboard-html) you can share with people
  - a translation (more and more complete) of the official endpoint documentation at doc/endpoints.json
- - a packaging script to create a .deb package
+ - a packaging script to create a .deb package at debian/makedeb.sh
  
 ## How you can contribute
  - I'd love to have people testing this on Windows
