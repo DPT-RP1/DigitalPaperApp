@@ -1,8 +1,21 @@
 # dpt-rp1-java
 Inspired by https://github.com/janten/dpt-rp1-py
 
-Script to manage Sony DPT-RP1 without the Digital Paper App. This repository includes a Java library and a command line utility to manage documents on the DPT-RP1. Barely tested. May not work for Sony's other digital paper readers.
+Script to manage Sony DPT-RP1 without the Digital Paper App. 
 
+This repository includes:
+ - a Java library 
+ - a command line utility to manage documents on the DPT-RP1
+ - a CUPS driver to use the DPT as a printer
+ - a server to proxy whiteboard refreshes to a webpage (dpt whiteboard-html) you can share with people
+ - a translation (more and more complete) of the official endpoint documentation at doc/endpoints.json
+ - a packaging script to create a .deb package
+ 
+## How you can contribute
+ - I'd love to have people testing this on Windows
+ - Building an rpm and a mac pkg
+ - Testing the CUPS driver on many more archs
+ 
 ## Installation
 You can install on debian using the deb package at https://github.com/xpierrohk/DigitalPaperApp/releases
 
