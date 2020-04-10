@@ -15,7 +15,7 @@ mkdir -p "${root_folder}/usr/share/doc/dpt/"
 echo "Building jar..."
 cd ..
 mvn clean package 1>/dev/null 2>/dev/null || (echo "Build failed...";exit)
-cd deb || exit
+cd debian || exit
 
 jar_name=DigitalPaperApp
 jar_version=1.0-SNAPSHOT
@@ -39,6 +39,8 @@ echo "Building changelog"
 cp changelog changelog.bak
 gbp dch --ignore-branch --since=1c23aca0070f0f7a9d9f064b2d172165eb8060c2 -R --full --spawn-editor=never --git-author
 
+gzip -9 changelog -c > changelog.gz
+
 cp changelog.gz "${root_folder}/usr/share/doc/dpt/changelog.Debian.gz"
 cp changelog.gz "${root_folder}/usr/share/doc/dpt/changelog.gz"
 
@@ -47,7 +49,7 @@ dpkg-deb --root-owner-group --build "${root_folder}"
 
 echo "Cleaning up"
 rm -rf "${root_folder}"
-cp changelog.bak changelog
+mv changelog.bak changelog
 echo "Debian package built, now installing"
 sudo dpkg -r dpt
 sudo dpkg -i dpt_1.0-1.deb
