@@ -20,7 +20,7 @@ public class DigitalPaperApp {
                 System.out::println,
                 () -> {
                     Scanner scanner = new Scanner(System.in);
-                    return scanner.next();
+                    return scanner.nextLine();
                 },
                 new RegistrationTokenStore(Path.of(System.getProperty("user.home"))),
                 new SyncStore(Path.of(System.getProperty("user.home"))),

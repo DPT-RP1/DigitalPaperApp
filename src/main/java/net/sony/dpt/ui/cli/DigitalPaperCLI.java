@@ -265,7 +265,7 @@ public class DigitalPaperCLI {
     }
 
     private void checkFirmware() throws InterruptedException, ParserConfigurationException, SAXException, XPathExpressionException, IOException {
-        new FirmwareUpdatesCommand(null, digitalPaperEndpoint, logWriter).checkForUpdates();
+        new FirmwareUpdatesCommand(null, digitalPaperEndpoint, logWriter, null).checkForUpdates();
     }
 
     private void whiteboardHtml() throws IOException, URISyntaxException {
@@ -319,7 +319,8 @@ public class DigitalPaperCLI {
                         ProgressBar.ProgressStyle.RECTANGLES_1
                 ),
                 digitalPaperEndpoint,
-                logWriter
+                logWriter,
+                inputReader
         ).update(force, dryrun);
     }
 

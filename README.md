@@ -35,55 +35,56 @@ Type dpt --help to find all the possible options.
 ### Supported commands
 ```$xslt
 dpt command [parameters] [-options] [-addr] [-serial]
-        register 
-                Starts the pairing process with the Digital Paper
-        ping 
-                Tests the connection with the Digital Paper
-        sync local-sync-folder [-dryrun] 
-                Synchronizes a local folder with the Digital paper
-        list-documents 
-                Lists all documents
-        document-info 
-                Prints all documents and their attributes, raw
-        upload local-file [remote-file] 
-                Sends a local file to the Digital Paper
-        download 
-        move source target 
-        copy source target 
-        new-folder remote-folder 
-        delete-folder remote-file 
-        delete remote-file 
-        print local-file 
-                Sends a pdf to the Digital Paper, and opens it immediately
-        watch-print local-folder 
-                Watches a folder, and print pdfs on creation/modification in this folder
-        screenshot png-file 
-        whiteboard 
-                Shows a landscape half-scale projection of the digital paper, refreshed every second
-        whiteboard-html 
-                Opens a distribution server with /frontend path feeding the images from the Digital Paper
-        dialog title content button 
-                Prints a dialog on the Digital Paper
-        get-owner 
-        set-owner 
-        wifi-list 
-        wifi-scan 
-        wifi-add 
-        wifi-del 
-        wifi 
-        wifi-enable 
-        wifi-disable 
-        battery 
-                Shows the battery status informations
-        storage 
-                Shows the storage status informations
-        update-firmware 
-                BETA - NON FUNCTIONAL
-        get url 
-                Sends and display a GET request to the Digital Paper
-        help 
-                Prints this message
-
+	register 
+		Starts the pairing process with the Digital Paper
+	ping 
+		Tests the connection with the Digital Paper
+	sync local-sync-folder [-dryrun] 
+		Synchronizes a local folder with the Digital paper
+	list-documents 
+		Lists all documents
+	document-info 
+		Prints all documents and their attributes, raw
+	upload local-file [remote-file] 
+		Sends a local file to the Digital Paper
+	download 
+	move source target 
+	copy source target 
+	new-folder remote-folder 
+	delete-folder remote-file 
+	delete remote-file 
+	print local-file 
+		Sends a pdf to the Digital Paper, and opens it immediately
+	watch-print local-folder 
+		Watches a folder, and print pdfs on creation/modification in this folder
+	screenshot png-file 
+	whiteboard 
+		Shows a landscape half-scale projection of the digital paper, refreshed every second
+	whiteboard-html 
+		Opens a distribution server with /frontend path feeding the images from the Digital Paper
+	dialog title content button 
+		Prints a dialog on the Digital Paper
+	get-owner 
+	set-owner owner-name 
+	wifi-list 
+	wifi-scan 
+	wifi-add 
+	wifi-del 
+	wifi 
+	wifi-enable 
+	wifi-disable 
+	battery 
+		Shows the battery status informations
+	storage 
+		Shows the storage status informations
+	check-firmware 
+		Check if a new firmware version has been published
+	update-firmware [-force] [-dryrun] 
+		Check for update and update the firmware if needed. Will ask for confirmation before triggering the update. Use -dryrun to test the process.
+	get url 
+		Sends and display a GET request to the Digital Paper
+	help 
+		Prints this message
 ```
 
 ### Registering the DPT-RP1

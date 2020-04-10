@@ -1,8 +1,10 @@
 package net.sony.dpt.command.firmware;
 
 import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.util.InputReader;
 import net.sony.util.LogWriter;
 import net.sony.util.ProgressBar;
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -18,6 +20,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
@@ -25,7 +28,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
+import static net.sony.util.SimpleHttpClient.fromJSON;
 import static net.sony.util.StringUtils.resolve;
 import static net.sony.util.StringUtils.variable;
 
@@ -42,11 +50,13 @@ public class FirmwareUpdatesCommand {
     private final ProgressBar progressBar;
     private final DigitalPaperEndpoint digitalPaperEndpoint;
     private final LogWriter logWriter;
+    private final InputReader inputReader;
 
-    public FirmwareUpdatesCommand(final ProgressBar progressBar, final DigitalPaperEndpoint digitalPaperEndpoint, final LogWriter logWriter) {
+    public FirmwareUpdatesCommand(final ProgressBar progressBar, final DigitalPaperEndpoint digitalPaperEndpoint, final LogWriter logWriter, final InputReader inputReader) {
         xpath = XPathFactory.newInstance().newXPath();
         this.progressBar = progressBar;
         this.digitalPaperEndpoint = digitalPaperEndpoint;
+        this.inputReader = inputReader;
         this.logWriter = logWriter;
     }
 
@@ -108,10 +118,11 @@ public class FirmwareUpdatesCommand {
 
     private Document parsedXml;
     private String modelTag;
+    private FirmwareVersionResponse firmwareVersionResponse;
 
     public boolean checkForUpdates() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, InterruptedException {
         // 1. Check firmware currently installed
-        FirmwareVersionResponse firmwareVersionResponse = digitalPaperEndpoint.checkVersion();
+        firmwareVersionResponse = digitalPaperEndpoint.checkVersion();
 
         // 2. Check version online
         HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
@@ -149,16 +160,43 @@ public class FirmwareUpdatesCommand {
         // 3. Download in memory if version > current
         byte[] firmwareData = downloadAndVerify(firmware(parsedXml, modelTag));
 
+        logWriter.log("Sending to device...");
         // 4. Put on device
         digitalPaperEndpoint.putFirmwareOnDevice(firmwareData);
 
         // 5. Run precheck and verify
-
+        FirmwarePrecheckResponse firmwarePrecheckResponse = fromJSON(digitalPaperEndpoint.precheckUpdate(), FirmwarePrecheckResponse.class);
+        if (!firmwarePrecheckResponse.validate()) {
+            logWriter.log(firmwarePrecheckResponse.toString());
+            return;
+        }
+        logWriter.log("Firmware now on the device and ready to upgrade... press enter to continue");
+        inputReader.read();
 
         // 6. Trigger upgrade
+        if (!dryrun) {
+            digitalPaperEndpoint.triggerUpdate();
+        }
 
         // 7. Check it's done
+        String expectedFirmware = firmwareVersionResponse.getValue();
+        logWriter.log("We will now regularly check for the firmware version, press Ctrl+C to stop...");
+
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        scheduledFuture = executor.scheduleAtFixedRate(() -> {
+            try {
+                FirmwareVersionResponse response = digitalPaperEndpoint.checkVersion();
+                if (expectedFirmware.equals(response.getValue())) {
+                    logWriter.log("Version match newest firmware, quitting...");
+                    scheduledFuture.cancel(true);
+                    executor.shutdownNow();
+                }
+            } catch (IOException | InterruptedException ignored) {
+            }
+        }, 0, 30000, TimeUnit.MILLISECONDS);
     }
+
+    private ScheduledFuture<?> scheduledFuture;
 
     public static class Firmware {
         public String version;

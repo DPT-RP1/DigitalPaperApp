@@ -277,4 +277,14 @@ public class DigitalPaperEndpoint {
     public String rawSecuredGet(String url) throws IOException, InterruptedException {
         return simpleHttpClient.get(secured(url));
     }
+
+    private static final String FIRMWARE_PRECHECK_URL = "/system/controls/update_firmware/precheck";
+    public String precheckUpdate() throws IOException, InterruptedException {
+        return simpleHttpClient.get(secured(FIRMWARE_PRECHECK_URL));
+    }
+
+    private static final String FIRMWARRE_TRIGGER_URL = "/system/controls/update_firmware";
+    public void triggerUpdate() throws IOException, InterruptedException {
+        simpleHttpClient.put(secured(FIRMWARRE_TRIGGER_URL));
+    }
 }

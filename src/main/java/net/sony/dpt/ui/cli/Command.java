@@ -1,6 +1,5 @@
 package net.sony.dpt.ui.cli;
 
-
 import java.util.*;
 
 public enum Command {
@@ -23,7 +22,7 @@ public enum Command {
     WHITEBOARD_HTML("whiteboard-html", "Opens a distribution server with /frontend path feeding the images from the Digital Paper"),
     DIALOG("dialog", Collections.emptyList(), Arrays.asList("title", "content", "button"), "Prints a dialog on the Digital Paper"),
     GET_OWNER(Arrays.asList("get-owner", "show-owner")),
-    SET_OWNER("set-owner"),
+    SET_OWNER("set-owner", Collections.singletonList("owner-name")),
     WIFI_LIST("wifi-list"),
     WIFI_SCAN("wifi-scan"),
     WIFI_ADD("wifi-add"),
@@ -34,7 +33,7 @@ public enum Command {
     BATTERY("battery", "Shows the battery status informations"),
     STORAGE("storage", "Shows the storage status informations"),
     CHECK_FIRMWARE("check-firmware", "Check if a new firmware version has been published"),
-    UPDATE_FIRMWARE("update-firmware", Collections.singletonList(CommandOption.FORCE), Collections.emptyList(), "BETA - NON FUNCTIONAL"),
+    UPDATE_FIRMWARE("update-firmware", Arrays.asList(CommandOption.FORCE, CommandOption.DRYRUN), Collections.emptyList(), "Check for update and update the firmware if needed. Will ask for confirmation before triggering the update. Use -dryrun to test the process."),
     RAW_GET("get", Collections.emptyList(), Collections.singletonList("url"), "Sends and display a GET request to the Digital Paper"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 

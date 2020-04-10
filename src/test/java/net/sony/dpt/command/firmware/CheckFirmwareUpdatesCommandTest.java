@@ -30,7 +30,7 @@ public class CheckFirmwareUpdatesCommandTest {
     public void shouldParseSonyXml() throws IOException, ParserConfigurationException, SAXException {
         String xml = Files.readString(Path.of(this.getClass().getClassLoader().getResource("firmwareUpgrade.xml").getPath()));
 
-        FirmwareUpdatesCommand checkFirmwareUpdatesCommand = new FirmwareUpdatesCommand(null, null, null);
+        FirmwareUpdatesCommand checkFirmwareUpdatesCommand = new FirmwareUpdatesCommand(null, null, null, null);
         Document document = checkFirmwareUpdatesCommand.parseXml(checkFirmwareUpdatesCommand.filterValidXml(xml));
 
         assertNotNull(document);
@@ -42,7 +42,7 @@ public class CheckFirmwareUpdatesCommandTest {
 
         String xml = Files.readString(Path.of(this.getClass().getClassLoader().getResource("firmwareUpgrade.xml").getPath()));
 
-        FirmwareUpdatesCommand checkFirmwareUpdatesCommand = new FirmwareUpdatesCommand(null, null, null);
+        FirmwareUpdatesCommand checkFirmwareUpdatesCommand = new FirmwareUpdatesCommand(null, null, null, null);
         Document document = checkFirmwareUpdatesCommand.parseXml(checkFirmwareUpdatesCommand.filterValidXml(xml));
 
         String result = checkFirmwareUpdatesCommand.lastestVersion(document, "DPT-RP1");
@@ -56,7 +56,7 @@ public class CheckFirmwareUpdatesCommandTest {
 
         String xml = Files.readString(Path.of(this.getClass().getClassLoader().getResource("firmwareUpgrade.xml").getPath()));
 
-        FirmwareUpdatesCommand checkFirmwareUpdatesCommand = new FirmwareUpdatesCommand(null, null, null);
+        FirmwareUpdatesCommand checkFirmwareUpdatesCommand = new FirmwareUpdatesCommand(null, null, null, null);
         Document document = checkFirmwareUpdatesCommand.parseXml(checkFirmwareUpdatesCommand.filterValidXml(xml));
 
         FirmwareUpdatesCommand.Firmware result = checkFirmwareUpdatesCommand.firmware(document, "DPT-RP1");
@@ -73,6 +73,7 @@ public class CheckFirmwareUpdatesCommandTest {
                         System.err,
                         ProgressBar.ProgressStyle.CAMEMBERT
                 ),
+                null,
                 null,
                 null
         );
