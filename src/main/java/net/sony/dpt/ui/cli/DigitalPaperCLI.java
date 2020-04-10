@@ -16,7 +16,6 @@ import net.sony.dpt.command.register.RegisterCommand;
 import net.sony.dpt.command.register.RegistrationResponse;
 import net.sony.dpt.command.reversing.ReverseEngineeringCommand;
 import net.sony.dpt.command.sync.LocalSyncProgressBar;
-import net.sony.dpt.command.sync.RemoteSyncProgressBar;
 import net.sony.dpt.command.sync.SyncCommand;
 import net.sony.dpt.command.wifi.AccessPointList;
 import net.sony.dpt.command.wifi.WifiCommand;
@@ -59,7 +58,7 @@ public class DigitalPaperCLI {
     private final Options options;
     private final CommandLineParser parser;
     private final DiffieHelman diffieHelman;
-    private final CryptographyUtil cryptographyUtil;
+    private final CryptographyUtils cryptographyUtils;
     private final LogWriter logWriter;
     private final InputReader inputReader;
     private final RegistrationTokenStore registrationTokenStore;
@@ -68,7 +67,7 @@ public class DigitalPaperCLI {
     private DigitalPaperEndpoint digitalPaperEndpoint;
 
     public DigitalPaperCLI(DiffieHelman diffieHelman,
-                           CryptographyUtil cryptographyUtil,
+                           CryptographyUtils cryptographyUtils,
                            LogWriter logWriter,
                            InputReader inputReader,
                            RegistrationTokenStore registrationTokenStore,
@@ -77,7 +76,7 @@ public class DigitalPaperCLI {
 
         parser = new DefaultParser();
         this.diffieHelman = diffieHelman;
-        this.cryptographyUtil = cryptographyUtil;
+        this.cryptographyUtils = cryptographyUtils;
         this.logWriter = logWriter;
         this.inputReader = inputReader;
         this.registrationTokenStore = registrationTokenStore;
@@ -148,7 +147,7 @@ public class DigitalPaperCLI {
         RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
 
         SimpleHttpClient secureHttpClient = FindDigitalPaper.ZEROCONF_HOST.equals(addr)
-                ? SimpleHttpClient.secure(registrationResponse.getPemCertificate(), registrationResponse.getPrivateKey(), cryptographyUtil)
+                ? SimpleHttpClient.secure(registrationResponse.getPemCertificate(), registrationResponse.getPrivateKey(), cryptographyUtils)
                 : SimpleHttpClient.secureNoHostVerification();
 
         digitalPaperEndpoint = new DigitalPaperEndpoint(
@@ -348,13 +347,13 @@ public class DigitalPaperCLI {
     }
 
     private void register(SimpleHttpClient simpleHttpClient, String addr) throws IOException, BadPaddingException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, InvalidKeyException {
-        RegistrationResponse registrationResponse = new RegisterCommand(addr, simpleHttpClient, diffieHelman, cryptographyUtil, logWriter, inputReader).register();
+        RegistrationResponse registrationResponse = new RegisterCommand(addr, simpleHttpClient, diffieHelman, cryptographyUtils, logWriter, inputReader).register();
         registrationTokenStore.storeRegistrationToken(registrationResponse);
     }
 
     private void auth(SimpleHttpClient simpleHttpClient) throws Exception {
         RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
-        AuthenticationCookie authenticationCookie = new AuthenticateCommand(digitalPaperEndpoint, cryptographyUtil).authenticate(registrationResponse);
+        AuthenticationCookie authenticationCookie = new AuthenticateCommand(digitalPaperEndpoint, cryptographyUtils).authenticate(registrationResponse);
         authenticationCookie.insertInCookieManager(digitalPaperEndpoint.getSecuredURI(), (CookieManager) CookieHandler.getDefault());
         authenticationCookie.insertInRequest(simpleHttpClient::addDefaultHeader);
     }

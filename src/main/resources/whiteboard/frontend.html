@@ -1,15 +1,22 @@
-<html>
+<html lang="en">
     <head>
         <script>
+            let lastLength = 0;
             let updateWhiteboard = function(data) {
+                if (lastLength === data.length) return;
+                lastLength = data.length;
                 let parent = document.getElementById("whiteboard-container");
-                let whiteboard = parent.childNodes[0];
-
+                console.log(data.length);
                 let buffer = new Image();
                 // We swap the buffer to avoid flickering
                 buffer.onload = function(){
+                    buffer.className = "whiteboard"
+                    let child = parent.lastElementChild;
+                    while (child) {
+                        parent.removeChild(child);
+                        child = parent.lastElementChild;
+                    }
                     parent.appendChild(buffer);
-                    parent.removeChild(whiteboard);
                 }
                 buffer.src = 'data:image/jpeg;base64,' + data;
             }
@@ -30,10 +37,23 @@
 
             setInterval(loadWhiteboardData, 200);
         </script>
+
+        <style>
+            body, html {
+                height: 100%;
+            }
+
+            .whiteboard {
+                width: 100vh;
+                height: 100vw;
+                transform: translatex(calc(50vw - 50%)) translatey(calc(50vh - 50%)) rotate(90deg);
+            }
+        </style>
+
+        <title>DPT-RP1 Whiteboard</title>
     </head>
 
     <body>
-        <h1>DPT-RP1 Whiteboard</h1>
         <div id="whiteboard-container">
         </div>
     </body>

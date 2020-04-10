@@ -2,24 +2,24 @@ package net.sony.dpt.command.authenticate;
 
 import net.sony.dpt.DigitalPaperEndpoint;
 import net.sony.dpt.command.register.RegistrationResponse;
-import net.sony.util.CryptographyUtil;
+import net.sony.util.CryptographyUtils;
 
 import java.nio.charset.StandardCharsets;
 
 public class AuthenticateCommand {
 
-    private final CryptographyUtil cryptographyUtil;
+    private final CryptographyUtils cryptographyUtils;
     private final DigitalPaperEndpoint digitalPaperEndpoint;
 
     public AuthenticateCommand(
             DigitalPaperEndpoint digitalPaperEndpoint,
-            CryptographyUtil cryptographyUtil) {
-        this.cryptographyUtil = cryptographyUtil;
+            CryptographyUtils cryptographyUtils) {
+        this.cryptographyUtils = cryptographyUtils;
         this.digitalPaperEndpoint = digitalPaperEndpoint;
     }
 
     public AuthenticationCookie authenticate(RegistrationResponse registrationResponse) throws Exception {
-        byte[] signedNonce = cryptographyUtil.signSHA256RSA(
+        byte[] signedNonce = cryptographyUtils.signSHA256RSA(
                 digitalPaperEndpoint.getNonce(registrationResponse.getClientId()).getBytes(StandardCharsets.UTF_8),
                 registrationResponse.getPrivateKey()
         );

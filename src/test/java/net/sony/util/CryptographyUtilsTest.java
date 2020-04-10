@@ -19,7 +19,7 @@ import static net.sony.util.ByteUtils.hexToByte;
 import static org.junit.Assert.*;
 
 
-public class CryptographyUtilTest {
+public class CryptographyUtilsTest {
 
     /**
      * We protect against changes in the underlying method
@@ -41,7 +41,7 @@ public class CryptographyUtilTest {
         expected.put("e", "T69GcvoZvRTKWqcDgXqh7P8mIo+wvkEEwpK3BH+jrRg=");
 
         DiffieHelman dh = new DiffieHelman(DiffieHelman.Prime.P_2048_BIT, privateKey);
-        CryptographyUtil cryptographyUtil = new CryptographyUtil();
+        CryptographyUtils cryptographyUtils = new CryptographyUtils();
 
         byte[] nonce1 = Base64.getDecoder().decode(nonce1b64);
         byte[] mac = Base64.getDecoder().decode(macb64);
@@ -53,7 +53,7 @@ public class CryptographyUtilTest {
 
         byte[] sharedKey = dh.generateSharedKey(otherContribution);
 
-        HashRequest hashRequest = cryptographyUtil.generateHash(
+        HashRequest hashRequest = cryptographyUtils.generateHash(
                 sharedKey,
                 nonce1,
                 mac,
@@ -73,9 +73,9 @@ public class CryptographyUtilTest {
         byte[] sharedKey = hexToByte("c28f73d4c22f6341a2f9a631d91d746c337586f39202105a18d08a06cdabcc4c57c4f88d7a1637c9cf9b5a9fb50e236c9c3e2bd257bb78019e42f832ef1d6fc7b55e222fd6a1dde489bae30c6f91027d7ac7be4a296a0e90172037c86079b2b73f7501be9c8fe815c11a54642e94c0ae797f5812c130bd5f4afb4084c9f15f07eae32b1cafb4bc31fd200ae097bb3a8ee6a672ed12f80444bc07153cf8029fe78f6ba56383d7de3bf06907935005f5eef939e73d8324bf25292b1ae8f91725fd9138fa4175a68a1dc796d12860f3e9eb9cd7d48620872df58e7dcfca2615465329c9d7598182633abaab3ef45af0f3f6d3378bd57d11027990f9a47b3deafa48");
         byte[] salt = hexToByte("867e2fe812da465f9458845f5ecf551cac8995f7f8991dd85bd453507f820354a44c6f9584c2");
 
-        CryptographyUtil cryptographyUtil = new CryptographyUtil();
+        CryptographyUtils cryptographyUtils = new CryptographyUtils();
         String actualHex = ByteUtils.bytesToHex(
-                cryptographyUtil.deriveKey(sharedKey, salt)
+                cryptographyUtils.deriveKey(sharedKey, salt)
         );
 
         assertEquals(expectedHex, actualHex);
@@ -116,27 +116,27 @@ public class CryptographyUtilTest {
         byte[] update = ByteUtils.hexToByte(updateHex);
         byte[] authKey = Arrays.copyOfRange(ByteUtils.hexToByte(derivedKeyHex), 0, 32);
 
-        CryptographyUtil cryptographyUtil = new CryptographyUtil();
-        String actualHmac = ByteUtils.bytesToHex(cryptographyUtil.hmac(authKey, update));
+        CryptographyUtils cryptographyUtils = new CryptographyUtils();
+        String actualHmac = ByteUtils.bytesToHex(cryptographyUtils.hmac(authKey, update));
 
         assertEquals(expectedHmac, actualHmac);
     }
 
     @Test
     public void generateNonceShouldBeCorrectSize() {
-        CryptographyUtil cryptographyUtil = new CryptographyUtil();
+        CryptographyUtils cryptographyUtils = new CryptographyUtils();
         for (int i = 0; i < 2048; i++) {
-            byte[] result = cryptographyUtil.generateNonce(i);
+            byte[] result = cryptographyUtils.generateNonce(i);
             assertEquals(i, result.length);
         }
     }
 
     @Test
     public void generateNonceShouldBeRandom() {
-        CryptographyUtil cryptographyUtil = new CryptographyUtil();
+        CryptographyUtils cryptographyUtils = new CryptographyUtils();
         Set<String> generatedNonces = new HashSet<>();
         for (int i = 0; i < 10000; i++) {
-            byte[] result = cryptographyUtil.generateNonce(2048);
+            byte[] result = cryptographyUtils.generateNonce(2048);
             String descriptor = ByteUtils.bytesToHex(result);
             assertFalse(generatedNonces.contains(descriptor));
             generatedNonces.add(descriptor);
@@ -145,7 +145,7 @@ public class CryptographyUtilTest {
 
     @Test
     public void wrapShouldNotRegress() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
-        CryptographyUtil cryptographyUtil = new CryptographyUtil() {
+        CryptographyUtils cryptographyUtils = new CryptographyUtils() {
             @Override
             public byte[] generateNonce(int size) {
                 return hexToByte("AEEFDDCCDC1545A1454545EFEFEF4544");
@@ -155,7 +155,7 @@ public class CryptographyUtilTest {
         byte[] authKey = ByteUtils.hexToByte("EEFFEAVAAVCDDDEEFFAADEDEDEDFFFAA");
         byte[] keyWrapKey = ByteUtils.hexToByte("EFEFABABACDCDCBABABEFEFEEFABABAB");
 
-        byte[] result = cryptographyUtil.wrap(data, authKey, keyWrapKey);
+        byte[] result = cryptographyUtils.wrap(data, authKey, keyWrapKey);
         assertEquals(
                 "F5D9A4759330EB01D439FAABB74740D6551AFB7C28A5E60A4671C27A9F1274ABAEEFDDCCDC1545A1454545EFEFEF4544",
                 bytesToHex(result));
@@ -163,7 +163,7 @@ public class CryptographyUtilTest {
 
     @Test
     public void unwrapShouldRevertWrap() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
-        CryptographyUtil cryptographyUtil = new CryptographyUtil() {
+        CryptographyUtils cryptographyUtils = new CryptographyUtils() {
             @Override
             public byte[] generateNonce(int size) {
                 return hexToByte("AEEFDDCCDC1545A1454545EFEFEF4544");
@@ -173,8 +173,8 @@ public class CryptographyUtilTest {
         byte[] authKey = ByteUtils.hexToByte("EEFFEAVAAVCDDDEEFFAADEDEDEDFFFAA");
         byte[] keyWrapKey = ByteUtils.hexToByte("EFEFABABACDCDCBABABEFEFEEFABABAB");
 
-        byte[] wrap = cryptographyUtil.wrap(data, authKey, keyWrapKey);
-        byte[] unwrap = cryptographyUtil.unwrap(wrap, authKey, keyWrapKey);
+        byte[] wrap = cryptographyUtils.wrap(data, authKey, keyWrapKey);
+        byte[] unwrap = cryptographyUtils.unwrap(wrap, authKey, keyWrapKey);
 
         String actual = bytesToHex(unwrap);
         assertEquals(bytesToHex(data), actual);
@@ -182,7 +182,7 @@ public class CryptographyUtilTest {
 
     @Test
     public void publickKeyShouldExportToPem() throws IOException {
-        CryptographyUtil cryptographyUtil = new CryptographyUtil();
+        CryptographyUtils cryptographyUtils = new CryptographyUtils();
 
         PublicKey publicKey = new PublicKey() {
             @Override
@@ -200,7 +200,7 @@ public class CryptographyUtilTest {
                 return hexToByte("AABBCCDDEEFF001122445533557899ABCDDE");
             }
         };
-        String pem = cryptographyUtil.exportPublicKeyToPEM(publicKey);
+        String pem = cryptographyUtils.exportPublicKeyToPEM(publicKey);
         assertEquals(
                 "-----BEGIN PUBLIC KEY-----\n" +
                         "qrvM3e7/ABEiRFUzVXiZq83e\n" +
@@ -209,14 +209,14 @@ public class CryptographyUtilTest {
 
     @Test
     public void privateKeyShouldExportToPem() throws IOException, GeneralSecurityException {
-        CryptographyUtil cryptographyUtil = new CryptographyUtil();
+        CryptographyUtils cryptographyUtils = new CryptographyUtils();
 
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048); // Default exponent is 65537
         KeyPair pair = kpg.generateKeyPair();
-        String pem = cryptographyUtil.exportPrivateKeyToPEM(pair.getPrivate());
+        String pem = cryptographyUtils.exportPrivateKeyToPEM(pair.getPrivate());
         byte[] expectedPrivateKey = pair.getPrivate().getEncoded();
-        byte[] actualPrivateKey = cryptographyUtil.readPrivateKeyFromPEM(pem).getEncoded();
+        byte[] actualPrivateKey = cryptographyUtils.readPrivateKeyFromPEM(pem).getEncoded();
 
         assertArrayEquals(expectedPrivateKey, actualPrivateKey);
     }
@@ -228,14 +228,14 @@ public class CryptographyUtilTest {
 
         byte[] input = hexToByte("AABBCCDDEEABCDE12457896321456987ACCDEB");
 
-        CryptographyUtil cryptographyUtil = new CryptographyUtil() {
+        CryptographyUtils cryptographyUtils = new CryptographyUtils() {
             @Override
             public PrivateKey readPrivateKeyFromPEM(String pemFile) throws GeneralSecurityException {
                 return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privateKey));
             }
         };
 
-        String actual = bytesToHex(cryptographyUtil.signSHA256RSA(input, null));
+        String actual = bytesToHex(cryptographyUtils.signSHA256RSA(input, null));
 
         assertEquals(
                 "00C58E874270674BE5AA58B6E8DB423EBB5D9703509EF1D212F6B1096C5EC524EA70D36770BF9E6C54CB4C6B429BAA4CDC5DF80699A686B4D0E0529F137F9CA1016066B378E566CADA9DEB051D00BCE58E600057299C78672F5A669B371FB67F28B2528200DD7BC2C32EED87B6015EF874FA1E3B501DDC56DD9228F4CFF3992DDD667BC1596852702AA1A25DD07927E8B4BACF7A2327572D3A4DD5A20960D9D96C0A887880A2C8E3177B97DDEB7FB6983DA37187D8EECEF3F8B09593C0347869054BE6A53D69D1ECB0F633E16E4D1C78A338D4E7E42E74186A12009D02A1DEBF6BCE1D91E1C2AB1984E1850F543900A5261579E6F0ED67644DB65CD8CC4A6FB9",
@@ -245,7 +245,7 @@ public class CryptographyUtilTest {
 
     @Test
     public void unwrappedKwaShouldVerify() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
-        CryptographyUtil cryptographyUtil = new CryptographyUtil() {
+        CryptographyUtils cryptographyUtil = new CryptographyUtils() {
             @Override
             public byte[] generateNonce(int size) {
                 return hexToByte("AEEFDDCCDC1545A1454545EFEFEF4544");

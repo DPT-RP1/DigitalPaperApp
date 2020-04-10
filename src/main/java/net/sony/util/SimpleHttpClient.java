@@ -89,10 +89,10 @@ public class SimpleHttpClient {
         return new SimpleHttpClient(null);
     }
 
-    public static SimpleHttpClient secure(String certPem, String privateKeyPem, CryptographyUtil cryptographyUtil) throws KeyManagementException, NoSuchAlgorithmException {
+    public static SimpleHttpClient secure(String certPem, String privateKeyPem, CryptographyUtils cryptographyUtils) throws KeyManagementException, NoSuchAlgorithmException {
         initCookieManager();
         try {
-            return new SimpleHttpClient(new SSLFactory(certPem, privateKeyPem, cryptographyUtil).getSslContext());
+            return new SimpleHttpClient(new SSLFactory(certPem, privateKeyPem, cryptographyUtils).getSslContext());
         } catch (Exception e) {
             return secureNoHostVerification();
         }

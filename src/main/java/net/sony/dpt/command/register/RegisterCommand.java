@@ -22,7 +22,7 @@ public class RegisterCommand {
     private static final int REG_PORT = 8080;
     private final String addr;
     private final SimpleHttpClient simpleHttpClient;
-    private final CryptographyUtil cryptographyUtil;
+    private final CryptographyUtils cryptographyUtils;
     private final DiffieHelman diffieHelman;
     private final LogWriter logWriter;
     private final InputReader inputReader;
@@ -35,12 +35,12 @@ public class RegisterCommand {
     public RegisterCommand(String addr,
                            SimpleHttpClient simpleHttpClient,
                            DiffieHelman diffieHelman,
-                           CryptographyUtil cryptographyUtil,
+                           CryptographyUtils cryptographyUtils,
                            LogWriter logWriter,
                            InputReader inputReader) {
         this.addr = addr;
         this.simpleHttpClient = simpleHttpClient;
-        this.cryptographyUtil = cryptographyUtil;
+        this.cryptographyUtils = cryptographyUtils;
         this.diffieHelman = diffieHelman;
         this.logWriter = logWriter;
         this.inputReader = inputReader;
@@ -75,7 +75,7 @@ public class RegisterCommand {
         byte[] publicKey = diffieHelman.generatePublicKey();
         byte[] sharedKey = diffieHelman.generateSharedKey(pinResponse.getRawOtherContribution());
 
-        return cryptographyUtil.generateHash(
+        return cryptographyUtils.generateHash(
                 sharedKey,
                 nonce1,
                 mac,
@@ -95,7 +95,7 @@ public class RegisterCommand {
             throw new IllegalStateException("The nonce N2 doesn't match: generated[" + ByteUtils.bytesToHex(hashRequest.getNonce2()) + "] vs returned[" + ByteUtils.bytesToHex(response.getReturnedNonce2()) + "]");
         }
 
-        byte[] hmac = cryptographyUtil.hmac(hashRequest.getAuthKey(),
+        byte[] hmac = cryptographyUtils.hmac(hashRequest.getAuthKey(),
                 Bytes.concat(
                         pinResponse.getNonce1(),
                         hashRequest.getNonce2(),
@@ -123,12 +123,12 @@ public class RegisterCommand {
 
     public void registerDevice(KeyPair rsaKeyPair, String selfDeviceId, PinResponse pinResponse, HashRequest hashRequest, RegisterCaResponse registerCaResponse) throws NoSuchAlgorithmException, IOException, InterruptedException, IllegalBlockSizeException, InvalidAlgorithmParameterException, BadPaddingException, NoSuchPaddingException, InvalidKeyException {
 
-        String keyPubC = cryptographyUtil.exportPublicKeyToPEM(rsaKeyPair.getPublic());
+        String keyPubC = cryptographyUtils.exportPublicKeyToPEM(rsaKeyPair.getPublic());
 
 
         logWriter.log("Device ID: " + selfDeviceId);
 
-        byte[] wrappedDIDKPUBC = cryptographyUtil.wrap(
+        byte[] wrappedDIDKPUBC = cryptographyUtils.wrap(
                 Bytes.concat(
                         selfDeviceId.getBytes(StandardCharsets.UTF_8),
                         keyPubC.getBytes(StandardCharsets.UTF_8)
@@ -137,7 +137,7 @@ public class RegisterCommand {
                 hashRequest.getKeyWrapKey()
         );
 
-        byte[] m6hmac = cryptographyUtil.hmac(hashRequest.getAuthKey(),
+        byte[] m6hmac = cryptographyUtils.hmac(hashRequest.getAuthKey(),
                 Bytes.concat(
                         hashRequest.getNonce2(),
                         registerCaResponse.getWrappedEsCert(),
@@ -176,7 +176,7 @@ public class RegisterCommand {
 
         PinResponse pinResponse = requestPin();
 
-        byte[] nonce2 = cryptographyUtil.generateNonce(16);
+        byte[] nonce2 = cryptographyUtils.generateNonce(16);
         HashRequest hashRequest = buildHashRequest(pinResponse, nonce2);
         HashResponse hashResponse = encodeNonce(pinResponse, hashRequest);
 
@@ -191,7 +191,7 @@ public class RegisterCommand {
         cleanup();
 
         String certificate = new String(registerCaResponse.getCert(), StandardCharsets.UTF_8);
-        String privateKey = cryptographyUtil.exportPrivateKeyToPEM(rsaKeyPair.getPrivate());
+        String privateKey = cryptographyUtils.exportPrivateKeyToPEM(rsaKeyPair.getPrivate());
 
         return new RegistrationResponse(certificate, privateKey, selfDeviceId);
     }
@@ -205,13 +205,13 @@ public class RegisterCommand {
         byte[] nonce1 = pinResponse.getNonce1();
 
 
-        byte[] psk = cryptographyUtil.hmac(authKey, pin.getBytes(StandardCharsets.UTF_8));
-        byte[] rs = cryptographyUtil.generateNonce(16);
-        byte[] rHash = cryptographyUtil.hmac(authKey, Bytes.concat(rs, psk, otherContribution, publicKey));
+        byte[] psk = cryptographyUtils.hmac(authKey, pin.getBytes(StandardCharsets.UTF_8));
+        byte[] rs = cryptographyUtils.generateNonce(16);
+        byte[] rHash = cryptographyUtils.hmac(authKey, Bytes.concat(rs, psk, otherContribution, publicKey));
 
-        byte[] wrappedRs = cryptographyUtil.wrap(rs, authKey, keyWrapKey);
+        byte[] wrappedRs = cryptographyUtils.wrap(rs, authKey, keyWrapKey);
 
-        byte[] m4hmac = cryptographyUtil.hmac(authKey, Bytes.concat(nonce2, hashResponse.geteHash(), hashResponse.getM3hmac(), nonce1, rHash, wrappedRs));
+        byte[] m4hmac = cryptographyUtils.hmac(authKey, Bytes.concat(nonce2, hashResponse.geteHash(), hashResponse.getM3hmac(), nonce1, rHash, wrappedRs));
 
         logWriter.log("Getting certificate from device CA...");
         RegisterCaResponse registerCaResponse = RegisterCaResponse.fromJson(simpleHttpClient.post(registerCaUrl, new RegisterCaRequest(nonce1, rHash, wrappedRs, m4hmac).asMap()));
@@ -223,18 +223,18 @@ public class RegisterCommand {
         byte[] wrappedEsCert = registerCaResponse.getWrappedEsCert();
         byte[] m5hmac = registerCaResponse.getM5hmac();
 
-        if (!Arrays.equals(m5hmac, cryptographyUtil.hmac(authKey, Bytes.concat(nonce1, rHash, wrappedRs, m4hmac, nonce2, wrappedEsCert)))) {
+        if (!Arrays.equals(m5hmac, cryptographyUtils.hmac(authKey, Bytes.concat(nonce1, rHash, wrappedRs, m4hmac, nonce2, wrappedEsCert)))) {
             throw new IllegalStateException("M5 HMAC doesn't match!");
         }
 
-        byte[] esCert = cryptographyUtil.unwrap(wrappedEsCert, authKey, keyWrapKey);
+        byte[] esCert = cryptographyUtils.unwrap(wrappedEsCert, authKey, keyWrapKey);
         byte[] es = new byte[16];
         System.arraycopy(esCert, 0, es, 0, 16);
 
         byte[] cert = new byte[esCert.length - 16];
         System.arraycopy(esCert, 16, cert, 0, esCert.length - 16);
 
-        byte[] eHashCheck = cryptographyUtil.hmac(authKey, Bytes.concat(es, psk, otherContribution, publicKey));
+        byte[] eHashCheck = cryptographyUtils.hmac(authKey, Bytes.concat(es, psk, otherContribution, publicKey));
         if (!Arrays.equals(eHashCheck, hashResponse.geteHash())) {
             throw new IllegalStateException("eHash does not match!");
         }

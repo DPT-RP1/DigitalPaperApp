@@ -5,7 +5,7 @@ import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
 import net.sony.dpt.ui.cli.Command;
 import net.sony.dpt.ui.cli.DigitalPaperCLI;
-import net.sony.util.CryptographyUtil;
+import net.sony.util.CryptographyUtils;
 import net.sony.util.DiffieHelman;
 
 import java.nio.file.Path;
@@ -16,7 +16,7 @@ public class DigitalPaperApp {
     public static void main(String[] args)  {
         DigitalPaperCLI digitalPaperCLI = new DigitalPaperCLI(
                 new DiffieHelman(),
-                new CryptographyUtil(),
+                new CryptographyUtils(),
                 System.out::println,
                 () -> {
                     Scanner scanner = new Scanner(System.in);

@@ -18,10 +18,10 @@ public class SSLFactory {
     private static final String TEMPORARY_KEY_PASSWORD = "changeit";
 
     private final SSLContext sslContext;
-    private final CryptographyUtil cryptographyUtil;
+    private final CryptographyUtils cryptographyUtils;
 
-    public SSLFactory(final String certificatePem, final String privateKeyPem, final CryptographyUtil cryptographyUtil) throws GeneralSecurityException, IOException {
-        this.cryptographyUtil = cryptographyUtil;
+    public SSLFactory(final String certificatePem, final String privateKeyPem, final CryptographyUtils cryptographyUtils) throws GeneralSecurityException, IOException {
+        this.cryptographyUtils = cryptographyUtils;
 
         KeyStore keyStore = getKeyStore(certificatePem, privateKeyPem);
 
@@ -38,7 +38,7 @@ public class SSLFactory {
     }
 
     private KeyStore getKeyStore(String certificatePem, String privateKeyPem) throws GeneralSecurityException, IOException {
-        PrivateKey privateKey = cryptographyUtil.readPrivateKeyFromPEM(privateKeyPem);
+        PrivateKey privateKey = cryptographyUtils.readPrivateKeyFromPEM(privateKeyPem);
 
         Certificate caCertificate = loadCertificate(certificatePem);
 
