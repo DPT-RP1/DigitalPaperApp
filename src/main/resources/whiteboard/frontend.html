@@ -1,0 +1,40 @@
+<html>
+    <head>
+        <script>
+            let updateWhiteboard = function(data) {
+                let parent = document.getElementById("whiteboard-container");
+                let whiteboard = parent.childNodes[0];
+
+                let buffer = new Image();
+                // We swap the buffer to avoid flickering
+                buffer.onload = function(){
+                    parent.appendChild(buffer);
+                    parent.removeChild(whiteboard);
+                }
+                buffer.src = 'data:image/jpeg;base64,' + data;
+            }
+
+            let loadWhiteboardData = function() {
+                let xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === XMLHttpRequest.DONE
+                        && xhr.status === 200
+                        && xhr.responseText != null
+                        && xhr.responseText !== "") {
+                        updateWhiteboard(xhr.responseText);
+                    }
+                };
+                xhr.open('GET', '/lastImage');
+                xhr.send()
+            }
+
+            setInterval(loadWhiteboardData, 200);
+        </script>
+    </head>
+
+    <body>
+        <h1>DPT-RP1 Whiteboard</h1>
+        <div id="whiteboard-container">
+        </div>
+    </body>
+</html>

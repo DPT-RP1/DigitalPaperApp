@@ -24,6 +24,7 @@ import net.sony.dpt.persistence.DeviceInfoStore;
 import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
 import net.sony.dpt.ui.gui.whiteboard.Whiteboard;
+import net.sony.dpt.ui.html.WhiteboardBackend;
 import net.sony.dpt.zeroconf.FindDigitalPaper;
 import net.sony.util.*;
 import org.apache.commons.cli.CommandLine;
@@ -38,11 +39,13 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -252,8 +255,19 @@ public class DigitalPaperCLI {
             case RAW_GET:
                 rawGet(arguments.get(1));
                 break;
+            case WHITEBOARD_HTML:
+                whiteboardHtml();
+                break;
         }
 
+    }
+
+    private void whiteboardHtml() throws IOException, URISyntaxException {
+        WhiteboardBackend whiteboardBackend = new WhiteboardBackend(new TakeScreenshotCommand(digitalPaperEndpoint), logWriter);
+        int port = whiteboardBackend.bind();
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            Desktop.getDesktop().browse(new URI("http://localhost:" + port + "/frontend"));
+        }
     }
 
     private void rawGet(String url) throws IOException, InterruptedException {

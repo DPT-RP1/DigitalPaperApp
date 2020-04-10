@@ -20,6 +20,7 @@ public enum Command {
     WATCH_PRINT("watch-print", Collections.emptyList(), Collections.singletonList("local-folder"), "Watches a folder, and print pdfs on creation/modification in this folder"),
     SCREENSHOT("screenshot", Collections.singletonList("png-file")),
     WHITEBOARD("whiteboard", "Shows a landscape half-scale projection of the digital paper, refreshed every second"),
+    WHITEBOARD_HTML("whiteboard-html", "Opens a distribution server with /frontend path feeding the images fron the Digital Paper"),
     DIALOG("dialog", Collections.emptyList(), Arrays.asList("title", "content", "button"), "Prints a dialog on the Digital Paper"),
     GET_OWNER(Arrays.asList("get-owner", "show-owner")),
     SET_OWNER("set-owner"),
