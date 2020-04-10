@@ -9,27 +9,27 @@ public enum Command {
     LIST_DOCUMENTS("list-documents", "Lists all documents"),
     DOCUMENT_INFO("document-info", "Prints all documents and their attributes, raw"),
     UPLOAD("upload", Collections.emptyList(), Arrays.asList("local-file", "[remote-file]"), "Sends a local file to the Digital Paper"),
-    DOWNLOAD("download"),
-    MOVE(Arrays.asList("move", "move-document"), Arrays.asList("source", "target")),
-    COPY(Arrays.asList("copy", "copy-document"), Arrays.asList("source", "target")),
-    NEW_FOLDER("new-folder", Collections.singletonList("remote-folder")),
-    DELETE_FOLDER("delete-folder", Collections.singletonList("remote-file")),
-    DELETE("delete", Collections.singletonList("remote-file")),
+    DOWNLOAD("download", "Downloads a remote file locally"),
+    MOVE(Arrays.asList("move", "move-document"), Collections.emptyList(), Arrays.asList("source", "target"), "Moves a document on the device"),
+    COPY(Arrays.asList("copy", "copy-document"), Collections.emptyList(), Arrays.asList("source", "target"), "COpies a document on the device"),
+    NEW_FOLDER("new-folder", Collections.emptyList(), Collections.singletonList("remote-folder"), "Creates a new folder on the device"),
+    DELETE_FOLDER("delete-folder", Collections.emptyList(), Collections.singletonList("remote-file"), "Remove a folder on the device"),
+    DELETE("delete", Collections.emptyList(), Collections.singletonList("remote-file"), "Deletes a file on the device"),
     PRINT("print", Collections.emptyList(), Collections.singletonList("local-file"), "Sends a pdf to the Digital Paper, and opens it immediately"),
     WATCH_PRINT("watch-print", Collections.emptyList(), Collections.singletonList("local-folder"), "Watches a folder, and print pdfs on creation/modification in this folder"),
-    SCREENSHOT("screenshot", Collections.singletonList("png-file")),
+    SCREENSHOT("screenshot", Collections.emptyList(), Collections.singletonList("png-file"), "Takes a PNG screenshot and stores it locally"),
     WHITEBOARD("whiteboard", "Shows a landscape half-scale projection of the digital paper, refreshed every second"),
     WHITEBOARD_HTML("whiteboard-html", "Opens a distribution server with /frontend path feeding the images from the Digital Paper"),
     DIALOG("dialog", Collections.emptyList(), Arrays.asList("title", "content", "button"), "Prints a dialog on the Digital Paper"),
-    GET_OWNER(Arrays.asList("get-owner", "show-owner")),
-    SET_OWNER("set-owner", Collections.singletonList("owner-name")),
-    WIFI_LIST("wifi-list"),
-    WIFI_SCAN("wifi-scan"),
-    WIFI_ADD("wifi-add"),
-    WIFI_DEL("wifi-del"),
-    WIFI("wifi"),
-    WIFI_ENABLE("wifi-enable"),
-    WIFI_DISABLE("wifi-disable"),
+    GET_OWNER(Arrays.asList("get-owner", "show-owner"), "Displays the owner's name"),
+    SET_OWNER("set-owner", Collections.emptyList(), Collections.singletonList("owner-name"), "Sets the owner's name"),
+    WIFI_LIST("wifi-list", "Lists all wifi configured on the device"),
+    WIFI_SCAN("wifi-scan", "Scans all wifi hotspot available around the device"),
+    WIFI_ADD("wifi-add", "Adds a wifi hotspot (obsolete since the latest firmware)"),
+    WIFI_DEL("wifi-del", "Deletes a wifi hotspot (obsolete since the latest firmware)"),
+    WIFI("wifi", "Displays the current wifi configured"),
+    WIFI_ENABLE("wifi-enable", "Enables the wifi network device"),
+    WIFI_DISABLE("wifi-disable", "Disables the wifi network device"),
     BATTERY("battery", "Shows the battery status informations"),
     STORAGE("storage", "Shows the storage status informations"),
     CHECK_FIRMWARE("check-firmware", "Check if a new firmware version has been published"),
@@ -57,20 +57,8 @@ public enum Command {
         this.argumentNames = arguments;
     }
 
-    Command(String commandName, List<String> arguments) {
-        this(Collections.singletonList(commandName), Collections.emptyList(), arguments);
-    }
-
     Command(String commandName) {
         this(Collections.singletonList(commandName), Collections.emptyList(), Collections.emptyList());
-    }
-
-    Command(List<String> commandNames) {
-        this(commandNames, Collections.emptyList(), Collections.emptyList());
-    }
-
-    Command(List<String> commandNames, List<String> argumentNames) {
-        this(commandNames, Collections.emptyList(), argumentNames);
     }
 
     Command(String command, String description) {
@@ -97,22 +85,46 @@ public enum Command {
     }
 
     public static Command parse(String[] args) {
-        if (!commandMap.containsKey(args[0])) return HELP;
+        if (args.length == 0 || !commandMap.containsKey(args[0])) return HELP;
         return commandMap.get(args[0]);
     }
 
+    private static String left(String left) {
+        return String.format("  %-40s", left);
+    }
+
+    public static String printVersion() {
+        return "dpt 1.0";
+    }
+
     public static String printHelp() {
-        StringBuilder helpBuilder = new StringBuilder("dpt command [parameters] [-options] [-addr] [-serial]\n");
+        StringBuilder helpBuilder = new StringBuilder();
+        helpBuilder.append("dpt is an utility to manage a Sony Digital Paper device\n\n");
+
+        helpBuilder.append("Usage: dpt COMMAND [PARAMETERS] [OPTIONS]\n\n");
+
+        helpBuilder.append("Options that can be passed to every commands, but aren't mandatory to find the device:\n");
+        helpBuilder.append(left("-addr=IP_ADDR")).append("ip address of the DPT\n");
+        helpBuilder.append(left("-serial=SERIAL")).append("serial code of the device\n");
+
+        helpBuilder.append("\nAvailable commands:\n");
+
         for (Command command : values()) {
-            helpBuilder.append("\t").append(command.commandNames.get(0)).append(" ");
+            StringBuilder commandHelpBuilder = new StringBuilder();
+            commandHelpBuilder.append(command.commandNames.get(0)).append(" ");
             for (String param : command.argumentNames) {
-                helpBuilder.append(param).append(" ");
+                commandHelpBuilder.append(param).append(" ");
             }
             for (CommandOption commandOption : command.commandOptions) {
-                helpBuilder.append("[-").append(commandOption.getOptionLongName()).append("] ");
+                commandHelpBuilder.append("[-").append(commandOption.getOptionLongName()).append("] ");
+            }
+            helpBuilder.append(left(commandHelpBuilder.toString()));
+            if (command.description != null && !command.description.isEmpty()) {
+                helpBuilder.append(command.description);
+            } else {
+                helpBuilder.append("BETA");
             }
             helpBuilder.append("\n");
-            if (command.description != null && !command.description.isEmpty()) helpBuilder.append("\t\t" ).append(command.description).append("\n");
         }
         return helpBuilder.toString();
     }

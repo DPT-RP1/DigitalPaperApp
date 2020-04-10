@@ -123,7 +123,12 @@ public class DigitalPaperCLI {
         boolean dryrun = commandLine.hasOption("dryrun");
         boolean force = commandLine.hasOption("force");
 
+        Command command = Command.parse(args);
 
+        if (commandLine.hasOption("version")) {
+            printVersion();
+            return;
+        }
 
         // The arguments have to be ordered: command param1 param2 etc.
         List<String> arguments = commandLine.getArgList();
@@ -131,7 +136,6 @@ public class DigitalPaperCLI {
             printHelp();
             return;
         }
-        Command command = Command.parse(args);
 
         if (command == Command.HELP) {
             printHelp();
@@ -262,6 +266,10 @@ public class DigitalPaperCLI {
                 break;
         }
 
+    }
+
+    private void printVersion() {
+        logWriter.log(Command.printVersion());
     }
 
     private void checkFirmware() throws InterruptedException, ParserConfigurationException, SAXException, XPathExpressionException, IOException {

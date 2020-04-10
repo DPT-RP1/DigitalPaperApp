@@ -8,7 +8,9 @@ public enum CommandOption {
     SERIAL("serial", true, "The serial number of the Digital Paper we want to auto discover"),
     DRYRUN("dryrun", "For commands that can run in dry mode, simulate their action"),
     INTERACTIVE("interactive", "For commands that can run in interactive mode, stop the process to ask for user input"),
-    FORCE("force", "For commands that can run in force mode, continue despite validation errors");
+    FORCE("force", "For commands that can run in force mode, continue despite validation errors"),
+    VERSION("version", "Prints the version of the program"),
+    HELP("help", "Prints helpful informations about the program");
 
     private String optionLongName;
     private String description;

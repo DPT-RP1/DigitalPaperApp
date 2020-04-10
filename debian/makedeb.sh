@@ -45,7 +45,7 @@ gzip -9 changelog -c > changelog.gz
 mv changelog.gz "${root_folder}/usr/share/doc/dpt/changelog.Debian.gz"
 
 echo "Building documentation"
-help2man -n "A simple Sony Digital Paper CLI manager" "java -jar ${root_folder}/usr/share/dpt/${jar_name}.jar --help" > dpt.1
+help2man -N -n "A simple Sony Digital Paper CLI manager" "java -jar ${root_folder}/usr/share/dpt/${jar_name}.jar --help" > dpt.1
 gzip -9 dpt.1 -c > dpt.1.gz
 mv dpt.1.gz "${root_folder}/usr/share/man/man1/"
 
