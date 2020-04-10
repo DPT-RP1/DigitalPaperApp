@@ -1,10 +1,11 @@
 Package: dpt
 Version: 1.0-1
-Section: base
+Section: utils
 Priority: optional
 Architecture: amd64
-Depends: openjdk-11-jre (>= 11.0.6), cups (>= 2.2.10)
+Depends: openjdk-11-jre (>= 11.0.6), cups (>= 2.2.10), libc6 (>=2.28)
 Maintainer: xpierrohk <xpierro@gmail.com>
+Installed-Size: 23068672
 Homepage: https://github.com/xpierrohk/DigitalPaperApp
 Description: Digital Paper App
  Java 11 Application to manage a DPT-RP1

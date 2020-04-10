@@ -1,0 +1,16 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: dpt
+Upstream-Contact: xpierrohk <xpierro@gmail.com>
+Source: https://github.com/xpierrohk/DigitalPaperApp
+
+Files: *
+Copyright: Copyright (c) 2020 Jan-Gerd Tenberge
+License: mit
+
+Files: cups/*
+Copyright: Copyright (c) 2020 Alex Ivkin <alex.ivking@github.com>
+License: GPL-2
+
+Files: debian/*
+Copyright: Copyright (c) 2020 xpierrohk <xpierro@gmail.com>
+License: GPL-2

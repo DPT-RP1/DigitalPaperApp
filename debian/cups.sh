@@ -14,12 +14,13 @@ echo "Compiling cups backend..."
 rm "${cups_folder}/cups-pdf-dpt"
 cd "${cups_folder}" || exit
 gcc -O9 -s -o cups-pdf-dpt cups-pdf.c -lcups 1>/dev/null 2>/dev/null
-cd ../deb || exit
+cd ../debian || exit
 
 echo "Packaging cups backend"
 cp "${cups_folder}/cups-pdf-dpt" "${root_folder}/usr/lib/cups/backend/"
 cp "${cups_folder}/CUPS-PDF-DPT.ppd" "${root_folder}/usr/share/cups/model"
 cp "${cups_folder}/cups-pdf-dpt.conf" "${root_folder}/etc/cups/cups-pdf-dpt.conf"
 
-chmod 700 "${root_folder}/usr/lib/cups/backend/cups-pdf-dpt"
+# This will be downgraded post install, against debian policy.
+chmod 755 "${root_folder}/usr/lib/cups/backend/cups-pdf-dpt"
 cp "${cups_folder}/cups-pdf-dpt-post.sh" "${root_folder}/usr/share/cups/"
