@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 # Necessary for the backend to work, against debian policy.
 chmod 700 /usr/lib/cups/backend/cups-pdf-dpt
 service cups start

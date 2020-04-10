@@ -1,3 +1,5 @@
 #!/bin/bash
-lpadmin -x "DPT-RP1" 2>/dev/null
+set -e
+# This command is allowed to fail
+lpadmin -x "DPT-RP1" 2>/dev/null || true
 service cups stop

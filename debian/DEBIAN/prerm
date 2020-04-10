@@ -1,3 +1,5 @@
 #!/bin/bash
-lpadmin -x "DPT-RP1"
+set -e
+# The printer could have been removed manually... this is fine to fail.
+lpadmin -x "DPT-RP1" || true
 service cups stop
