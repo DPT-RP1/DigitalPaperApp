@@ -61,7 +61,7 @@ dpt command [parameters] [-options] [-addr] [-serial]
         whiteboard 
                 Shows a landscape half-scale projection of the digital paper, refreshed every second
         whiteboard-html 
-                Opens a distribution server with /frontend path feeding the images fron the Digital Paper
+                Opens a distribution server with /frontend path feeding the images from the Digital Paper
         dialog title content button 
                 Prints a dialog on the Digital Paper
         get-owner 
