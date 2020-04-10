@@ -1,31 +1,77 @@
 # dpt-rp1-java
-Java port of https://github.com/janten/dpt-rp1-py
+Inspired by https://github.com/janten/dpt-rp1-py
 
 Script to manage Sony DPT-RP1 without the Digital Paper App. This repository includes a Java library and a command line utility to manage documents on the DPT-RP1. Barely tested. May not work for Sony's other digital paper readers.
 
 ## Installation
-If you want a practical CLI, there now is a proper Python package, so you may just run:
+You can install on debian using the deb package at https://github.com/xpierrohk/DigitalPaperApp/releases
 
 ```
-pip3 install dpt-rp1-py
+# apt install dpt_<version>.deb 
 ```
 
-Installing the package also installs the command line utilities `dptrp1` and `dptmount`.
-
+Run dpt or man dpt to get more information.
 
 ### From Source
 To install the library from the sources, clone this repository, then run `mvn clean install` from the root directory.
+The use the script in install/linux.sh to setup up the dpt command in your home folder.
 
 ## Using the command line utility
-You need java 11 and maven.
-```
-mvn exec:java -Dexec.mainClass="net.sony.dpt.DigitalPaperApp" -Dexec.args="command [arguments]"
-```
-
-To see if you can successfully connect to the reader, try the command `list-documents`. If you have Sony's Digital Paper App installed, this should work without any further configuration. If this fails, register your reader with the app using `register`.
+Type dpt --help to find all the possible options.
 
 ### Supported commands
-Note that the root path for DPT-RP1 is `Document/`. Example command to download a document `file.pdf` from the root folder ("System Storage") of DPT-RP1: `download Document/file.pdf ./file.pdf`. Example command to upload a document `file.pdf` to a folder named `Articles` on DPT-RP1: `upload ./file.pdf Document/Articles/file.pdf`
+```$xslt
+dpt command [parameters] [-options] [-addr] [-serial]
+        register 
+                Starts the pairing process with the Digital Paper
+        ping 
+                Tests the connection with the Digital Paper
+        sync local-sync-folder [-dryrun] 
+                Synchronizes a local folder with the Digital paper
+        list-documents 
+                Lists all documents
+        document-info 
+                Prints all documents and their attributes, raw
+        upload local-file [remote-file] 
+                Sends a local file to the Digital Paper
+        download 
+        move source target 
+        copy source target 
+        new-folder remote-folder 
+        delete-folder remote-file 
+        delete remote-file 
+        print local-file 
+                Sends a pdf to the Digital Paper, and opens it immediately
+        watch-print local-folder 
+                Watches a folder, and print pdfs on creation/modification in this folder
+        screenshot png-file 
+        whiteboard 
+                Shows a landscape half-scale projection of the digital paper, refreshed every second
+        whiteboard-html 
+                Opens a distribution server with /frontend path feeding the images fron the Digital Paper
+        dialog title content button 
+                Prints a dialog on the Digital Paper
+        get-owner 
+        set-owner 
+        wifi-list 
+        wifi-scan 
+        wifi-add 
+        wifi-del 
+        wifi 
+        wifi-enable 
+        wifi-disable 
+        battery 
+                Shows the battery status informations
+        storage 
+                Shows the storage status informations
+        update-firmware 
+                BETA - NON FUNCTIONAL
+        get url 
+                Sends and display a GET request to the Digital Paper
+        help 
+                Prints this message
+
+```
 
 ### Registering the DPT-RP1
 The DPT-RP1 uses SSL encryption to communicate with the computer.  This requires registering the DPT-RP1 with the computer, which results in two pieces of information -- the client ID and the key file -- that you'll need to run the script. You can get this information in three ways.
@@ -45,9 +91,6 @@ The tool can generally figure out the correct IP address of the device automatic
 
 If you get an error, wait a few seconds and try again. Sometimes it takes two or three tries to work.
 
-## Mounting as a file system
-Unsupported
-
 #### Finding the private key and client ID on Windows
 
 If you have already registered on Windows, the Digital Paper app stores the files in _Users/{username}/AppData/Roaming/Sony Corporation/Digital Paper App/_. You'll need the files _deviceid.dat_ and _privatekey.dat_.
@@ -56,24 +99,10 @@ If you have already registered on Windows, the Digital Paper app stores the file
 
 If you have already registered on macOS, the Digital Paper app stores the files in _$HOME/Library/Application Support/Sony Corporation/Digital Paper App/_. You'll need the files _deviceid.dat_ and _privatekey.dat_.
 
-#### What works
-* Reading files
-* Moving files (both rename and move to different folder)
-* Uploading new files
-* Deleting files and folders 
-
-#### What does not work
-* Currently there is no caching, therefore operations can be slow as they require uploading or downloading from the 
-device. However, this avoids having to resolve conflicts if a document has been changed both on the Digital Paper and
-the caching directory.
-
 ## Usage
-
-Else, over Wifi:
 
 ```
 # Try multiple times
 --addr 192.168.0.107 register
-
---addr 192.168.0.107 list-documents
+--addr 192.168.0.107 ping
 ```

@@ -94,6 +94,7 @@ public class WhiteboardBackend implements HttpHandler {
                 if (lastImage == null || lastImage.isEmpty()) {
                     error(httpExchange);
                 } else {
+                    httpExchange.getResponseHeaders().add("content-type", "image/jpeg");
                     writeString(httpExchange, lastImage);
                 }
                 break;

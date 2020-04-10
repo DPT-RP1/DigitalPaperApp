@@ -10,5 +10,5 @@ cp install/dpt ~/.local/bin/dpt
 chmod +x ~/.local/bin/dpt
 export PATH=$PATH:~/.local/bin
 
-cd cups
+cd cups || exit
 ./install.sh
