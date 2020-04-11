@@ -55,7 +55,7 @@ public class WhiteboardBackend implements HttpHandler {
         server.setExecutor(Executors.newFixedThreadPool(10));
         server.start();
 
-        logWriter.log("We will regularly pool the DPT for new image data");
+        logWriter.log("We will regularly poll the DPT for new image data... press Ctrl+C to stop the server");
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(() -> {
             try(InputStream imageStream = takeScreenshotCommand.fastScreenshot()) {
