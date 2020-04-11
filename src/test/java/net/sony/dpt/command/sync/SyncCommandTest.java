@@ -50,7 +50,7 @@ public class SyncCommandTest {
     }
 
     @Test
-    public void initWithEmptyRemoteFolderShouldSendAll() throws IOException, InterruptedException {
+    public void initWithEmptyRemoteFolderShouldSendAll() throws IOException, InterruptedException, URISyntaxException {
         List<String> messages = new ArrayList<>();
 
         SyncCommand syncCommand = new SyncCommand(null, null, null, null, message -> {
@@ -59,7 +59,7 @@ public class SyncCommandTest {
 
         syncCommand.loadLocalDocuments(
                 Path.of(
-                        Objects.requireNonNull(this.getClass().getClassLoader().getResource("sync")).getPath()
+                        Objects.requireNonNull(this.getClass().getClassLoader().getResource("sync")).toURI()
                 ), true
         );
 
