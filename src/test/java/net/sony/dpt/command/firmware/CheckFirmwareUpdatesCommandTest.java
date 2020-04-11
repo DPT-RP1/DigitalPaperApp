@@ -2,6 +2,7 @@ package net.sony.dpt.command.firmware;
 
 import net.sony.dpt.command.sync.LocalSyncProgressBar;
 import net.sony.util.ProgressBar;
+import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockserver.client.MockServerClient;
@@ -12,8 +13,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import static org.junit.Assert.*;
 import static org.mockserver.model.HttpRequest.request;
@@ -24,11 +25,11 @@ public class CheckFirmwareUpdatesCommandTest {
     @Rule
     public MockServerRule mockServerRule = new MockServerRule(this);
 
-    private MockServerClient mockServerClient;
+    public MockServerClient mockServerClient;
 
     @Test
     public void shouldParseSonyXml() throws IOException, ParserConfigurationException, SAXException {
-        String xml = Files.readString(Path.of(this.getClass().getClassLoader().getResource("firmwareUpgrade.xml").getPath()));
+        String xml = IOUtils.toString(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("firmwareUpgrade.xml")), StandardCharsets.UTF_8);
 
         FirmwareUpdatesCommand checkFirmwareUpdatesCommand = new FirmwareUpdatesCommand(null, null, null, null);
         Document document = checkFirmwareUpdatesCommand.parseXml(checkFirmwareUpdatesCommand.filterValidXml(xml));
@@ -40,7 +41,7 @@ public class CheckFirmwareUpdatesCommandTest {
     public void shouldFindLatestVersion() throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
         String expected = "1.6.50.14130";
 
-        String xml = Files.readString(Path.of(this.getClass().getClassLoader().getResource("firmwareUpgrade.xml").getPath()));
+        String xml = IOUtils.toString(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("firmwareUpgrade.xml")), StandardCharsets.UTF_8);
 
         FirmwareUpdatesCommand checkFirmwareUpdatesCommand = new FirmwareUpdatesCommand(null, null, null, null);
         Document document = checkFirmwareUpdatesCommand.parseXml(checkFirmwareUpdatesCommand.filterValidXml(xml));
@@ -54,7 +55,7 @@ public class CheckFirmwareUpdatesCommandTest {
     public void shouldFindDownloadUrl() throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
         String expected = "https://www.sony.net/Products/DigitalPaperSystem/Software/DP/FwUpdater.pkg";
 
-        String xml = Files.readString(Path.of(this.getClass().getClassLoader().getResource("firmwareUpgrade.xml").getPath()));
+        String xml = IOUtils.toString(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("firmwareUpgrade.xml")), StandardCharsets.UTF_8);
 
         FirmwareUpdatesCommand checkFirmwareUpdatesCommand = new FirmwareUpdatesCommand(null, null, null, null);
         Document document = checkFirmwareUpdatesCommand.parseXml(checkFirmwareUpdatesCommand.filterValidXml(xml));
@@ -66,7 +67,7 @@ public class CheckFirmwareUpdatesCommandTest {
 
     @Test
     public void shouldDownload() throws IOException {
-        byte[] firmwarePkg = Files.readAllBytes(Path.of(this.getClass().getClassLoader().getResource("firmware.pkg").getPath()));
+        byte[] firmwarePkg = IOUtils.toByteArray(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("firmware.pkg")));
 
         FirmwareUpdatesCommand checkFirmwareUpdatesCommand = new FirmwareUpdatesCommand(
                 new LocalSyncProgressBar(
