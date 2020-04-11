@@ -1,11 +1,13 @@
 package net.sony.dpt.command.sync;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
 import net.sony.dpt.command.documents.DocumentListResponse;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,14 +77,14 @@ public class SyncCommandTest {
     }
 
     @Test
-    public void bothFoldersEmptyShouldDoNothing() throws IOException, InterruptedException {
+    public void bothFoldersEmptyShouldDoNothing() throws IOException, InterruptedException, URISyntaxException {
         List<String> messages = new ArrayList<>();
 
         SyncCommand syncCommand = new SyncCommand(null, null, null, null, messages::add, null, null);
 
         syncCommand.loadLocalDocuments(
                 Path.of(
-                        this.getClass().getClassLoader().getResource("empty").getPath()
+                        Objects.requireNonNull(this.getClass().getClassLoader().getResource("empty")).toURI()
                 ), true
         );
 
