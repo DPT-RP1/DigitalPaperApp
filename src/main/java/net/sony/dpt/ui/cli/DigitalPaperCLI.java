@@ -108,8 +108,10 @@ public class DigitalPaperCLI {
         deviceInfoStore.storeLastIp(addr);
 
         // We test if the zeroconf digitalpaper.local is setup
-        String zeroconfIp = new PingCommand().pingAndResolve(FindDigitalPaper.ZEROCONF_HOST);
-        if (addr.equals(zeroconfIp)) return FindDigitalPaper.ZEROCONF_HOST;
+        try {
+            String zeroconfIp = new PingCommand().pingAndResolve(FindDigitalPaper.ZEROCONF_HOST);
+            if (addr.equals(zeroconfIp)) return FindDigitalPaper.ZEROCONF_HOST;
+        } catch (Exception ignored) {}
         return addr;
     }
 
