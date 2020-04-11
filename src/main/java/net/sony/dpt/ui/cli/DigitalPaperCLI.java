@@ -148,6 +148,7 @@ public class DigitalPaperCLI {
 
         if (!registrationTokenStore.registered() || command == Command.REGISTER) {
             register(SimpleHttpClient.insecure(), addr);
+            return;
         }
 
         RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
