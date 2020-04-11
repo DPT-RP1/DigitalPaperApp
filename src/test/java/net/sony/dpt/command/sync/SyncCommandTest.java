@@ -1,7 +1,6 @@
 package net.sony.dpt.command.sync;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Resources;
 import net.sony.dpt.command.documents.DocumentListResponse;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +28,7 @@ public class SyncCommandTest {
     }
 
     @Test
-    public void initWithEmptyLocalFolderShouldFetchAll() throws IOException, InterruptedException {
+    public void initWithEmptyLocalFolderShouldFetchAll() throws IOException, InterruptedException, URISyntaxException {
         List<String> messages = new ArrayList<>();
 
         SyncCommand syncCommand = new SyncCommand(null, null, null, null, message -> {
@@ -37,7 +36,7 @@ public class SyncCommandTest {
         }, null, null);
 
         syncCommand.loadLocalDocuments(Path.of(
-                this.getClass().getClassLoader().getResource("empty").getPath())
+                Objects.requireNonNull(this.getClass().getClassLoader().getResource("empty")).toURI())
         , true);
 
         syncCommand.loadRemoteDocuments(documentListResponse);
