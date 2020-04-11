@@ -62,7 +62,7 @@ public class WhiteboardBackend implements HttpHandler {
                 writeLastScreenshotBase64(IOUtils.toByteArray(imageStream));
             } catch (IOException | InterruptedException ignored) {
             }
-        }, 0, 1000, TimeUnit.MILLISECONDS);
+        }, 0, 500, TimeUnit.MILLISECONDS);
     }
 
     public int bind() throws IOException {
