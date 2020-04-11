@@ -9,9 +9,11 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
@@ -24,7 +26,7 @@ public class WhiteboardBackend implements HttpHandler {
     private final TakeScreenshotCommand takeScreenshotCommand;
     private String lastScreenshotBase64;
     private final Object screenshotLock;
-    private final String frontendHtml;
+    private String frontendHtml;
 
     private final LogWriter logWriter;
 
@@ -34,9 +36,11 @@ public class WhiteboardBackend implements HttpHandler {
         this.screenshotLock = new Object();
 
 
-        URL frontendHtmlURL = this.getClass().getResource("/whiteboard/frontend.html");
-        if (frontendHtmlURL == null) throw new IllegalStateException("Impossible to open frontend html");
-        this.frontendHtml = Files.readString(Path.of(frontendHtmlURL.getPath()));
+        try (InputStream frontendHtmlStream = WhiteboardBackend.class.getClassLoader().getResourceAsStream("whiteboard/frontend.html")) {
+            if (frontendHtmlStream != null) {
+                this.frontendHtml = IOUtils.toString(frontendHtmlStream, StandardCharsets.UTF_8);
+            }
+        }
     }
 
     /**
@@ -111,6 +115,10 @@ public class WhiteboardBackend implements HttpHandler {
     }
 
     public void writeString(HttpExchange httpExchange, String content) throws IOException {
+        if (content == null) {
+            error(httpExchange);
+            return;
+        }
         httpExchange.sendResponseHeaders(200, content.length());
         httpExchange.getResponseBody().write(content.getBytes());
         httpExchange.getResponseBody().flush();
