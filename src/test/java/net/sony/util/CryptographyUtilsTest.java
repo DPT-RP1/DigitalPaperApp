@@ -202,9 +202,10 @@ public class CryptographyUtilsTest {
         };
         String pem = cryptographyUtils.exportPublicKeyToPEM(publicKey);
         assertEquals(
-                "-----BEGIN PUBLIC KEY-----\n" +
-                        "qrvM3e7/ABEiRFUzVXiZq83e\n" +
-                        "-----END PUBLIC KEY-----\n", pem);
+                "-----BEGIN PUBLIC KEY-----" + System.lineSeparator() +
+                        "qrvM3e7/ABEiRFUzVXiZq83e" + System.lineSeparator() +
+                        "-----END PUBLIC KEY-----" + System.lineSeparator(),
+                pem);
     }
 
     @Test
