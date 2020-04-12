@@ -1,5 +1,6 @@
 package net.sony.dpt.command.documents;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sony.dpt.DigitalPaperEndpoint;
 import org.apache.commons.io.IOUtils;
 
@@ -11,12 +12,13 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 
-public class TransferDocumentCommand {
+public class DocumentCommand {
 
     private static final Path REMOTE_ROOT = Path.of("Document");
     private final DigitalPaperEndpoint digitalPaperEndpoint;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public TransferDocumentCommand(DigitalPaperEndpoint digitalPaperEndpoint) {
+    public DocumentCommand(DigitalPaperEndpoint digitalPaperEndpoint) {
         this.digitalPaperEndpoint = digitalPaperEndpoint;
     }
 
@@ -119,5 +121,23 @@ public class TransferDocumentCommand {
         }
 
         digitalPaperEndpoint.copy(fromId, toFolder, toFilename);
+    }
+
+    public DocumentListResponse listContent(String folderId) throws IOException, InterruptedException {
+        return fromJson(digitalPaperEndpoint.getFolderContent(folderId));
+    }
+
+    public DocumentListResponse listDocuments() throws IOException, InterruptedException {
+        String json = digitalPaperEndpoint.listDocuments();
+        return fromJson(json);
+    }
+
+    public DocumentListResponse listDocuments(EntryType entryType) throws IOException, InterruptedException {
+        String json = digitalPaperEndpoint.listDocuments(entryType);
+        return fromJson(json);
+    }
+
+    public static DocumentListResponse fromJson(String json) throws IOException {
+        return objectMapper.readValue(json, DocumentListResponse.class);
     }
 }

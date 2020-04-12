@@ -2,6 +2,7 @@ package net.sony.dpt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sony.dpt.command.device.BatteryStatus;
+import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.documents.EntryType;
 import net.sony.dpt.command.firmware.FirmwareVersionResponse;
 import net.sony.dpt.command.wifi.AccessPoint;
@@ -286,5 +287,10 @@ public class DigitalPaperEndpoint {
     private static final String FIRMWARRE_TRIGGER_URL = "/system/controls/update_firmware";
     public void triggerUpdate() throws IOException, InterruptedException {
         simpleHttpClient.put(secured(FIRMWARRE_TRIGGER_URL));
+    }
+
+    private static final String FOLDER_CONTENT_URL = "/folders/${folder_id}/entries2";
+    public String getFolderContent(String folderId) throws IOException, InterruptedException {
+        return simpleHttpClient.get(secured(resolve(FOLDER_CONTENT_URL, variable("folder_id", folderId))));
     }
 }

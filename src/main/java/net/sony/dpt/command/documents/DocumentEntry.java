@@ -213,4 +213,12 @@ public class DocumentEntry {
                 ", totalPage: " + totalPage +
                 ", extId: " + extId;
     }
+
+    public DocumentEntry() {
+
+    }
+
+    public DocumentEntry(final EntryType entryType) {
+        this.entryType = entryType;
+    }
 }

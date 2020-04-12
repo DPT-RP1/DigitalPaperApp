@@ -7,8 +7,7 @@ import net.sony.dpt.command.device.StatusCommand;
 import net.sony.dpt.command.device.TakeScreenshotCommand;
 import net.sony.dpt.command.dialog.DialogCommand;
 import net.sony.dpt.command.documents.DocumentListResponse;
-import net.sony.dpt.command.documents.ListDocumentsCommand;
-import net.sony.dpt.command.documents.TransferDocumentCommand;
+import net.sony.dpt.command.documents.DocumentCommand;
 import net.sony.dpt.command.firmware.FirmwareUpdatesCommand;
 import net.sony.dpt.command.ping.PingCommand;
 import net.sony.dpt.command.print.PrintCommand;
@@ -277,8 +276,8 @@ public class DigitalPaperCLI {
 
     private void mount(String mountPoint) throws IOException, InterruptedException {
         new DptFuseMounter(
-                new ListDocumentsCommand(digitalPaperEndpoint),
-                new TransferDocumentCommand(digitalPaperEndpoint)
+                new DocumentCommand(digitalPaperEndpoint),
+                new DocumentCommand(digitalPaperEndpoint)
         ).mountDpt(Path.of(mountPoint));
     }
 
@@ -314,7 +313,7 @@ public class DigitalPaperCLI {
         PrintCommand printCommand = new PrintCommand(
                 digitalPaperEndpoint,
                 new DialogCommand(digitalPaperEndpoint),
-                new TransferDocumentCommand(digitalPaperEndpoint),
+                new DocumentCommand(digitalPaperEndpoint),
                 logWriter,
                 new PingCommand(digitalPaperEndpoint, logWriter)
         );
@@ -325,7 +324,7 @@ public class DigitalPaperCLI {
         PrintCommand printCommand = new PrintCommand(
                 digitalPaperEndpoint,
                 new DialogCommand(digitalPaperEndpoint),
-                new TransferDocumentCommand(digitalPaperEndpoint),
+                new DocumentCommand(digitalPaperEndpoint),
                 logWriter,
                 new PingCommand(digitalPaperEndpoint, logWriter)
         );
@@ -365,7 +364,7 @@ public class DigitalPaperCLI {
     }
 
     private void copyDocument(String from, String to) throws IOException, InterruptedException {
-        new TransferDocumentCommand(digitalPaperEndpoint).copy(Path.of(from), Path.of(to));
+        new DocumentCommand(digitalPaperEndpoint).copy(Path.of(from), Path.of(to));
     }
 
     private void ping() throws IOException, URISyntaxException {
@@ -389,12 +388,12 @@ public class DigitalPaperCLI {
     }
 
     private void listDocuments() throws IOException, InterruptedException {
-        DocumentListResponse documentListResponse = new ListDocumentsCommand(digitalPaperEndpoint).listDocuments();
+        DocumentListResponse documentListResponse = new DocumentCommand(digitalPaperEndpoint).listDocuments();
         documentListResponse.getEntryList().forEach(documentEntry -> logWriter.log(documentEntry.getEntryPath()));
     }
 
     private void listDocumentsInfo() throws IOException, InterruptedException {
-        DocumentListResponse documentListResponse = new ListDocumentsCommand(digitalPaperEndpoint).listDocuments();
+        DocumentListResponse documentListResponse = new DocumentCommand(digitalPaperEndpoint).listDocuments();
         documentListResponse.getEntryList().forEach(
                 documentEntry -> logWriter.log(documentEntry.getEntryPath() + " - " + documentEntry)
         );
@@ -416,15 +415,15 @@ public class DigitalPaperCLI {
         if (remotePath == null) {
             remotePath = "Document/" + localPath;
         }
-        new TransferDocumentCommand(digitalPaperEndpoint).upload(Path.of(localPath), Path.of(remotePath));
+        new DocumentCommand(digitalPaperEndpoint).upload(Path.of(localPath), Path.of(remotePath));
     }
 
     private void deleteFolder(String remotePath) throws IOException, InterruptedException {
-        new TransferDocumentCommand(digitalPaperEndpoint).deleteFolder(Path.of(remotePath));
+        new DocumentCommand(digitalPaperEndpoint).deleteFolder(Path.of(remotePath));
     }
 
     private void deleteDocument(String remotePath) throws IOException, InterruptedException {
-        new TransferDocumentCommand(digitalPaperEndpoint).delete(Path.of(remotePath));
+        new DocumentCommand(digitalPaperEndpoint).delete(Path.of(remotePath));
     }
 
     private void downloadDocument(String remotePath, String localPath) throws IOException, InterruptedException {
@@ -435,7 +434,7 @@ public class DigitalPaperCLI {
             localDownloadPath = Path.of(localPath);
         }
         Path remoteDownloadPath = Path.of(remotePath);
-        InputStream inputStream = new TransferDocumentCommand(digitalPaperEndpoint).download(remoteDownloadPath);
+        InputStream inputStream = new DocumentCommand(digitalPaperEndpoint).download(remoteDownloadPath);
 
         if (Files.isDirectory(localDownloadPath)) {
             localDownloadPath = localDownloadPath.resolve(remoteDownloadPath.getFileName());
@@ -448,11 +447,11 @@ public class DigitalPaperCLI {
     }
 
     private void newFolder(String remotePath) throws IOException, InterruptedException {
-        new TransferDocumentCommand(digitalPaperEndpoint).createFolderRecursively(Path.of(remotePath));
+        new DocumentCommand(digitalPaperEndpoint).createFolderRecursively(Path.of(remotePath));
     }
 
     private void moveDocument(String oldPath, String newPath) throws IOException, InterruptedException {
-        new TransferDocumentCommand(digitalPaperEndpoint).move(Path.of(oldPath), Path.of(newPath));
+        new DocumentCommand(digitalPaperEndpoint).move(Path.of(oldPath), Path.of(newPath));
     }
 
     private void takeScreenshot(String target) throws IOException, InterruptedException {
@@ -469,8 +468,8 @@ public class DigitalPaperCLI {
     private void sync(String localFolder, boolean dryrun) throws IOException, InterruptedException {
         new SyncCommand(
                 Path.of(localFolder),
-                new ListDocumentsCommand(digitalPaperEndpoint),
-                new TransferDocumentCommand(digitalPaperEndpoint),
+                new DocumentCommand(digitalPaperEndpoint),
+                new DocumentCommand(digitalPaperEndpoint),
                 digitalPaperEndpoint,
                 logWriter,
                 syncStore,

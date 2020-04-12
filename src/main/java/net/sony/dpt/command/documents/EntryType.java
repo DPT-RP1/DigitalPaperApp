@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum EntryType {
     ALL("all"),
+    FOLDER("folder"),
     DOCUMENT("document");
 
     private final String value;

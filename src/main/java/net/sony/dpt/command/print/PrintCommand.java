@@ -2,7 +2,7 @@ package net.sony.dpt.command.print;
 
 import net.sony.dpt.DigitalPaperEndpoint;
 import net.sony.dpt.command.dialog.DialogCommand;
-import net.sony.dpt.command.documents.TransferDocumentCommand;
+import net.sony.dpt.command.documents.DocumentCommand;
 import net.sony.dpt.command.ping.PingCommand;
 import net.sony.util.LogWriter;
 
@@ -29,7 +29,7 @@ public class PrintCommand {
 
     private final DigitalPaperEndpoint digitalPaperEndpoint;
     private final DialogCommand dialogCommand;
-    private final TransferDocumentCommand transferDocumentCommand;
+    private final DocumentCommand documentCommand;
     private final static Path PRINT_ROOT = Path.of("Document/Received/");
     private final LogWriter logWriter;
     private final PingCommand pingCommand;
@@ -38,12 +38,12 @@ public class PrintCommand {
 
     public PrintCommand(final DigitalPaperEndpoint digitalPaperEndpoint,
                         final DialogCommand dialogCommand,
-                        final TransferDocumentCommand transferDocumentCommand,
+                        final DocumentCommand documentCommand,
                         final LogWriter logWriter,
                         final PingCommand pingCommand) {
         this.digitalPaperEndpoint = digitalPaperEndpoint;
         this.dialogCommand = dialogCommand;
-        this.transferDocumentCommand = transferDocumentCommand;
+        this.documentCommand = documentCommand;
         this.logWriter = logWriter;
         this.pingCommand = pingCommand;
 
@@ -77,13 +77,13 @@ public class PrintCommand {
         if (!quiet) {
             UUID modalId = openPrintModal(targetPath);
             try {
-                String documentId = transferDocumentCommand.upload(localPath, targetPath);
+                String documentId = documentCommand.upload(localPath, targetPath);
                 openOnDevice(documentId);
             } finally {
                 closePrintModal(modalId);
             }
         } else {
-            transferDocumentCommand.upload(localPath, targetPath);
+            documentCommand.upload(localPath, targetPath);
         }
 
         logWriter.log("Print job finished");

@@ -3,8 +3,7 @@ package net.sony.dpt.command.sync;
 import net.sony.dpt.DigitalPaperEndpoint;
 import net.sony.dpt.command.documents.DocumentEntry;
 import net.sony.dpt.command.documents.DocumentListResponse;
-import net.sony.dpt.command.documents.ListDocumentsCommand;
-import net.sony.dpt.command.documents.TransferDocumentCommand;
+import net.sony.dpt.command.documents.DocumentCommand;
 import net.sony.dpt.persistence.SyncStore;
 import net.sony.util.LogWriter;
 import net.sony.util.ProgressBar;
@@ -24,8 +23,8 @@ public class SyncCommand {
     private final Map<Path, DocumentEntry> localFileMap;
     private final Map<Path, DocumentEntry> remoteFileMap;
     private final PathMatcher pdfMatcher = FileSystems.getDefault().getPathMatcher("glob:**.pdf");
-    private final TransferDocumentCommand transferDocumentCommand;
-    private final ListDocumentsCommand listDocumentsCommand;
+    private final DocumentCommand documentCommand;
+    private final DocumentCommand listDocumentsCommand;
 
     private final List<Path> toFetch;
     private final List<Path> toSend;
@@ -39,8 +38,8 @@ public class SyncCommand {
     private int handledSoFarMB = 0;
 
     public SyncCommand(final Path localRoot,
-                       final ListDocumentsCommand listDocumentsCommand,
-                       final TransferDocumentCommand transferDocumentCommand,
+                       final DocumentCommand listDocumentsCommand,
+                       final DocumentCommand documentCommand,
                        final DigitalPaperEndpoint digitalPaperEndpoint,
                        final LogWriter logWriter,
                        final SyncStore syncStore,
@@ -54,7 +53,7 @@ public class SyncCommand {
         this.localRoot = localRoot;
         this.listDocumentsCommand = listDocumentsCommand;
 
-        this.transferDocumentCommand = transferDocumentCommand;
+        this.documentCommand = documentCommand;
 
         toFetch = new ArrayList<>();
         toSend = new ArrayList<>();
@@ -338,7 +337,7 @@ public class SyncCommand {
 
     private void sendLocalFile(Path path, boolean dryrun) throws IOException, InterruptedException {
         if (!dryrun) {
-            transferDocumentCommand.upload(localRoot.resolve(path), remoteRoot.resolve(path));
+            documentCommand.upload(localRoot.resolve(path), remoteRoot.resolve(path));
         }
     }
 

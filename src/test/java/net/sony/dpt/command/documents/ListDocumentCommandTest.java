@@ -13,7 +13,7 @@ public class ListDocumentCommandTest {
     @Test
     public void entryListCanDeserialize() throws IOException {
         String pdf_list = new String(getClass().getClassLoader().getResourceAsStream("pdf_list.json").readAllBytes());
-        DocumentListResponse documentListResponse = ListDocumentsCommand.fromJson(pdf_list);
+        DocumentListResponse documentListResponse = DocumentCommand.fromJson(pdf_list);
 
         Set<EntryType> entryTypes = new HashSet<>();
         for (DocumentEntry entry : documentListResponse.getEntryList()) {

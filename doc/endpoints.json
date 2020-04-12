@@ -17,7 +17,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "** ★ Obsoleted use deprecated ★ ** __ * n ** Get document list ** \n * entry_type Filter by item type \n * All (folder + document 'notes' \n * search_target Target of keyword search or identifier specification \n * Document meta information (name, title, author): 'all' \n * Document: 'documents' 'annotation_pattern' \n * annotation_type Filter by type annotation type \n <small> * search ('*') * 'document_body' \n * Document body: 'document_body' </small> \n * All (highlight + handwritten): 'all' \n * Highlights: 'highlights' \n * Handwriting: 'handwritings' \n * order_type Specify sort order in list \n <small> * </small> \n * Name - Ascending order: 'entry_name_asc' \n * Name - The folder is grouped first in ascending order, the folders are grouped first in descending order, 'Modified_date_desc' \n * Created date and time - Ascending order: 'created_date_asc' \n * Created date and time - Descending order: 'created_date_desc' \n * Edit date and time - Ascending order: 'modified_date_asc' \n * Edit date and time - Descending order: 'modified_date_desc' 'reading_date_desc' \n * Ascending order: 'title_asc' \n * Title - Descending order: 'title_desc' \n * Author - ascending order: n * Last viewed date and time - Ascending order: 'reading_date_asc' \n * Last viewed date and time - 'author_sc' \n * Author - Descending order: 'author_desc' \n * File size - Ascending order: 'file_size_asc' \n * File size - Descending order: 'file_size_desc' \n ",
+        "description": "** ★ Deprecated use deprecated ★ ** __ * n ** Get document list ** \n * entry_type Filter by item type \n * All (folder + document 'notes' \n * search_target Target of keyword search or identifier specification \n * Document meta information (name, title, author): 'all' \n * Document: 'documents' 'annotation_pattern' \n * annotation_type Filter by type annotation type \n <small> * search ('*') * 'document_body' \n * Document body: 'document_body' </small> \n * All (highlight + handwritten): 'all' \n * Highlights: 'highlights' \n * Handwriting: 'handwritings' \n * order_type Specify sort order in list \n <small> * </small> \n * Name - Ascending order: 'entry_name_asc' \n * Name - The folder is grouped first in ascending order, the folders are grouped first in descending order, 'Modified_date_desc' \n * Created date and time - Ascending order: 'created_date_asc' \n * Created date and time - Descending order: 'created_date_desc' \n * Edit date and time - Ascending order: 'modified_date_asc' \n * Edit date and time - Descending order: 'modified_date_desc' 'reading_date_desc' \n * Ascending order: 'title_asc' \n * Title - Descending order: 'title_desc' \n * Author - ascending order: n * Last viewed date and time - Ascending order: 'reading_date_asc' \n * Last viewed date and time - 'author_sc' \n * Author - Descending order: 'author_desc' \n * File size - Ascending order: 'file_size_asc' \n * File size - Descending order: 'file_size_desc' \n ",
         "parameters": [
           {
             "name": "entry_type",
@@ -108,7 +108,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "** ★ Obsoleted use deprecated ★ ** __ * n ** New document registration ** \n * After that, upload the file to the generated document ID Needed \n ",
+        "description": "** ★ Deprecated use deprecated ★ ** __ * n ** New document registration ** \n * After that, upload the file to the generated document ID Needed \n ",
         "parameters": [
           {
             "name": "doc_info",
@@ -313,7 +313,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "** ★ Obsoleted use deprecated ★ ** __ * n ** Acquire information on the document corresponding to the specified document ID ** \n",
+        "description": "** ★ Deprecated use deprecated ★ ** __ * n ** Acquire information on the document corresponding to the specified document ID ** \n",
         "parameters": [
           {
             "name": "document_id",
@@ -357,7 +357,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "** ★ Obsoleted use deprecated ★ ** __ * n ** Document name change / move (document information update) ** \n",
+        "description": "** ★ Deprecated use deprecated ★ ** __ * n ** Document name change / move (document information update) ** \n",
         "parameters": [
           {
             "name": "document_id",
@@ -948,7 +948,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "**★Obsoleted 使用非推奨★** <br/><br/>\n**フォルダーの新規作成**\n",
+        "description": "**★Deprecated not recommended★** <br/><br/>\n**フォルダーの新規作成**\n",
         "parameters": [
           {
             "name": "folder_info",
@@ -996,7 +996,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "**フォルダーの新規作成**\n",
+        "description": "**Create new folder**\n",
         "parameters": [
           {
             "name": "folder_info",
@@ -1047,7 +1047,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "**★Obsoleted 使用非推奨★** <br/><br/>\n**指定IDに該当するフォルダーの情報を取得**\n",
+        "description": "**★Deprecated not recommended★** <br/><br/>\n**指定IDに該当するフォルダーの情報を取得**\n",
         "parameters": [
           {
             "name": "folder_id",
@@ -1091,7 +1091,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "**★Obsoleted 使用非推奨★** <br/><br/>\n**フォルダーの名称変更・移動 （フォルダーの情報更新）**\n",
+        "description": "**★Deprecated not recommended★** <br/><br/>\n**フォルダーの名称変更・移動 （フォルダーの情報更新）**\n",
         "parameters": [
           {
             "name": "folder_id",
@@ -1309,7 +1309,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "**★Obsoleted 使用非推奨★** <br/><br/>\n**フォルダー内のエントリー一覧を取得**  \n * order_type　一覧のソート順指定<br>\n   <small>※フォルダーとドキュメントはグルーピングされ、昇順の場合はフォルダーがまとめて先に、降順の場合はドキュメントがまとめて先に列挙される</small>\n  * 名前-昇順 : 'entry_name_asc'\n  * 名前-降順 : 'entry_name_desc'\n  * 作成日時-昇順 : 'created_date_asc'\n  * 作成日時-降順 : 'created_date_desc'\n  * 編集日時-昇順 : 'modified_date_asc'\n  * 編集日時-降順 : 'modified_date_desc'\n  * 最終閲覧日時-昇順 : 'reading_date_asc'\n  * 最終閲覧日時-降順 : 'reading_date_desc'\n  * タイトル-昇順 : 'title_asc'\n  * タイトル-降順 : 'title_desc'\n  * 著者-昇順 : 'author_asc'\n  * 著者-降順 : 'author_desc'\n  * ファイルサイズ-昇順 : 'file_size_asc'\n  * ファイルサイズ-降順 : 'file_size_desc'\n",
+        "description": "**★Deprecated not recommended★** <br/><br/>\n**Get a list of entries in a folder**  \n * order_type　一覧のソート順指定<br>\n   <small>※Folders and documents are grouped, and folders are listed first in ascending order, and documents are listed first in descending order.</small>\n  * 名前-昇順 : 'entry_name_asc'\n  * 名前-降順 : 'entry_name_desc'\n  * 作成日時-昇順 : 'created_date_asc'\n  * 作成日時-降順 : 'created_date_desc'\n  * 編集日時-昇順 : 'modified_date_asc'\n  * 編集日時-降順 : 'modified_date_desc'\n  * 最終閲覧日時-昇順 : 'reading_date_asc'\n  * 最終閲覧日時-降順 : 'reading_date_desc'\n  * タイトル-昇順 : 'title_asc'\n  * タイトル-降順 : 'title_desc'\n  * 著者-昇順 : 'author_asc'\n  * 著者-降順 : 'author_desc'\n  * ファイルサイズ-昇順 : 'file_size_asc'\n  * ファイルサイズ-降順 : 'file_size_desc'\n",
         "parameters": [
           {
             "name": "folder_id",
@@ -1382,7 +1382,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "**フォルダー内のエントリー一覧を取得**  \n * order_type　一覧のソート順指定<br>\n   <small>※フォルダーとドキュメントはグルーピングされ、昇順の場合はフォルダーがまとめて先に、降順の場合はドキュメントがまとめて先に列挙される</small>\n  * 名前-昇順 : 'entry_name_asc'\n  * 名前-降順 : 'entry_name_desc'\n  * 作成日時-昇順 : 'created_date_asc'\n  * 作成日時-降順 : 'created_date_desc'\n  * 編集日時-昇順 : 'modified_date_asc'\n  * 編集日時-降順 : 'modified_date_desc'\n  * 最終閲覧日時-昇順 : 'reading_date_asc'\n  * 最終閲覧日時-降順 : 'reading_date_desc'\n  * タイトル-昇順 : 'title_asc'\n  * タイトル-降順 : 'title_desc'\n  * 著者-昇順 : 'author_asc'\n  * 著者-降順 : 'author_desc'\n  * ファイルサイズ-昇順 : 'file_size_asc'\n  * ファイルサイズ-降順 : 'file_size_desc'\n",
+        "description": "**Get a list of entries in a folder**  \n * order_type　一覧のソート順指定<br>\n   <small>※Folders and documents are grouped, and folders are listed first in ascending order, and documents are listed first in descending order.</small>\n  * 名前-昇順 : 'entry_name_asc'\n  * 名前-降順 : 'entry_name_desc'\n  * 作成日時-昇順 : 'created_date_asc'\n  * 作成日時-降順 : 'created_date_desc'\n  * 編集日時-昇順 : 'modified_date_asc'\n  * 編集日時-降順 : 'modified_date_desc'\n  * 最終閲覧日時-昇順 : 'reading_date_asc'\n  * 最終閲覧日時-降順 : 'reading_date_desc'\n  * タイトル-昇順 : 'title_asc'\n  * タイトル-降順 : 'title_desc'\n  * 著者-昇順 : 'author_asc'\n  * 著者-降順 : 'author_desc'\n  * ファイルサイズ-昇順 : 'file_size_asc'\n  * ファイルサイズ-降順 : 'file_size_desc'\n",
         "parameters": [
           {
             "name": "folder_id",
@@ -1792,7 +1792,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "**★Obsoleted 使用非推奨★** <br/><br/>\n**指定ドキュメントを開く**\n",
+        "description": "**★Deprecated not recommended★** <br/><br/>\n**指定ドキュメントを開く**\n",
         "parameters": [
           {
             "name": "target_doc_info",
@@ -4364,7 +4364,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "** ★ Obsoleted use deprecated ★ ** __ * \n Get entry information from the full path of the document / folder <br> \n * Change the root folder to 'Document /' Be careful with expressing ",
+        "description": "** ★ Deprecated use deprecated ★ ** __ * \n Get entry information from the full path of the document / folder <br> \n * Change the root folder to 'Document /' Be careful with expressing ",
         "parameters": [
           {
             "name": "path",
