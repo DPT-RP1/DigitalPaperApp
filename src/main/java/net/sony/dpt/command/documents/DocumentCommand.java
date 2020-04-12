@@ -12,6 +12,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 
+import static net.sony.util.SimpleHttpClient.fromJSON;
+
 public class DocumentCommand {
 
     private static final Path REMOTE_ROOT = Path.of("Document");
@@ -58,12 +60,27 @@ public class DocumentCommand {
         digitalPaperEndpoint.deleteFolderByRemoteId(remoteId);
     }
 
+    public String create(Path remotePath) throws IOException, InterruptedException {
+        Path directory = remotePath.getParent();
+
+        String parentId = createFolderRecursively(directory);
+        return digitalPaperEndpoint.touchFile(remotePath.getFileName().toString(), parentId);
+    }
+
     public String upload(Path localPath, Path remotePath) throws IOException, InterruptedException {
         delete(remotePath);
         Path directory = remotePath.getParent();
 
         String parentId = createFolderRecursively(directory);
         return digitalPaperEndpoint.uploadFile(localPath, parentId);
+    }
+
+    public String upload(byte[] content, Path remotePath) throws IOException, InterruptedException {
+        delete(remotePath);
+        Path directory = remotePath.getParent();
+
+        String parentId = createFolderRecursively(directory);
+        return digitalPaperEndpoint.uploadFile(remotePath.getFileName().toString(), content, parentId);
     }
 
     private Path resolveRemotePath(Path remotePath) {
@@ -135,6 +152,16 @@ public class DocumentCommand {
     public DocumentListResponse listDocuments(EntryType entryType) throws IOException, InterruptedException {
         String json = digitalPaperEndpoint.listDocuments(entryType);
         return fromJson(json);
+    }
+
+    public DocumentEntry documentInfo(Path remotePath) throws IOException, InterruptedException {
+        String documentId = digitalPaperEndpoint.resolveObjectByPath(remotePath);
+        return documentInfo(documentId);
+    }
+
+
+    public DocumentEntry documentInfo(String documentId) throws IOException, InterruptedException {
+        return fromJSON(digitalPaperEndpoint.documentInfos(documentId), DocumentEntry.class);
     }
 
     public static DocumentListResponse fromJson(String json) throws IOException {

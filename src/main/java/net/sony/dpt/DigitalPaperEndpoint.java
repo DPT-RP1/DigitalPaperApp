@@ -71,6 +71,11 @@ public class DigitalPaperEndpoint {
         this.simpleHttpClient = simpleHttpClient;
     }
 
+    private static final String DOCUMENT_INFO_URL = "/documents2/${document_id}";
+    public String documentInfos(String objectId) throws IOException, InterruptedException {
+        return simpleHttpClient.get(secured(resolve(DOCUMENT_INFO_URL, variable("document_id", objectId))));
+    }
+
     public String getNonce(String clientId) throws IOException, InterruptedException {
         return (String) fromJSON(simpleHttpClient.get(secured("/auth/nonce/" + clientId))).get("nonce");
     }
@@ -151,6 +156,26 @@ public class DigitalPaperEndpoint {
         }};
         simpleHttpClient.post(secured("/folders2"), body);
         return resolveObjectByPath(directory);
+    }
+
+    public String touchFile(String filename, String parentId) throws IOException, InterruptedException {
+        Map<String, Object> touchParam = new HashMap<>() {{
+            put("file_name", filename);
+            put("parent_folder_id", parentId);
+            put("document_source", "");
+        }};
+        return (String) fromJSON(simpleHttpClient.post(secured("/documents2"), touchParam)).get("document_id");
+    }
+
+    public void uploadDocumentData(String documentId, String filename, byte[] content) throws IOException, InterruptedException {
+        String documentUrl = secured(resolve(filePathUrl, variable("doc_id", documentId)));
+        simpleHttpClient.putBytes(documentUrl, filename, "application/pdf", content);
+    }
+
+    public String uploadFile(String filename, byte[] content, String parentId) throws IOException, InterruptedException {
+        String documentId = touchFile(filename, parentId);
+        uploadDocumentData(documentId, filename, content);
+        return documentId;
     }
 
     public String uploadFile(Path filePath, String parentId) throws IOException, InterruptedException {

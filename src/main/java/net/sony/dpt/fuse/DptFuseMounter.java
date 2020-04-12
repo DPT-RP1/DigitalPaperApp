@@ -13,14 +13,16 @@ import ru.serce.jnrfuse.FuseFillDir;
 import ru.serce.jnrfuse.FuseStubFS;
 import ru.serce.jnrfuse.struct.FileStat;
 import ru.serce.jnrfuse.struct.FuseFileInfo;
+import ru.serce.jnrfuse.struct.Timespec;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 public class DptFuseMounter extends FuseStubFS {
@@ -30,6 +32,15 @@ public class DptFuseMounter extends FuseStubFS {
 
     private final DocumentCommand listDocumentsCommand;
     private final DocumentCommand documentCommand;
+
+    // The DPT cannot handle too many request in parallel. We need to lock and wait
+    // for requests in this class.
+    private static final Object dptLock = new Object();
+
+    // This cache will help to read partial files TODO: definitely a good LRU use case !!
+    private final ConcurrentMap<String, byte[]> fileCache;
+    private final ConcurrentMap<String, byte[]> writeCache;
+    private final ConcurrentMap<Path, DocumentEntry> documentEntriesMap;
 
     private static Path toRemote(Path localPath) {
         return REMOTE_ROOT.resolve(LOCAL_ROOT.relativize(localPath));
@@ -43,7 +54,9 @@ public class DptFuseMounter extends FuseStubFS {
         this.listDocumentsCommand = listDocumentsCommand;
         this.documentCommand = documentCommand;
 
-        fileCache = new HashMap<>();
+        fileCache = new ConcurrentHashMap<>();
+        writeCache = new ConcurrentHashMap<>();
+        documentEntriesMap = new ConcurrentHashMap<>();
     }
 
     private int getFolderAttr(FileStat stat) {
@@ -96,7 +109,6 @@ public class DptFuseMounter extends FuseStubFS {
 
     @Override
     public int open(String path, FuseFileInfo fi) {
-        if (!documentEntriesMap.containsKey(Path.of(path))) return -ErrorCodes.ENOENT();
         return 0;
     }
 
@@ -106,7 +118,9 @@ public class DptFuseMounter extends FuseStubFS {
 
         if (documentEntriesMap.containsKey(localPath)) return -ErrorCodes.EEXIST();
         try {
-            documentCommand.createFolderRecursively(toRemote(localPath));
+            synchronized (dptLock) {
+                documentCommand.createFolderRecursively(toRemote(localPath));
+            }
         } catch (IOException | InterruptedException e) {
             return -ErrorCodes.EREMOTEIO();
         }
@@ -120,7 +134,9 @@ public class DptFuseMounter extends FuseStubFS {
         Path localPath = Path.of(path);
         if (!documentEntriesMap.containsKey(localPath)) return -ErrorCodes.ENOENT();
         try {
-            documentCommand.deleteFolder(toRemote(localPath));
+            synchronized (dptLock) {
+                documentCommand.deleteFolder(toRemote(localPath));
+            }
         } catch (IOException | InterruptedException e) {
             return -ErrorCodes.EREMOTEIO();
         }
@@ -128,12 +144,134 @@ public class DptFuseMounter extends FuseStubFS {
                 .stream()
                 .filter(candidate -> candidate.startsWith(localPath))
                 .collect(Collectors.toSet());
-        toRemove.forEach(path1 -> documentEntriesMap.remove(path1));
+        toRemove.forEach(documentEntriesMap::remove);
         return 0;
     }
 
-    // This cache will help to read partial files TODO: definitely a good LRU use case !!
-    private final Map<String, byte[]> fileCache;
+    @Override
+    public int rename(String oldpath, String newpath) {
+        Path old = Path.of(oldpath);
+        Path newP = Path.of(newpath);
+
+        if (documentEntriesMap.containsKey(old)) return -ErrorCodes.ENOENT();
+
+        try {
+            synchronized (dptLock) {
+                documentCommand.move(toRemote(old), toRemote(newP));
+            }
+        } catch (IOException | InterruptedException e) {
+            return -ErrorCodes.EREMOTEIO();
+        }
+
+        DocumentEntry documentEntry = documentEntriesMap.remove(old);
+        documentEntry.setEntryPath(newpath);
+        documentEntriesMap.put(newP, documentEntry);
+        return 0;
+    }
+
+    @Override
+    public int unlink(String path) {
+        Path localPath = Path.of(path);
+        if (documentEntriesMap.containsKey(localPath)) return -ErrorCodes.ENOENT();
+
+        try {
+            synchronized (dptLock) {
+                documentCommand.delete(toRemote(localPath));
+            }
+        } catch (IOException | InterruptedException e) {
+            return -ErrorCodes.EREMOTEIO();
+        }
+        documentEntriesMap.remove(localPath);
+        fileCache.remove(path);
+        return 0;
+    }
+
+    @Override
+    public int flush(String path, FuseFileInfo fi) {
+        return 0;
+    }
+
+    @Override
+    public int release(String path, FuseFileInfo fi) {
+        if (writeCache.containsKey(path)) {
+            if (writeCache.get(path).length == 0) return 0;
+            Path localPath = Path.of(path);
+            String documentId;
+            try {
+                synchronized (dptLock) {
+                    documentId = documentCommand.upload(writeCache.remove(path), toRemote(localPath));
+                }
+                documentEntriesMap.put(localPath, documentCommand.documentInfo(documentId));
+            } catch (IOException | InterruptedException e) {
+                documentId = null;
+            }
+            if (documentId == null) return ErrorCodes.EREMOTEIO();
+        }
+        return 0;
+    }
+
+    @Override
+    public int create(String path, long mode, FuseFileInfo fi) {
+        Path localPath = Path.of(path);
+        if (documentEntriesMap.containsKey(localPath)) return ErrorCodes.EEXIST();
+
+        Path remotePath = toRemote(localPath);
+        DocumentEntry documentEntry;
+        try {
+            synchronized (dptLock) {
+                documentEntry = documentCommand.documentInfo(documentCommand.create(remotePath));
+            }
+        } catch (IOException | InterruptedException e) {
+            return ErrorCodes.EREMOTEIO();
+        }
+
+        documentEntriesMap.put(localPath, documentEntry);
+        fileCache.put(path, new byte[0]);
+        writeCache.put(path, new byte[0]);
+        return 0;
+    }
+
+    @Override
+    public int setxattr(String path, String name, Pointer value, long size, int flags) {
+        return 0; // IGNORED
+    }
+
+    @Override
+    public int chown(String path, long uid, long gid) {
+        return 0; // IGNORED
+    }
+
+    @Override
+    public int truncate(String path, long size) {
+        return 0; // IGNORED
+    }
+
+    @Override
+    public int utimens(String path, Timespec[] timespec) {
+        return 0;
+    }
+
+    @Override
+    public int write(String path, Pointer buf, long size, long offset, FuseFileInfo fi) {
+
+        byte[] content = writeCache.get(path);
+        if (content.length < offset + size) {
+            byte[] resized = new byte[(int) (offset + size)];
+            System.arraycopy(content, 0, resized, 0, content.length);
+            content = resized;
+            writeCache.put(path, content);
+        }
+        buf.get(0, content, (int) offset, (int) size);
+
+        documentEntriesMap.computeIfPresent(Path.of(path), (key, documentEntry) -> {
+            documentEntry.setFileSize(documentEntry.getFileSize() + size);
+            return documentEntry;
+        });
+        fileCache.put(path, content);
+
+        return (int) size;
+    }
+
     private int readFromCache(String path, Pointer buf, @size_t long size, @off_t long offset) {
         byte[] content = fileCache.get(path);
         int length = content.length;
@@ -157,10 +295,12 @@ public class DptFuseMounter extends FuseStubFS {
         Path remotePath = Path.of(documentEntry.getEntryPath());
 
         if (!fileCache.containsKey(path)) {
-            try (InputStream stream = documentCommand.download(remotePath)){
-                byte[] content = IOUtils.toByteArray(stream);
-                fileCache.put(path, content);
-            } catch (Exception ignored) { }
+            synchronized (dptLock) {
+                try (InputStream stream = documentCommand.download(remotePath)) {
+                    byte[] content = IOUtils.toByteArray(stream);
+                    fileCache.put(path, content);
+                } catch (Exception ignored) { }
+            }
         }
 
         return readFromCache(path, buf, size, offset);
@@ -176,10 +316,8 @@ public class DptFuseMounter extends FuseStubFS {
         return 0;
     }
 
-    private Map<Path, DocumentEntry> documentEntriesMap;
-    public void buildDocumentsMap(List<DocumentEntry> documentEntries) {
-        documentEntriesMap = new HashMap<>();
 
+    public void buildDocumentsMap(List<DocumentEntry> documentEntries) {
         for (DocumentEntry entry : documentEntries) {
             Path path = toLocal(Path.of(entry.getEntryPath()));
             documentEntriesMap.put(path, entry);
