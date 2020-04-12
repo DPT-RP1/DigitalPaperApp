@@ -7,6 +7,7 @@ This repository includes:
  - a Java library 
  - a command line utility to manage documents on the DPT-RP1
  - a CUPS driver to use the DPT as a printer
+ - a FUSE mounter to navigate the dpt as a disk on a userspace mount-point
  - a server to proxy whiteboard refreshes to a webpage (dpt whiteboard-html) you can share with people
  - a translation (more and more complete) of the official endpoint documentation at doc/endpoints.json
  - a packaging script to create a .deb package at debian/makedeb.sh
@@ -112,6 +113,22 @@ If you have already registered on Windows, the Digital Paper app stores the file
 #### Finding the private key and client ID on macOS
 
 If you have already registered on macOS, the Digital Paper app stores the files in _$HOME/Library/Application Support/Sony Corporation/Digital Paper App/_. You'll need the files _deviceid.dat_ and _privatekey.dat_.
+
+## Fuse mount
+You can mount the dpt on a userspace mount point with the following:
+```bash
+dpt mount <mountpoint> 
+```
+The mount point is then browsable, and you can read, copy, rename, delete files and folders.
+
+### What is not supported yet:
+- Renaming a folder
+- Getting changes from the dpt after the mount point has been created.
+
+For now the file cache is aggressive, in the sense that all files and folder trees are precalculated,
+changes you do via the mount point are taken into account, but changes from the dpt or another source
+will not. Furthermore, the content of files are cached the first time they're accessed, and the 
+mounter will consume more and more memory as you open files around.
 
 ## Usage
 
