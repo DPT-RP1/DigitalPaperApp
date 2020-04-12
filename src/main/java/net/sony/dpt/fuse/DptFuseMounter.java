@@ -142,6 +142,8 @@ public class DptFuseMounter extends FuseStubFS {
         return 0;
     }
 
+
+
     @Override
     public int rename(String oldpath, String newpath) {
         Path old = Path.of(oldpath);
@@ -290,7 +292,7 @@ public class DptFuseMounter extends FuseStubFS {
     }
 
     public void mountDpt(Path mountPoint) throws IOException, InterruptedException {
-        logWriter.log("Mounting the Digital Paper...");
+        logWriter.log("Mounting the Digital Paper on " + mountPoint);
         Files.createDirectories(mountPoint);
         DocumentListResponse documentListResponse;
         synchronized (dptLock) { documentListResponse = documentCommand.listDocuments(EntryType.ALL); }
@@ -300,7 +302,6 @@ public class DptFuseMounter extends FuseStubFS {
         }
         try {
             mount(mountPoint, true, false);
-            logWriter.log("Digital Paper mounted on " + mountPoint);
         }
         finally {
             umount();

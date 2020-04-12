@@ -318,4 +318,12 @@ public class DigitalPaperEndpoint {
     public String getFolderContent(String folderId) throws IOException, InterruptedException {
         return simpleHttpClient.get(secured(resolve(FOLDER_CONTENT_URL, variable("folder_id", folderId))));
     }
+
+    private static final String UPDATE_FOLDER_URL = "/folders2/${folder_id}";
+    public void updateFolder(String folderId, String newParentId, String newName) throws IOException, InterruptedException {
+        simpleHttpClient.put(secured(resolve(UPDATE_FOLDER_URL, variable("folder_id", folderId))), new HashMap<>() {{
+            if (newParentId != null) put("parent_folder_id", newParentId);
+            if (newName != null) put("folder_name", newName);
+        }});
+    }
 }

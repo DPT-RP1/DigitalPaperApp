@@ -113,7 +113,6 @@ dpt mount <mountpoint>
 The mount point is then browsable, and you can read, copy, rename, delete files and folders.
 
 ### What is not supported yet:
-- Renaming a folder
 - Getting changes from the dpt after the mount point has been created.
 
 For now the file cache is aggressive, in the sense that all files and folder trees are precalculated,

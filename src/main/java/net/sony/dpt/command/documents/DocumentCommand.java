@@ -103,8 +103,14 @@ public class DocumentCommand {
             newParentFolderId = createFolderRecursively(to.getParent());
         } else {
             // We have a folder
-            newParentFolderId = createFolderRecursively(to);
-            to = to.resolve(from.getFileName());
+            // We may just want to mv a folder
+            if (!matcher.matches(from.getFileName())) {
+                digitalPaperEndpoint.updateFolder(oldId, null, to.getName(to.getNameCount() - 1).toString());
+                return;
+            } else {
+                newParentFolderId = createFolderRecursively(to);
+                to = to.resolve(from.getFileName());
+            }
         }
 
         String newFileName = null;
