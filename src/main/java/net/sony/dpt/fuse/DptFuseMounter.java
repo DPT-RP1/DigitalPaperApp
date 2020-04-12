@@ -7,6 +7,7 @@ import net.sony.dpt.command.documents.DocumentEntry;
 import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.documents.DocumentCommand;
 import net.sony.dpt.command.documents.EntryType;
+import net.sony.util.LogWriter;
 import org.apache.commons.io.IOUtils;
 import ru.serce.jnrfuse.ErrorCodes;
 import ru.serce.jnrfuse.FuseFillDir;
@@ -30,7 +31,7 @@ public class DptFuseMounter extends FuseStubFS {
     private static final Path LOCAL_ROOT = Path.of("/");
 
     private final DocumentCommand documentCommand;
-
+    private final LogWriter logWriter;
     // The DPT cannot handle too many request in parallel. We need to lock and wait
     // for requests in this class.
     private static final Object dptLock = new Object();
@@ -48,8 +49,9 @@ public class DptFuseMounter extends FuseStubFS {
         return LOCAL_ROOT.resolve(REMOTE_ROOT.relativize(remotePath));
     }
 
-    public DptFuseMounter(final DocumentCommand documentCommand) {
+    public DptFuseMounter(final DocumentCommand documentCommand, final LogWriter logWriter) {
         this.documentCommand = documentCommand;
+        this.logWriter = logWriter;
 
         fileCache = new ConcurrentHashMap<>();
         writeCache = new ConcurrentHashMap<>();
@@ -288,6 +290,7 @@ public class DptFuseMounter extends FuseStubFS {
     }
 
     public void mountDpt(Path mountPoint) throws IOException, InterruptedException {
+        logWriter.log("Mounting the Digital Paper...");
         Files.createDirectories(mountPoint);
         DocumentListResponse documentListResponse;
         synchronized (dptLock) { documentListResponse = documentCommand.listDocuments(EntryType.ALL); }
@@ -295,8 +298,14 @@ public class DptFuseMounter extends FuseStubFS {
             Path path = toLocal(Path.of(entry.getEntryPath()));
             documentEntriesMap.put(path, entry);
         }
-        try { mount(mountPoint, true, true); }
-        finally { umount(); }
+        try {
+            mount(mountPoint, true, false);
+            logWriter.log("Digital Paper mounted on " + mountPoint);
+        }
+        finally {
+            umount();
+            logWriter.log("Digital Paper unmounted from " + mountPoint);
+        }
     }
 
     @Override

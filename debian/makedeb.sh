@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 sudo apt install git-buildpackage help2man maven dpkg
 sudo apt-get install fuse libfuse-dev
 
@@ -16,7 +17,7 @@ mkdir -p "${root_folder}/usr/share/man/man1/"
 
 echo "Building jar..."
 cd ..
-mvn clean package 1>/dev/null 2>/dev/null || (echo "Build failed...";exit)
+mvn clean package 1>/dev/null 2>/dev/null
 cd debian || exit
 
 jar_name=DigitalPaperApp
