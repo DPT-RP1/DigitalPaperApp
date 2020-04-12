@@ -15,7 +15,6 @@ import ru.serce.jnrfuse.struct.FileStat;
 import ru.serce.jnrfuse.struct.FuseFileInfo;
 import ru.serce.jnrfuse.struct.Timespec;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -30,7 +29,6 @@ public class DptFuseMounter extends FuseStubFS {
     private static final Path REMOTE_ROOT = Path.of("Document/");
     private static final Path LOCAL_ROOT = Path.of("/");
 
-    private final DocumentCommand listDocumentsCommand;
     private final DocumentCommand documentCommand;
 
     // The DPT cannot handle too many request in parallel. We need to lock and wait
@@ -50,8 +48,7 @@ public class DptFuseMounter extends FuseStubFS {
         return LOCAL_ROOT.resolve(REMOTE_ROOT.relativize(remotePath));
     }
 
-    public DptFuseMounter(final DocumentCommand listDocumentsCommand, final DocumentCommand documentCommand) {
-        this.listDocumentsCommand = listDocumentsCommand;
+    public DptFuseMounter(final DocumentCommand documentCommand) {
         this.documentCommand = documentCommand;
 
         fileCache = new ConcurrentHashMap<>();
@@ -60,13 +57,13 @@ public class DptFuseMounter extends FuseStubFS {
     }
 
     private int getFolderAttr(FileStat stat) {
-        stat.st_mode.set(FileStat.S_IFDIR | 0755);
+        stat.st_mode.set(FileStat.S_IFDIR | 0_755);
         stat.st_nlink.set(2);
         return 0;
     }
 
     private int getFileAttr(DocumentEntry found, FileStat stat) {
-        stat.st_mode.set(FileStat.S_IFREG | 0444);
+        stat.st_mode.set(FileStat.S_IFREG | 0_444);
         stat.st_nlink.set(1);
         stat.st_size.set(found.getFileSize());
 
@@ -118,9 +115,7 @@ public class DptFuseMounter extends FuseStubFS {
 
         if (documentEntriesMap.containsKey(localPath)) return -ErrorCodes.EEXIST();
         try {
-            synchronized (dptLock) {
-                documentCommand.createFolderRecursively(toRemote(localPath));
-            }
+            synchronized (dptLock) { documentCommand.createFolderRecursively(toRemote(localPath)); }
         } catch (IOException | InterruptedException e) {
             return -ErrorCodes.EREMOTEIO();
         }
@@ -134,12 +129,9 @@ public class DptFuseMounter extends FuseStubFS {
         Path localPath = Path.of(path);
         if (!documentEntriesMap.containsKey(localPath)) return -ErrorCodes.ENOENT();
         try {
-            synchronized (dptLock) {
-                documentCommand.deleteFolder(toRemote(localPath));
-            }
-        } catch (IOException | InterruptedException e) {
-            return -ErrorCodes.EREMOTEIO();
-        }
+            synchronized (dptLock) { documentCommand.deleteFolder(toRemote(localPath)); }
+        } catch (IOException | InterruptedException e) { return -ErrorCodes.EREMOTEIO(); }
+
         Set<Path> toRemove = documentEntriesMap.keySet()
                 .stream()
                 .filter(candidate -> candidate.startsWith(localPath))
@@ -153,12 +145,10 @@ public class DptFuseMounter extends FuseStubFS {
         Path old = Path.of(oldpath);
         Path newP = Path.of(newpath);
 
-        if (documentEntriesMap.containsKey(old)) return -ErrorCodes.ENOENT();
+        if (!documentEntriesMap.containsKey(old)) return -ErrorCodes.ENOENT();
 
         try {
-            synchronized (dptLock) {
-                documentCommand.move(toRemote(old), toRemote(newP));
-            }
+            synchronized (dptLock) { documentCommand.move(toRemote(old), toRemote(newP)); }
         } catch (IOException | InterruptedException e) {
             return -ErrorCodes.EREMOTEIO();
         }
@@ -175,12 +165,8 @@ public class DptFuseMounter extends FuseStubFS {
         if (documentEntriesMap.containsKey(localPath)) return -ErrorCodes.ENOENT();
 
         try {
-            synchronized (dptLock) {
-                documentCommand.delete(toRemote(localPath));
-            }
-        } catch (IOException | InterruptedException e) {
-            return -ErrorCodes.EREMOTEIO();
-        }
+            synchronized (dptLock) { documentCommand.delete(toRemote(localPath)); }
+        } catch (IOException | InterruptedException e) { return -ErrorCodes.EREMOTEIO(); }
         documentEntriesMap.remove(localPath);
         fileCache.remove(path);
         return 0;
@@ -196,16 +182,13 @@ public class DptFuseMounter extends FuseStubFS {
         if (writeCache.containsKey(path)) {
             if (writeCache.get(path).length == 0) return 0;
             Path localPath = Path.of(path);
-            String documentId;
             try {
-                synchronized (dptLock) {
-                    documentId = documentCommand.upload(writeCache.remove(path), toRemote(localPath));
-                }
-                documentEntriesMap.put(localPath, documentCommand.documentInfo(documentId));
+                String documentId;
+                synchronized (dptLock) { documentId = documentCommand.upload(writeCache.remove(path), toRemote(localPath)); }
+                synchronized (dptLock) { documentEntriesMap.put(localPath, documentCommand.documentInfo(documentId)); }
             } catch (IOException | InterruptedException e) {
-                documentId = null;
+                return ErrorCodes.EREMOTEIO();
             }
-            if (documentId == null) return ErrorCodes.EREMOTEIO();
         }
         return 0;
     }
@@ -218,9 +201,7 @@ public class DptFuseMounter extends FuseStubFS {
         Path remotePath = toRemote(localPath);
         DocumentEntry documentEntry;
         try {
-            synchronized (dptLock) {
-                documentEntry = documentCommand.documentInfo(documentCommand.create(remotePath));
-            }
+            synchronized (dptLock) { documentEntry = documentCommand.documentInfo(documentCommand.create(remotePath)); }
         } catch (IOException | InterruptedException e) {
             return ErrorCodes.EREMOTEIO();
         }
@@ -228,26 +209,6 @@ public class DptFuseMounter extends FuseStubFS {
         documentEntriesMap.put(localPath, documentEntry);
         fileCache.put(path, new byte[0]);
         writeCache.put(path, new byte[0]);
-        return 0;
-    }
-
-    @Override
-    public int setxattr(String path, String name, Pointer value, long size, int flags) {
-        return 0; // IGNORED
-    }
-
-    @Override
-    public int chown(String path, long uid, long gid) {
-        return 0; // IGNORED
-    }
-
-    @Override
-    public int truncate(String path, long size) {
-        return 0; // IGNORED
-    }
-
-    @Override
-    public int utimens(String path, Timespec[] timespec) {
         return 0;
     }
 
@@ -299,7 +260,7 @@ public class DptFuseMounter extends FuseStubFS {
                 try (InputStream stream = documentCommand.download(remotePath)) {
                     byte[] content = IOUtils.toByteArray(stream);
                     fileCache.put(path, content);
-                } catch (Exception ignored) { }
+                } catch (Exception ignored) { return ErrorCodes.EREMOTEIO(); }
             }
         }
 
@@ -316,14 +277,6 @@ public class DptFuseMounter extends FuseStubFS {
         return 0;
     }
 
-
-    public void buildDocumentsMap(List<DocumentEntry> documentEntries) {
-        for (DocumentEntry entry : documentEntries) {
-            Path path = toLocal(Path.of(entry.getEntryPath()));
-            documentEntriesMap.put(path, entry);
-        }
-    }
-
     public Set<String> findFolderChildren(Path folder, Map<Path, DocumentEntry> documentEntriesMap) {
         Set<String> content = new HashSet<>();
         for (Path candidate : documentEntriesMap.keySet()) {
@@ -336,12 +289,25 @@ public class DptFuseMounter extends FuseStubFS {
 
     public void mountDpt(Path mountPoint) throws IOException, InterruptedException {
         Files.createDirectories(mountPoint);
-        DocumentListResponse documentListResponse = listDocumentsCommand.listDocuments(EntryType.ALL);
-        buildDocumentsMap(documentListResponse.getEntryList());
-        try {
-            mount(mountPoint, true, true);
-        } finally {
-            umount();
+        DocumentListResponse documentListResponse;
+        synchronized (dptLock) { documentListResponse = documentCommand.listDocuments(EntryType.ALL); }
+        for (DocumentEntry entry : documentListResponse.getEntryList()) {
+            Path path = toLocal(Path.of(entry.getEntryPath()));
+            documentEntriesMap.put(path, entry);
         }
+        try { mount(mountPoint, true, true); }
+        finally { umount(); }
     }
+
+    @Override
+    public int setxattr(String path, String name, Pointer value, long size, int flags) { return 0; }
+
+    @Override
+    public int chown(String path, long uid, long gid) { return 0; }
+
+    @Override
+    public int truncate(String path, long size) { return 0; }
+
+    @Override
+    public int utimens(String path, Timespec[] timespec) { return 0; }
 }
