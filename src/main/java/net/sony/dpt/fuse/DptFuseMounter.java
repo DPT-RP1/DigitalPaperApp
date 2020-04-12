@@ -23,6 +23,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class DptFuseMounter extends FuseStubFS {
@@ -150,23 +152,39 @@ public class DptFuseMounter extends FuseStubFS {
         Path newP = Path.of(newpath);
 
         if (!documentEntriesMap.containsKey(old)) return -ErrorCodes.ENOENT();
-
+        String parentId;
         try {
-            synchronized (dptLock) { documentCommand.move(toRemote(old), toRemote(newP)); }
+            synchronized (dptLock) { parentId = documentCommand.move(toRemote(old), toRemote(newP)); }
         } catch (IOException | InterruptedException e) {
             return -ErrorCodes.EREMOTEIO();
         }
 
+        // TODO: maybe just refetching the entire document list would be simpler
         DocumentEntry documentEntry = documentEntriesMap.remove(old);
-        documentEntry.setEntryPath(newpath);
+        documentEntry.setEntryPath(toRemote(newP).toString());
+        documentEntry.setParentFolderId(parentId);
         documentEntriesMap.put(newP, documentEntry);
+        if (documentEntry.getEntryType() == EntryType.FOLDER) {
+            Set<Path> pathesToChange = documentEntriesMap.keySet()
+                    .stream()
+                    .filter(path -> path.getParent().equals(old))
+                    .collect(Collectors.toSet());
+
+            for (Path pathToChange : pathesToChange) {
+                Path changed = newP.resolve(old.relativize(pathToChange));
+                DocumentEntry entryToChange = documentEntriesMap.remove(pathToChange);
+                entryToChange.setEntryPath(toRemote(changed).toString());
+                entryToChange.setParentFolderId(parentId);
+                documentEntriesMap.put(changed, entryToChange);
+            }
+        }
         return 0;
     }
 
     @Override
     public int unlink(String path) {
         Path localPath = Path.of(path);
-        if (documentEntriesMap.containsKey(localPath)) return -ErrorCodes.ENOENT();
+        if (!documentEntriesMap.containsKey(localPath)) return -ErrorCodes.ENOENT();
 
         try {
             synchronized (dptLock) { documentCommand.delete(toRemote(localPath)); }
@@ -191,7 +209,7 @@ public class DptFuseMounter extends FuseStubFS {
                 synchronized (dptLock) { documentId = documentCommand.upload(writeCache.remove(path), toRemote(localPath)); }
                 synchronized (dptLock) { documentEntriesMap.put(localPath, documentCommand.documentInfo(documentId)); }
             } catch (IOException | InterruptedException e) {
-                return ErrorCodes.EREMOTEIO();
+                return -ErrorCodes.EREMOTEIO();
             }
         }
         return 0;
@@ -200,14 +218,14 @@ public class DptFuseMounter extends FuseStubFS {
     @Override
     public int create(String path, long mode, FuseFileInfo fi) {
         Path localPath = Path.of(path);
-        if (documentEntriesMap.containsKey(localPath)) return ErrorCodes.EEXIST();
+        if (documentEntriesMap.containsKey(localPath)) return -ErrorCodes.EEXIST();
 
         Path remotePath = toRemote(localPath);
         DocumentEntry documentEntry;
         try {
             synchronized (dptLock) { documentEntry = documentCommand.documentInfo(documentCommand.create(remotePath)); }
         } catch (IOException | InterruptedException e) {
-            return ErrorCodes.EREMOTEIO();
+            return -ErrorCodes.EREMOTEIO();
         }
 
         documentEntriesMap.put(localPath, documentEntry);
@@ -264,7 +282,7 @@ public class DptFuseMounter extends FuseStubFS {
                 try (InputStream stream = documentCommand.download(remotePath)) {
                     byte[] content = IOUtils.toByteArray(stream);
                     fileCache.put(path, content);
-                } catch (Exception ignored) { return ErrorCodes.EREMOTEIO(); }
+                } catch (Exception ignored) { return -ErrorCodes.EREMOTEIO(); }
             }
         }
 

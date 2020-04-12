@@ -90,7 +90,7 @@ public class DocumentCommand {
         return remotePath;
     }
 
-    public void move(Path from, Path to) throws IOException, InterruptedException {
+    public String move(Path from, Path to) throws IOException, InterruptedException {
         from = resolveRemotePath(from);
         to = resolveRemotePath(to);
         String oldId = digitalPaperEndpoint.resolveObjectByPath(from);
@@ -98,15 +98,12 @@ public class DocumentCommand {
         String newParentFolderId;
         // We assume here we'll only transfer extension-suffixed files
         PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.*");
-        if (matcher.matches(to.getFileName())) {
-            // We have a file
-            newParentFolderId = createFolderRecursively(to.getParent());
-        } else {
-            // We have a folder
+        newParentFolderId = createFolderRecursively(to.getParent());
+        if (!matcher.matches(to.getFileName())) {
             // We may just want to mv a folder
             if (!matcher.matches(from.getFileName())) {
-                digitalPaperEndpoint.updateFolder(oldId, null, to.getName(to.getNameCount() - 1).toString());
-                return;
+                digitalPaperEndpoint.updateFolder(oldId, newParentFolderId, to.getName(to.getNameCount() - 1).toString());
+                return newParentFolderId;
             } else {
                 newParentFolderId = createFolderRecursively(to);
                 to = to.resolve(from.getFileName());
@@ -118,6 +115,7 @@ public class DocumentCommand {
             newFileName = to.getFileName().toString();
         }
         digitalPaperEndpoint.setFileInfo(oldId, newParentFolderId, newFileName);
+        return newParentFolderId;
     }
 
     public void copy(Path from, Path to) throws IOException, InterruptedException {
