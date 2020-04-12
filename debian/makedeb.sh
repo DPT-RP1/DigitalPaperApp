@@ -1,5 +1,6 @@
 #!/bin/bash
 sudo apt install git-buildpackage help2man maven dpkg
+sudo apt-get install fuse libfuse-dev
 
 pkg_name=dpt
 version="$(cat VERSION)"

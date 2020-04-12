@@ -1,4 +1,6 @@
 #!/bin/bash
+sudo apt-get install fuse libfuse-dev
+
 cd ..
 mvn clean compile package
 

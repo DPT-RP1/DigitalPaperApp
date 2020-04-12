@@ -9,8 +9,10 @@ public class DocumentEntry {
 
     private String author;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss'Z'")
     @JsonProperty("created_date")
-    private String createDate;
+    private Date createDate;
+
     @JsonProperty("current_page")
     private long currentPage;
     @JsonProperty("document_source")
@@ -33,13 +35,18 @@ public class DocumentEntry {
     private boolean isNew;
     @JsonProperty("mime_type")
     private String mimeType;
+
     @JsonProperty("modified_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss'Z'")
     private Date modifiedDate;
+
     @JsonProperty("parent_folder_id")
     private String parentFolderId;
+
     @JsonProperty("reading_date")
-    private String readingDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss'Z'")
+    private Date readingDate;
+
     private String title;
     @JsonProperty("total_page")
     private long totalPage;
@@ -54,11 +61,11 @@ public class DocumentEntry {
         this.author = author;
     }
 
-    public String getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(String createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
@@ -158,11 +165,11 @@ public class DocumentEntry {
         this.parentFolderId = parentFolderId;
     }
 
-    public String getReadingDate() {
+    public Date getReadingDate() {
         return readingDate;
     }
 
-    public void setReadingDate(String readingDate) {
+    public void setReadingDate(Date readingDate) {
         this.readingDate = readingDate;
     }
 
@@ -181,6 +188,8 @@ public class DocumentEntry {
     public void setTotalPage(long totalPage) {
         this.totalPage = totalPage;
     }
+
+
 
     @Override
     public String toString() {

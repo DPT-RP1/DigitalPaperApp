@@ -19,6 +19,7 @@ import net.sony.dpt.command.sync.LocalSyncProgressBar;
 import net.sony.dpt.command.sync.SyncCommand;
 import net.sony.dpt.command.wifi.AccessPointList;
 import net.sony.dpt.command.wifi.WifiCommand;
+import net.sony.dpt.fuse.DptFuseMounter;
 import net.sony.dpt.persistence.DeviceInfoStore;
 import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
@@ -267,8 +268,17 @@ public class DigitalPaperCLI {
             case WHITEBOARD_HTML:
                 whiteboardHtml();
                 break;
+            case MOUNT:
+                mount(arguments.get(1));
+                break;
         }
 
+    }
+
+    private void mount(String mountPoint) throws IOException, InterruptedException {
+        new DptFuseMounter(
+                new ListDocumentsCommand(digitalPaperEndpoint)
+        ).mountDpt(Path.of(mountPoint));
     }
 
     private void printVersion() {
