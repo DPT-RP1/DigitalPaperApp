@@ -6,6 +6,8 @@ import jnr.ffi.types.size_t;
 import net.sony.dpt.command.documents.DocumentEntry;
 import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.documents.ListDocumentsCommand;
+import net.sony.dpt.command.documents.TransferDocumentCommand;
+import org.apache.commons.io.IOUtils;
 import ru.serce.jnrfuse.ErrorCodes;
 import ru.serce.jnrfuse.FuseFillDir;
 import ru.serce.jnrfuse.FuseStubFS;
@@ -13,6 +15,7 @@ import ru.serce.jnrfuse.struct.FileStat;
 import ru.serce.jnrfuse.struct.FuseFileInfo;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -23,9 +26,13 @@ public class DptFuseMounter extends FuseStubFS {
     private static final Path LOCAL_ROOT = Path.of("/");
 
     private final ListDocumentsCommand listDocumentsCommand;
+    private final TransferDocumentCommand transferDocumentCommand;
 
-    public DptFuseMounter(final ListDocumentsCommand listDocumentsCommand) {
+    public DptFuseMounter(final ListDocumentsCommand listDocumentsCommand, final TransferDocumentCommand transferDocumentCommand) {
         this.listDocumentsCommand = listDocumentsCommand;
+        this.transferDocumentCommand = transferDocumentCommand;
+
+        fileCache = new HashMap<>();
     }
 
     @Override
@@ -65,29 +72,42 @@ public class DptFuseMounter extends FuseStubFS {
 
     @Override
     public int open(String path, FuseFileInfo fi) {
-        if (!"/hello".equals(path)) {
-            return -ErrorCodes.ENOENT();
-        }
+        if (!documentEntriesMap.containsKey(Path.of(path))) return -ErrorCodes.ENOENT();
         return 0;
     }
 
-    @Override
-    public int read(String path, Pointer buf, @size_t long size, @off_t long offset, FuseFileInfo fi) {
-        if (!"/hello".equals(path)) {
-            return -ErrorCodes.ENOENT();
-        }
-
-        byte[] bytes = "Hello".getBytes();
-        int length = bytes.length;
+    // This cache will help to read partial files TODO: definitely a good LRU use case !!
+    private final Map<String, byte[]> fileCache;
+    private int readFromCache(String path, Pointer buf, @size_t long size, @off_t long offset) {
+        byte[] content = fileCache.get(path);
+        int length = content.length;
         if (offset < length) {
             if (offset + size > length) {
                 size = length - offset;
             }
-            buf.put(0, bytes, 0, bytes.length);
+            buf.put(0, content, (int) offset, (int) size);
         } else {
             size = 0;
         }
         return (int) size;
+    }
+
+    @Override
+    public int read(String path, Pointer buf, @size_t long size, @off_t long offset, FuseFileInfo fi) {
+        Path localPath = Path.of(path);
+        if (!documentEntriesMap.containsKey(localPath)) return -ErrorCodes.ENOENT();
+
+        DocumentEntry documentEntry = documentEntriesMap.get(localPath);
+        Path remotePath = Path.of(documentEntry.getEntryPath());
+
+        if (!fileCache.containsKey(path)) {
+            try (InputStream stream = transferDocumentCommand.download(remotePath)){
+                byte[] content = IOUtils.toByteArray(stream);
+                fileCache.put(path, content);
+            } catch (Exception ignored) { }
+        }
+
+        return readFromCache(path, buf, size, offset);
     }
 
     @Override

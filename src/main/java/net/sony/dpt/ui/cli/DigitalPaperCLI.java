@@ -277,7 +277,8 @@ public class DigitalPaperCLI {
 
     private void mount(String mountPoint) throws IOException, InterruptedException {
         new DptFuseMounter(
-                new ListDocumentsCommand(digitalPaperEndpoint)
+                new ListDocumentsCommand(digitalPaperEndpoint),
+                new TransferDocumentCommand(digitalPaperEndpoint)
         ).mountDpt(Path.of(mountPoint));
     }
 

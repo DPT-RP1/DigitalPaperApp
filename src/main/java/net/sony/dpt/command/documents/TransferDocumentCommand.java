@@ -24,12 +24,7 @@ public class TransferDocumentCommand {
         remotePath = resolveRemotePath(remotePath);
         String remoteId = digitalPaperEndpoint.resolveObjectByPath(remotePath);
 
-        InputStream file = digitalPaperEndpoint.downloadByRemoteId(remoteId);
-        try (ByteArrayOutputStream memoryCopy = new ByteArrayOutputStream()) {
-            IOUtils.copy(file, memoryCopy);
-            file.close();
-            return new ByteArrayInputStream(memoryCopy.toByteArray());
-        }
+        return digitalPaperEndpoint.downloadByRemoteId(remoteId);
     }
 
     public void delete(Path path) throws IOException, InterruptedException {
