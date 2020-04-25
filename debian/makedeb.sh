@@ -43,7 +43,7 @@ gbp dch --ignore-branch --since=1c23aca0070f0f7a9d9f064b2d172165eb8060c2 -R --sp
 
 gzip -9 changelog -c > changelog.gz
 
-mv changelog.gz "${root_folder}/usr/share/doc/dpt/changelog.Debian.gz"
+mv changelog.gz "${root_folder}/usr/share/doc/dpt/changelog.gz"
 
 echo "Building documentation"
 help2man -N -n "A simple Sony Digital Paper CLI manager" "java -jar ${root_folder}/usr/share/dpt/${jar_name}.jar --help" > dpt.1
