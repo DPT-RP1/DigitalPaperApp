@@ -36,7 +36,7 @@ public enum Command {
     UPDATE_FIRMWARE("update-firmware", Arrays.asList(CommandOption.FORCE, CommandOption.DRYRUN), Collections.emptyList(), "Check for update and update the firmware if needed. Will ask for confirmation before triggering the update. Use -dryrun to test the process."),
     RAW_GET("get", Collections.emptyList(), Collections.singletonList("url"), "Sends and display a GET request to the Digital Paper"),
     MOUNT("mount", Collections.emptyList(), Collections.singletonList("[mount-point]"), "FUSE-mounts the DPT at the specified mount point. If not mount point is specified, it will attempt to use the one passed previously"),
-    INSERT_NOTE_TEMPLATE("insert-note-template", Collections.emptyList(), Arrays.asList("name", "path-of-template"), "Inserts a new note template from the specified file, with the specified name"),
+    INSERT_NOTE_TEMPLATE("insert-note-template", Collections.emptyList(), Arrays.asList("name", "path"), "Inserts a new note template from the specified file, with the specified name"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 
     private final List<String> commandNames;
