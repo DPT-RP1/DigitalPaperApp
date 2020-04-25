@@ -23,8 +23,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class DptFuseMounter extends FuseStubFS {
@@ -159,7 +157,6 @@ public class DptFuseMounter extends FuseStubFS {
             return -ErrorCodes.EREMOTEIO();
         }
 
-        // TODO: maybe just refetching the entire document list would be simpler
         DocumentEntry documentEntry = documentEntriesMap.remove(old);
         documentEntry.setEntryPath(toRemote(newP).toString());
         documentEntry.setParentFolderId(parentId);
