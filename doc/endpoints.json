@@ -1461,7 +1461,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "**ノートテンプレートの一覧**\n",
+        "description": "**List of note templates**\n",
         "responses": {
           "200": {
             "description": "Successful response",
@@ -1490,12 +1490,12 @@
         "produces": [
           "application/json"
         ],
-        "description": "**ノートテンプレート情報の作成**\n * ここではノートテンプレート情報の作成のみ行う。\n * 本APIでノートテンプレート情報を作成後、それに対してノートテンプレートファイル実体を「/viewer/configs/note_templates/{note_template_id}/file」にて紐付ける必要がある。\n",
+        "description": "**Creating note template information **\n  * Only the note template information is created here.\n  * After creating the note template information with this API, it is necessary to associate the note template file entity with it in /viewer/configs/note_templates/{note_template_id}/file\".",
         "parameters": [
           {
             "name": "note_template_info",
             "in": "body",
-            "description": "作成するノートテンプレートの情報",
+            "description": "Information on the note template to be created",
             "required": true,
             "schema": {
               "$ref": "#/definitions/viewerConfigsNoteTemplatePostRequest"
@@ -1559,7 +1559,7 @@
             }
           },
           "404": {
-            "description": "* [40401] 指定されたIDのノートテンプレートが存在しない",
+            "description": "* [40401] The is no note template with this ID",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1615,7 +1615,7 @@
             }
           },
           "404": {
-            "description": "* [40401] 指定されたIDのノートテンプレートが存在しない",
+            "description": "* [40401] The is no note template with this ID",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1644,7 +1644,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "**ノートテンプレートの削除**\n",
+        "description": "** Delete note template **\n",
         "parameters": [
           {
             "name": "note_template_id",
@@ -1665,7 +1665,7 @@
             }
           },
           "404": {
-            "description": "* [40401] 指定されたIDのノートテンプレートが存在しない",
+            "description": "* [40401] The is no note template with this ID",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -1693,32 +1693,32 @@
         "produces": [
           "application/json"
         ],
-        "description": "**ノートテンプレート実体のアップロード**\n * 特定のノートテンプレートに対してファイル実体を紐づける。\n * 既にnote_template_idに紐づくファイルが存在した場合は上書きする。\n * 分割アップロードが可能\n",
+        "description": "** Upload note template entity **\n  * Associate the file entity with a specific note template.\n  * If a file associated with note_template_id already exists, it will be overwritten.\n  * Split upload is possible",
         "parameters": [
           {
             "name": "note_template_id",
             "in": "path",
-            "description": "アップロードして紐づけるノートテンプレートのID ※先にノートテンプレート登録を行い、IDを取得",
+            "description": "ID of note template to upload and associate * Register note template first and get ID",
             "required": true,
             "type": "string"
           },
           {
             "name": "file",
             "in": "formData",
-            "description": "ファイル実体",
+            "description": "File entity",
             "required": true,
             "type": "file"
           },
           {
             "name": "offset_bytes",
             "in": "query",
-            "description": "分割アップロードの際に指定 ※詳細はInstructionを参照の事",
+            "description": "Specify when uploading in multiple parts * For details, see Instruction",
             "type": "string"
           },
           {
             "name": "total_bytes",
             "in": "query",
-            "description": "分割アップロードの際に指定 ※詳細はInstructionを参照の事",
+            "description": "Specify when uploading in multiple parts * For details, see Instruction",
             "type": "string"
           }
         ],
@@ -1736,7 +1736,7 @@
             }
           },
           "404": {
-            "description": "* [40401] 指定されたIDのノートテンプレートが存在しない",
+            "description": "* [40401] The is no note template with this ID",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -5019,7 +5019,7 @@
       ],
       "properties": {
         "template_name": {
-          "description": "作成するノートテンプレート名",
+          "description": "Note template name to create",
           "type": "string"
         }
       }
@@ -5031,7 +5031,7 @@
       ],
       "properties": {
         "note_template_id": {
-          "description": "作成されたノートテンプレートのID",
+          "description": "ID of created note template",
           "type": "string"
         }
       }
@@ -5040,7 +5040,7 @@
       "type": "object",
       "properties": {
         "template_name": {
-          "description": "変更後のノートテンプレート名 ※NULLの場合は変更しない",
+          "description": "Note template name after change * If NULL, do not change ",
           "type": "string"
         }
       }

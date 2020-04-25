@@ -1,5 +1,6 @@
 package net.sony.dpt.ui.cli;
 
+import net.sony.dpt.command.notes.NoteTemplateCommand;
 import net.sony.dpt.network.CheckedHttpClient;
 import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.dpt.command.authenticate.AuthenticateCommand;
@@ -255,8 +256,14 @@ public class DigitalPaperCLI {
             case MOUNT:
                 mount(lastCommandRunStore.retrieveOneArgument(command, arguments));
                 break;
+            case INSERT_NOTE_TEMPLATE:
+                insertNoteTemplate(arguments.get(1), arguments.get(2));
         }
 
+    }
+
+    private void insertNoteTemplate(String name, String path) throws IOException, InterruptedException {
+        new NoteTemplateCommand(digitalPaperEndpoint).insertNoteTemplate(name, Path.of(path));
     }
 
     private void mount(String mountPoint) throws IOException, InterruptedException {

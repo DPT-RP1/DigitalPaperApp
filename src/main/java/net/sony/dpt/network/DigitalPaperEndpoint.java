@@ -323,4 +323,19 @@ public class DigitalPaperEndpoint {
             if (newName != null) put("folder_name", newName);
         }});
     }
+
+    private static final String NOTE_TEMPLATE = "/viewer/configs/note_templates";
+    public String createNoteTemplate(String name) throws IOException, InterruptedException {
+        return (String) fromJSON(simpleHttpClient.post(secured(NOTE_TEMPLATE), new HashMap<>() {{
+            put("template_name", name);
+        }})).get("note_template_id");
+    }
+
+    private static final String NOTE_TEMPLATE_FILE = "/viewer/configs/note_templates/${note_template_id}/file";
+    public void insertNoteTemplateFile(String noteId, Path sourcePath) throws IOException, InterruptedException {
+        simpleHttpClient.putFile(
+            secured(resolve(NOTE_TEMPLATE_FILE, variable("note_template_id", noteId))),
+            sourcePath
+        );
+    }
 }
