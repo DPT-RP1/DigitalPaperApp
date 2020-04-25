@@ -95,32 +95,9 @@ public class DigitalPaperCLI {
     }
 
     private String findAddress(CommandLine commandLine) throws IOException, InterruptedException {
-        String addr;
-        if (commandLine.hasOption("addr")) {
-            addr = commandLine.getOptionValue("addr");
-        } else {
-            // Before trying autoconfig, we can try loading the last ip
-            String lastIp = deviceInfoStore.retrieveLastIp();
-            if (lastIp != null && new PingCommand().ping(lastIp)) {
-                addr = lastIp;
-            } else {
-                String matchSerial = null;
-                if (commandLine.hasOption("serial")) {
-                    matchSerial = commandLine.getOptionValue("serial");
-                }
-                addr = new FindDigitalPaper(logWriter, new CheckedHttpClient(UncheckedHttpClient.insecure()), matchSerial).findOneIpv4();
-            }
-        }
-        if (addr == null || addr.isEmpty()) throw new IllegalStateException("No device found or reachable.");
-        // We store the last address
-        deviceInfoStore.storeLastIp(addr);
-
-        // We test if the zeroconf digitalpaper.local is setup
-        try {
-            String zeroconfIp = new PingCommand().pingAndResolve(FindDigitalPaper.ZEROCONF_HOST);
-            if (addr.equals(zeroconfIp)) return FindDigitalPaper.ZEROCONF_HOST;
-        } catch (Exception ignored) {}
-        return addr;
+        if (commandLine.hasOption("addr")) return FindDigitalPaper.findAddress(deviceInfoStore, logWriter, commandLine.getOptionValue("addr"), null);
+        if (commandLine.hasOption("serial")) return FindDigitalPaper.findAddress(deviceInfoStore, logWriter, null, commandLine.getOptionValue("serial"));
+        return FindDigitalPaper.findAddress(deviceInfoStore, logWriter, null, null);
     }
 
     private void printHelp() {

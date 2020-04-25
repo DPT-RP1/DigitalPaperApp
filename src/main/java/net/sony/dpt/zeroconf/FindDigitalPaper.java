@@ -1,5 +1,9 @@
 package net.sony.dpt.zeroconf;
 
+import net.sony.dpt.command.ping.PingCommand;
+import net.sony.dpt.network.CheckedHttpClient;
+import net.sony.dpt.network.UncheckedHttpClient;
+import net.sony.dpt.persistence.DeviceInfoStore;
 import net.sony.util.LogWriter;
 import net.sony.dpt.network.SimpleHttpClient;
 
@@ -138,5 +142,30 @@ public class FindDigitalPaper {
                 ipv4Found.put(ipv4Addresses[0], event);
             }
         }
+    }
+
+    public static String findAddress(DeviceInfoStore deviceInfoStore, LogWriter logWriter, String address, String serial) throws IOException, InterruptedException {
+        String addr;
+        if (address != null) {
+            addr = address;
+        } else {
+            // Before trying autoconfig, we can try loading the last ip
+            String lastIp = deviceInfoStore.retrieveLastIp();
+            if (lastIp != null && new PingCommand().ping(lastIp)) {
+                addr = lastIp;
+            } else {
+                addr = new FindDigitalPaper(logWriter, new CheckedHttpClient(UncheckedHttpClient.insecure()), serial).findOneIpv4();
+            }
+        }
+        if (addr == null || addr.isEmpty()) throw new IllegalStateException("No device found or reachable.");
+        // We store the last address
+        deviceInfoStore.storeLastIp(addr);
+
+        // We test if the zeroconf digitalpaper.local is setup
+        try {
+            String zeroconfIp = new PingCommand().pingAndResolve(FindDigitalPaper.ZEROCONF_HOST);
+            if (addr.equals(zeroconfIp)) return FindDigitalPaper.ZEROCONF_HOST;
+        } catch (Exception ignored) {}
+        return addr;
     }
 }
