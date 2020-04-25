@@ -37,6 +37,8 @@ public enum Command {
     RAW_GET("get", Collections.emptyList(), Collections.singletonList("url"), "Sends and display a GET request to the Digital Paper"),
     MOUNT("mount", Collections.emptyList(), Collections.singletonList("[mount-point]"), "FUSE-mounts the DPT at the specified mount point. If not mount point is specified, it will attempt to use the one passed previously"),
     INSERT_NOTE_TEMPLATE("insert-note-template", Collections.emptyList(), Arrays.asList("name", "path"), "Inserts a new note template from the specified file, with the specified name"),
+    GET_CONFIGURATION("get-configuration", Collections.emptyList(), Collections.singletonList("path"), "Saves the system configuration to a local file at <path>"),
+    SET_CONFIGURATION("set-configuration", Collections.emptyList(), Collections.singletonList("path"), "Send the system configuration from a local file at <path>"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 
     private final List<String> commandNames;

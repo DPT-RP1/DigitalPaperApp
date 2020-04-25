@@ -5,7 +5,7 @@ import net.sony.dpt.network.CheckedHttpClient;
 import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.dpt.command.authenticate.AuthenticateCommand;
 import net.sony.dpt.command.authenticate.AuthenticationCookie;
-import net.sony.dpt.command.device.StatusCommand;
+import net.sony.dpt.command.device.SystemConfigCommand;
 import net.sony.dpt.command.device.TakeScreenshotCommand;
 import net.sony.dpt.command.dialog.DialogCommand;
 import net.sony.dpt.command.documents.DocumentListResponse;
@@ -258,8 +258,23 @@ public class DigitalPaperCLI {
                 break;
             case INSERT_NOTE_TEMPLATE:
                 insertNoteTemplate(arguments.get(1), arguments.get(2));
+                break;
+            case GET_CONFIGURATION:
+                getConfiguration(arguments.size() < 2 ? "./config.json" : arguments.get(1));
+                break;
+            case SET_CONFIGURATION:
+                setConfiguration(arguments.size() < 2 ? "./config.json" : arguments.get(1));
+                break;
         }
 
+    }
+
+    private void getConfiguration(String path) throws IOException, InterruptedException {
+        new SystemConfigCommand(digitalPaperEndpoint, logWriter).saveSystemConfigsToLocal(Path.of(path));
+    }
+
+    private void setConfiguration(String path) throws IOException, InterruptedException {
+        new SystemConfigCommand(digitalPaperEndpoint, logWriter).sendSystemConfigsToRemote(Path.of(path));
     }
 
     private void insertNoteTemplate(String name, String path) throws IOException, InterruptedException {
@@ -291,11 +306,11 @@ public class DigitalPaperCLI {
     }
 
     private void showBatteryStatus() throws IOException, InterruptedException {
-        new StatusCommand(digitalPaperEndpoint, logWriter).showBatteryStatus();
+        new SystemConfigCommand(digitalPaperEndpoint, logWriter).showBatteryStatus();
     }
 
     private void showStorageStatus() throws IOException, InterruptedException {
-        new StatusCommand(digitalPaperEndpoint, logWriter).showStorageStatus();
+        new SystemConfigCommand(digitalPaperEndpoint, logWriter).showStorageStatus();
     }
 
     private void watchAndPrint(String localFolderToWatch) throws IOException {
@@ -468,11 +483,11 @@ public class DigitalPaperCLI {
     }
 
     private void showOwner() throws IOException, InterruptedException {
-        new StatusCommand(digitalPaperEndpoint, logWriter).showOwnerName();
+        new SystemConfigCommand(digitalPaperEndpoint, logWriter).showOwnerName();
     }
 
     private void setOwner(String ownerName) throws IOException, InterruptedException {
-        new StatusCommand(digitalPaperEndpoint, logWriter).setOwnerName(ownerName);
+        new SystemConfigCommand(digitalPaperEndpoint, logWriter).setOwnerName(ownerName);
     }
 
     private void turnWifiOff() throws IOException, InterruptedException {

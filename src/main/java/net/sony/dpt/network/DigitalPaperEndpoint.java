@@ -338,4 +338,14 @@ public class DigitalPaperEndpoint {
             sourcePath
         );
     }
+
+    private static final String CONFIG_URL = "/system/configs";
+    public String getSystemConfigs() throws IOException, InterruptedException {
+        return simpleHttpClient.get(secured(CONFIG_URL));
+    }
+
+    private static final String SET_CONFIG_URL = "/system/configs/${key}";
+    public void setSystemConfig(String key, Map<String, Object> value) throws IOException, InterruptedException {
+        simpleHttpClient.put(secured(resolve(SET_CONFIG_URL, variable("key", key))), value);
+    }
 }
