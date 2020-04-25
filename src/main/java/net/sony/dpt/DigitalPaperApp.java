@@ -2,6 +2,7 @@ package net.sony.dpt;
 
 import net.sony.dpt.error.SonyException;
 import net.sony.dpt.persistence.DeviceInfoStore;
+import net.sony.dpt.persistence.LastCommandRunStore;
 import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
 import net.sony.dpt.ui.cli.Command;
@@ -15,6 +16,8 @@ import java.util.Scanner;
 public class DigitalPaperApp {
 
     public static void main(String[] args)  {
+        Path homeFolder = Path.of(System.getProperty("user.home"));
+
         DigitalPaperCLI digitalPaperCLI = new DigitalPaperCLI(
                 new DiffieHelman(),
                 new CryptographyUtils(),
@@ -23,9 +26,10 @@ public class DigitalPaperApp {
                     Scanner scanner = new Scanner(System.in);
                     return scanner.nextLine();
                 },
-                new RegistrationTokenStore(Path.of(System.getProperty("user.home"))),
-                new SyncStore(Path.of(System.getProperty("user.home"))),
-                new DeviceInfoStore(Path.of(System.getProperty("user.home")))
+                new RegistrationTokenStore(homeFolder),
+                new SyncStore(homeFolder),
+                new DeviceInfoStore(homeFolder),
+                new LastCommandRunStore(homeFolder, System.out::println)
         );
         try {
             digitalPaperCLI.execute(args);

@@ -5,7 +5,7 @@ import java.util.*;
 public enum Command {
     REGISTER("register", Collections.emptyList(), Collections.emptyList(), "Starts the pairing process with the Digital Paper"),
     PING("ping", "Tests the connection with the Digital Paper"),
-    SYNC("sync", Collections.singletonList(CommandOption.DRYRUN), Collections.singletonList("local-sync-folder"), "Synchronizes a local folder with the Digital paper"),
+    SYNC("sync", Collections.singletonList(CommandOption.DRYRUN), Collections.singletonList("[local-sync-folder]"), "Synchronizes a local folder with the Digital paper. If no folder is given, it will use the one passed previously"),
     LIST_DOCUMENTS("list-documents", "Lists all documents"),
     DOCUMENT_INFO("document-info", "Prints all documents and their attributes, raw"),
     UPLOAD("upload", Collections.emptyList(), Arrays.asList("local-file", "[remote-file]"), "Sends a local file to the Digital Paper"),
@@ -128,6 +128,26 @@ public enum Command {
             helpBuilder.append("\n");
         }
         return helpBuilder.toString();
+    }
+
+    public List<String> getCommandNames() {
+        return commandNames;
+    }
+
+    public static Map<String, Command> getCommandMap() {
+        return commandMap;
+    }
+
+    public List<CommandOption> getCommandOptions() {
+        return commandOptions;
+    }
+
+    public List<String> getArgumentNames() {
+        return argumentNames;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public static void main(String[] args) {

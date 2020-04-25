@@ -23,6 +23,7 @@ import net.sony.dpt.fuse.DptFuseMounter;
 import net.sony.dpt.network.SimpleHttpClient;
 import net.sony.dpt.network.UncheckedHttpClient;
 import net.sony.dpt.persistence.DeviceInfoStore;
+import net.sony.dpt.persistence.LastCommandRunStore;
 import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
 import net.sony.dpt.ui.gui.whiteboard.Whiteboard;
@@ -67,6 +68,8 @@ public class DigitalPaperCLI {
     private final RegistrationTokenStore registrationTokenStore;
     private final SyncStore syncStore;
     private final DeviceInfoStore deviceInfoStore;
+    private final LastCommandRunStore lastCommandRunStore;
+
     private DigitalPaperEndpoint digitalPaperEndpoint;
 
     public DigitalPaperCLI(DiffieHelman diffieHelman,
@@ -75,7 +78,8 @@ public class DigitalPaperCLI {
                            InputReader inputReader,
                            RegistrationTokenStore registrationTokenStore,
                            SyncStore syncStore,
-                           DeviceInfoStore deviceInfoStore) {
+                           DeviceInfoStore deviceInfoStore,
+                           LastCommandRunStore lastCommandRunStore) {
 
         parser = new DefaultParser();
         this.diffieHelman = diffieHelman;
@@ -85,6 +89,7 @@ public class DigitalPaperCLI {
         this.registrationTokenStore = registrationTokenStore;
         this.syncStore = syncStore;
         this.deviceInfoStore = deviceInfoStore;
+        this.lastCommandRunStore = lastCommandRunStore;
 
         options = CommandOption.options();
     }
@@ -217,7 +222,14 @@ public class DigitalPaperCLI {
                 new Whiteboard(new TakeScreenshotCommand(digitalPaperEndpoint));
                 break;
             case SYNC:
-                sync(arguments.get(1), dryrun);
+                String localSyncFolder;
+                if (arguments.size() - 1 < command.getArgumentNames().size()) {
+                    localSyncFolder = lastCommandRunStore.retrieve(command).get(0);
+                } else {
+                    localSyncFolder = arguments.get(1);
+                    lastCommandRunStore.store(command, localSyncFolder);
+                }
+                sync(localSyncFolder, dryrun);
                 break;
             case DIALOG:
                 showDialog(arguments.get(1), arguments.get(2), arguments.get(3));

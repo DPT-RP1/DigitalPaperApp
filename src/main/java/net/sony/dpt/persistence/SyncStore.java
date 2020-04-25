@@ -6,14 +6,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 
-public class SyncStore {
+public class SyncStore extends AbstractStore {
 
-    private static final Path applicationPath = Path.of(".dpt");
     private static final Path lastSyncPath = Path.of("last_sync.date");
-    private final Path storagePath;
 
     public SyncStore(Path storagePath) {
-        this.storagePath = storagePath.resolve(applicationPath);
+        super(storagePath);
     }
 
     public void storeLastSyncDate(Date lastSync) throws IOException {

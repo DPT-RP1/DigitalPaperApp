@@ -5,13 +5,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class DeviceInfoStore {
-    private static final Path applicationPath = Path.of(".dpt");
+public class DeviceInfoStore extends AbstractStore  {
     private static final Path lastSyncPath = Path.of("last_connection.ip");
-    private final Path storagePath;
 
     public DeviceInfoStore(Path storagePath) {
-        this.storagePath = storagePath.resolve(applicationPath);
+
+        super(storagePath);
     }
 
     public void storeLastIp(String lastIp) throws IOException {

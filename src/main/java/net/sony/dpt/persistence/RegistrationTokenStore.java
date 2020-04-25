@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-public class RegistrationTokenStore {
+public class RegistrationTokenStore extends AbstractStore {
 
     public enum TokenStoreLocation {
         DEFAULT(".dpt", "id_rsa", "cert.pem", "client_id.dat"),
@@ -34,10 +34,8 @@ public class RegistrationTokenStore {
         }
     }
 
-    private final Path root;
-
     public RegistrationTokenStore(Path storageRoot) {
-        this.root = storageRoot;
+        super(storageRoot);
     }
 
     public void storeRegistrationToken(RegistrationResponse registrationResponse) throws IOException {
@@ -46,7 +44,7 @@ public class RegistrationTokenStore {
 
 
     public void storeRegistrationToken(RegistrationResponse registrationResponse, TokenStoreLocation tokenStoreLocation) throws IOException {
-        Path storagePath = root.resolve(tokenStoreLocation.applicationPath);
+        Path storagePath = storageRoot.resolve(tokenStoreLocation.applicationPath);
         Path privateKeyPath = tokenStoreLocation.privateKeyName;
         Path clientIdPath = tokenStoreLocation.clientIdName;
         Path certificatePath = tokenStoreLocation.certName;
@@ -71,7 +69,7 @@ public class RegistrationTokenStore {
     }
 
     public RegistrationResponse retrieveRegistrationToken(TokenStoreLocation tokenStoreLocation) throws IOException {
-        Path storagePath = root.resolve(tokenStoreLocation.applicationPath);
+        Path storagePath = storageRoot.resolve(tokenStoreLocation.applicationPath);
         Path privateKeyPath = tokenStoreLocation.privateKeyName;
         Path clientIdPath = tokenStoreLocation.clientIdName;
         Path certificatePath = tokenStoreLocation.certName;
@@ -90,7 +88,7 @@ public class RegistrationTokenStore {
     }
 
     public boolean registered(TokenStoreLocation tokenStoreLocation) {
-        Path storagePath = root.resolve(tokenStoreLocation.applicationPath);
+        Path storagePath = storageRoot.resolve(tokenStoreLocation.applicationPath);
         Path privateKeyPath = tokenStoreLocation.privateKeyName;
         Path clientIdPath = tokenStoreLocation.clientIdName;
         Path lastWorkspace;
@@ -113,7 +111,7 @@ public class RegistrationTokenStore {
                 return Path.of("");
             case OFFICIAL_MAC:
             case OFFICIAL_WINDOWS:
-                Path applicationPath = root.resolve(tokenStoreLocation.applicationPath);
+                Path applicationPath = storageRoot.resolve(tokenStoreLocation.applicationPath);
                 Path lastWorkspaceIdDescriptorPath = Path.of("lastworkspaceid.dat");
                 return Path.of(
                     Files.readString(
