@@ -38,8 +38,8 @@ cp -R DEBIAN "${root_folder}/"
 cp copyright "${root_folder}/usr/share/doc/dpt/"
 
 echo "Building changelog"
-cp changelog changelog.backup
-gbp dch --ignore-branch --since=1c23aca0070f0f7a9d9f064b2d172165eb8060c2 -R --spawn-editor=never --git-author --customizations=/usr/share/doc/git-buildpackage/examples/wrap_cl.py
+#gbp dch --ignore-branch --since=1c23aca0070f0f7a9d9f064b2d172165eb8060c2 -R --spawn-editor=never --git-author --customizations=/usr/share/doc/git-buildpackage/examples/wrap_cl.py
+gbp dch --ignore-branch -R -v "${version}" -R --spawn-editor=never --git-author --customizations=/usr/share/doc/git-buildpackage/examples/wrap_cl.py
 
 gzip -9 changelog -c > changelog.gz
 
@@ -55,7 +55,6 @@ dpkg-deb --root-owner-group --build "${root_folder}"
 
 echo "Cleaning up"
 rm -rf "${root_folder}"
-mv changelog.backup changelog
 rm ../cups/cups-pdf-dpt
 rm dpt.1
 

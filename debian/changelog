@@ -1,3 +1,159 @@
+dpt (1.1.0) stable; urgency=medium
+
+  [ pierre ]
+  * Initial commit - ability to register
+  * Initial commit - ability to register
+
+  [ dependabot[bot] ]
+  * Bump jackson-databind from 2.9.8 to 2.9.10.3
+  * Initial commit - ability to register
+
+  [ xpierro ]
+  * Large refactor of registration
+  * Working authentication and registration persistence
+  * Ability to list files
+  * Ability to list files
+  * Candidate file upload
+  * Candidate file upload
+  * Document upload works
+  * First CLI working
+  * Move command
+  * Scan wifi command
+  * Scan wifi command
+  * Zero-conf autodiscovery
+  * Cleanup
+  * Added a proto-readme
+  * Very crude whiteboard
+  * Ignore target folder
+  * Ignore target folder
+  * Update license to stick to the original.
+  * Remove remaining explicit console logs
+
+  [ pierre ]
+  * Tests
+  * Swagger doc added + fixes and some translation
+  * More swagger translations
+
+  [ xpierro ]
+  * Sync draft #1 - Dry-run
+  * Synchronization init works, same tree works, added a persistence of
+    the last ip with ping
+  * More translation, beginning of dialog management
+  * Dry-run should not set the last sync date
+  * Sync globally working
+  * Synchronization with progress info on the DPT
+  * Ability to "stop" the progress bar
+  * Progress bar
+
+  [ pierre ]
+  * Better registration logic and first launch
+  * Linux install script + sync fixes
+  * Various fixes
+  * Various fixes
+  * More wifi functions, at the same time the upgrade added wifi self-
+    configuration.
+  * Actual check of the cert and pv key if connecting to the host matching
+    the cert, with fallback.
+  * Wifi state command
+  * Wifi state command
+
+  [ xpierro ]
+  * A nice working whiteboard
+  * Rename function
+  * Rename function
+
+  [ pierre ]
+  * More tests
+  * More tests
+  * Preparation for the firnware update
+
+  [ xpierro ]
+  * Beginning of an upgrade function
+  * Beginning of an upgrade function
+  * Beginning of an upgrade function
+
+  [ pierre ]
+  * More translation
+  * Print with watcher
+  * Migrate if already registered on another app
+
+  [ xpierro ]
+  * Fix RSA key loader
+
+  [ pierre ]
+  * Remove deprecated
+  * Working CUPS driver, based on CUPS-PDF
+  * Beginning of an help function
+  * DEB package building
+  * DEB package building
+  * Continue command doc
+  * Sync improvements
+  * Some status commands
+  * More translation
+  * More translation / Reverse engineering utility / preinst hides error
+  * More debian fixes
+  * More debian fixes
+  * More debian fixes
+  * More debian fixes
+  * More debian fixes
+  * More debian fixes
+  * More debian fixes
+  * Passes lintian
+  * Fix size
+  * Added an html server to feed the image to a webpage TODO: rotate and
+    scale
+  * Rotation / scaling TODO: switch from polling to pushing, maybe ?
+  * Rotation / scaling TODO: switch from polling to pushing, maybe ?
+  * Update the README.md
+  * Update the README.md
+  * Update the README.md
+  * Check for firmware update
+  * Finish update firmware Fix progress bar Update doc
+  * Fix the help a bit
+  * Fix the help a bit
+  * Fix whiteboard loader from jar
+  * Fix typo
+  * Fix fullscreen
+  * Fix test for windows
+  * Fix test for windows
+  * Fix test for windows
+  * Fix test for windows
+  * Fix test for windows
+  * Fix test for windows
+  * Fix test for windows
+  * Read-only, list-only fuse FS
+  * Read-only fuse, can now open files, with aggressive caching. The cache
+    is aggressive on two levels:  - File lists are never refreshed, so
+    whatever you change has no chance to appear  - File contents are
+    loaded once and for all: this means the cache can only grow, and file
+    modification after a first caching won't be visible
+  * MKDIR / RMDIR The cache is aggressive on two levels:  - File lists are
+    never refreshed, so whatever you change has no chance to appear  -
+    File contents are loaded once and for all: this means the cache can
+    only grow, and file modification after a first caching won't be
+    visible
+  * First, not so perfect, write/copy implementation, delete, rename.
+  * Fix rename
+  * More FUSE fixes, now fully functional
+  * More FUSE fixes, now fully functional
+  * More FUSE fixes, now fully functional
+  * FUSE fixes to rename folder
+  * More FUSE fixes
+
+  [ dependabot[bot] ]
+  * Bump jackson-databind from 2.9.10.3 to 2.9.10.4
+  * Cleanup
+  * Refactor http server
+  * Ability to retry the registration if it fails
+  * Ability to save the parameter of the sync command, to just type "dpt
+    sync" next time
+  * Better logs around sync
+  * Version bumper 1.1.0
+  * Version bumper 1.1.0
+  * Version bumper 1.1.0
+
+ -- pierre <xpierro@gmail.com>  Sun, 26 Apr 2020 00:46:56 +0800
+
 dpt (1.0.0) stable; urgency=medium
 
   * Initial dummy changelog line.
