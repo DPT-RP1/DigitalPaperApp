@@ -1,5 +1,7 @@
 package net.sony.util;
 
+import net.sony.dpt.network.SimpleHttpClient;
+import net.sony.dpt.network.UncheckedHttpClient;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -9,7 +11,7 @@ import org.mockserver.junit.MockServerRule;
 import java.io.IOException;
 import java.util.HashMap;
 
-import static net.sony.util.SimpleHttpClient.ok;
+import static net.sony.util.HttpUtils.ok;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -48,7 +50,7 @@ public class SimpleHttpClientTest {
 
     @Test
     public void verifyGetSendsStringBody() throws IOException, InterruptedException {
-        SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
+        SimpleHttpClient simpleHttpClient = UncheckedHttpClient.insecure();
         String response = simpleHttpClient.get(baseUrl + "/junit");
 
         assertThat(response, is(JUNIT));
@@ -76,7 +78,7 @@ public class SimpleHttpClientTest {
 
     @Test
     public void verifyGetWithResponseReturnsResponse() throws IOException, InterruptedException {
-        SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
+        SimpleHttpClient simpleHttpClient = UncheckedHttpClient.insecure();
         java.net.http.HttpResponse<String> response = simpleHttpClient.getWithResponse(baseUrl + "/junit");
 
         assertThat(response.body(), is(JUNIT));
@@ -84,7 +86,7 @@ public class SimpleHttpClientTest {
 
     @Test
     public void verifyPutWithBodyReturnsStringBody() throws IOException, InterruptedException {
-        SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
+        SimpleHttpClient simpleHttpClient = UncheckedHttpClient.insecure();
         String response = simpleHttpClient.put(baseUrl + "/junitPut", new HashMap<>() {{
             put("param1", "value1");
         }});
@@ -94,7 +96,7 @@ public class SimpleHttpClientTest {
 
     @Test
     public void verifyPutReturnsStringBody() throws IOException, InterruptedException {
-        SimpleHttpClient simpleHttpClient = SimpleHttpClient.insecure();
+        SimpleHttpClient simpleHttpClient = UncheckedHttpClient.insecure();
         String response = simpleHttpClient.put(baseUrl + "/junitPut");
 
         assertThat(response, is(JSON));

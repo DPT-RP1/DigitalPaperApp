@@ -1,11 +1,11 @@
 package net.sony.dpt.command.device;
 
-import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.util.LogWriter;
 
 import java.io.IOException;
 
-import static net.sony.util.SimpleHttpClient.fromJSON;
+import static net.sony.util.JsonUtils.fromJSON;
 
 public class StatusCommand {
 

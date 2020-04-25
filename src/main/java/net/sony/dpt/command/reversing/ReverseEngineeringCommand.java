@@ -1,6 +1,6 @@
 package net.sony.dpt.command.reversing;
 
-import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.util.LogWriter;
 
 import java.io.IOException;

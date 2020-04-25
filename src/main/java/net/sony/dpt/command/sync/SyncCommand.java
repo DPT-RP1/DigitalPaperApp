@@ -1,6 +1,6 @@
 package net.sony.dpt.command.sync;
 
-import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.dpt.command.documents.DocumentEntry;
 import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.documents.DocumentCommand;

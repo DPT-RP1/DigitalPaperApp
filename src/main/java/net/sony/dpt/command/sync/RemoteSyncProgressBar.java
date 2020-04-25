@@ -1,6 +1,6 @@
 package net.sony.dpt.command.sync;
 
-import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.util.ProgressBar;
 
 import java.util.Date;

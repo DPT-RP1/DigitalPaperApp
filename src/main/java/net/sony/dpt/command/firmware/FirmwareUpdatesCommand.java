@@ -1,10 +1,9 @@
 package net.sony.dpt.command.firmware;
 
-import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.util.InputReader;
 import net.sony.util.LogWriter;
 import net.sony.util.ProgressBar;
-import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -20,7 +19,6 @@ import javax.xml.xpath.XPathFactory;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
@@ -33,7 +31,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static net.sony.util.SimpleHttpClient.fromJSON;
+import static net.sony.util.JsonUtils.fromJSON;
 import static net.sony.util.StringUtils.resolve;
 import static net.sony.util.StringUtils.variable;
 

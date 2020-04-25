@@ -1,6 +1,7 @@
 package net.sony.dpt.command.register;
 
 import com.google.common.primitives.Bytes;
+import net.sony.dpt.network.SimpleHttpClient;
 import net.sony.util.*;
 
 import javax.crypto.BadPaddingException;

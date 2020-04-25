@@ -5,7 +5,7 @@ import org.bouncycastle.util.encoders.Base64;
 import java.io.IOException;
 import java.util.Map;
 
-import static net.sony.util.SimpleHttpClient.fromJSON;
+import static net.sony.util.JsonUtils.fromJSON;
 
 public class HashResponse {
 
@@ -39,10 +39,6 @@ public class HashResponse {
 
     public byte[] getM3hmac() {
         return m3hmac;
-    }
-
-    public HashRequest getHashRequest() {
-        return hashRequest;
     }
 
     public void setHashRequest(HashRequest hashRequest) {

@@ -1,7 +1,7 @@
 package net.sony.dpt.zeroconf;
 
 import net.sony.util.LogWriter;
-import net.sony.util.SimpleHttpClient;
+import net.sony.dpt.network.SimpleHttpClient;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;

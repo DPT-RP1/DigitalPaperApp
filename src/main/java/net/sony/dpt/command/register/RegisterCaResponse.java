@@ -5,7 +5,7 @@ import org.bouncycastle.util.encoders.Base64;
 import java.io.IOException;
 import java.util.Map;
 
-import static net.sony.util.SimpleHttpClient.fromJSON;
+import static net.sony.util.JsonUtils.fromJSON;
 
 public class RegisterCaResponse {
 

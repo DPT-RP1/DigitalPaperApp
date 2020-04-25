@@ -1,6 +1,6 @@
 package net.sony.dpt.command.dialog;
 
-import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 
 import java.io.IOException;
 import java.util.UUID;

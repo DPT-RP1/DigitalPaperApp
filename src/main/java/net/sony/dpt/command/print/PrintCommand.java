@@ -1,6 +1,6 @@
 package net.sony.dpt.command.print;
 
-import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.dpt.command.dialog.DialogCommand;
 import net.sony.dpt.command.documents.DocumentCommand;
 import net.sony.dpt.command.ping.PingCommand;

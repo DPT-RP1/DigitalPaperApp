@@ -1,18 +1,15 @@
 package net.sony.dpt.command.documents;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.sony.dpt.DigitalPaperEndpoint;
-import org.apache.commons.io.IOUtils;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 
-import static net.sony.util.SimpleHttpClient.fromJSON;
+import static net.sony.util.JsonUtils.fromJSON;
 
 public class DocumentCommand {
 

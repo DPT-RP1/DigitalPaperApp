@@ -1,7 +1,7 @@
 package net.sony.dpt.command.wifi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.util.InputReader;
 import net.sony.util.LogWriter;
 

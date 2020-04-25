@@ -1,6 +1,6 @@
 package net.sony.dpt.command.authenticate;
 
-import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.dpt.command.register.RegistrationResponse;
 import net.sony.util.CryptographyUtils;
 

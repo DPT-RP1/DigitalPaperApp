@@ -1,6 +1,6 @@
 package net.sony.dpt.command.device;
 
-import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;

@@ -1,6 +1,6 @@
 package net.sony.dpt.ui.cli;
 
-import net.sony.dpt.DigitalPaperEndpoint;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.dpt.command.authenticate.AuthenticateCommand;
 import net.sony.dpt.command.authenticate.AuthenticationCookie;
 import net.sony.dpt.command.device.StatusCommand;
@@ -19,6 +19,8 @@ import net.sony.dpt.command.sync.SyncCommand;
 import net.sony.dpt.command.wifi.AccessPointList;
 import net.sony.dpt.command.wifi.WifiCommand;
 import net.sony.dpt.fuse.DptFuseMounter;
+import net.sony.dpt.network.SimpleHttpClient;
+import net.sony.dpt.network.UncheckedHttpClient;
 import net.sony.dpt.persistence.DeviceInfoStore;
 import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
@@ -100,7 +102,7 @@ public class DigitalPaperCLI {
                 if (commandLine.hasOption("serial")) {
                     matchSerial = commandLine.getOptionValue("serial");
                 }
-                addr = new FindDigitalPaper(logWriter, SimpleHttpClient.insecure(), matchSerial).findOneIpv4();
+                addr = new FindDigitalPaper(logWriter, UncheckedHttpClient.insecure(), matchSerial).findOneIpv4();
             }
         }
         if (addr == null || addr.isEmpty()) throw new IllegalStateException("No device found or reachable.");
@@ -147,15 +149,15 @@ public class DigitalPaperCLI {
         String addr = findAddress(commandLine);
 
         if (!registrationTokenStore.registered() || command == Command.REGISTER) {
-            register(SimpleHttpClient.insecure(), addr);
+            register(UncheckedHttpClient.insecure(), addr);
             return;
         }
 
         RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
 
         SimpleHttpClient secureHttpClient = FindDigitalPaper.ZEROCONF_HOST.equals(addr)
-                ? SimpleHttpClient.secure(registrationResponse.getPemCertificate(), registrationResponse.getPrivateKey(), cryptographyUtils)
-                : SimpleHttpClient.secureNoHostVerification();
+                ? UncheckedHttpClient.secure(registrationResponse.getPemCertificate(), registrationResponse.getPrivateKey(), cryptographyUtils)
+                : UncheckedHttpClient.secureNoHostVerification();
 
         digitalPaperEndpoint = new DigitalPaperEndpoint(
                 addr,

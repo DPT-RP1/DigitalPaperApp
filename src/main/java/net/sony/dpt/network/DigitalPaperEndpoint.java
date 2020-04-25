@@ -1,13 +1,10 @@
-package net.sony.dpt;
+package net.sony.dpt.network;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.sony.dpt.command.device.BatteryStatus;
-import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.documents.EntryType;
 import net.sony.dpt.command.firmware.FirmwareVersionResponse;
 import net.sony.dpt.command.wifi.AccessPoint;
 import net.sony.dpt.command.wifi.AccessPointCreationRequest;
-import net.sony.util.SimpleHttpClient;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.io.IOException;
@@ -22,8 +19,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.sony.util.SimpleHttpClient.fromJSON;
-import static net.sony.util.SimpleHttpClient.ok;
+import static net.sony.util.HttpUtils.ok;
+import static net.sony.util.JsonUtils.fromJSON;
 import static net.sony.util.StringUtils.resolve;
 import static net.sony.util.StringUtils.variable;
 

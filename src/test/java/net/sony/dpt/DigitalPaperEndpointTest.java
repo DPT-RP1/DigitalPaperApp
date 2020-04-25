@@ -1,5 +1,6 @@
 package net.sony.dpt;
 
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import org.junit.Assert;
 import org.junit.Test;
 
