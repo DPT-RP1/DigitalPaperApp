@@ -1925,10 +1925,10 @@
         "produces": [
           "application/json"
         ],
-        "description": "本体設定情報をまとめて取得する",
+        "description": "Fetches device configuration",
         "responses": {
           "200": {
-            "description": "設定情報をまとめたもの",
+            "description": "A collection of setting information",
             "schema": {
               "$ref": "#/definitions/configsListResult"
             }

@@ -123,7 +123,6 @@ mounter will consume more and more memory as you open files around.
 ## Usage
 
 ```
-# Try multiple times
 --addr 192.168.0.107 register
 --addr 192.168.0.107 ping
 ```

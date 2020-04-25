@@ -21,7 +21,7 @@ mvn clean package 1>/dev/null 2>/dev/null
 cd debian || exit
 
 jar_name=DigitalPaperApp
-jar_version=1.0-SNAPSHOT
+jar_version=${version}
 
 echo "Building main executable"
 cp "../target/${jar_name}-${jar_version}.jar" "${root_folder}/usr/share/dpt/${jar_name}.jar"
@@ -62,6 +62,6 @@ rm dpt.1
 
 echo "Debian package built, now installing"
 sudo dpkg -r dpt
-sudo dpkg -i dpt_1.0-1.deb
+sudo dpkg -i "dpt_${version}.deb"
 
-lintian ./dpt_1.0-1.deb --no-tag-display-limit
+lintian "./dpt_${version}.deb" --no-tag-display-limit
