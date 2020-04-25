@@ -35,7 +35,7 @@ public enum Command {
     CHECK_FIRMWARE("check-firmware", "Check if a new firmware version has been published"),
     UPDATE_FIRMWARE("update-firmware", Arrays.asList(CommandOption.FORCE, CommandOption.DRYRUN), Collections.emptyList(), "Check for update and update the firmware if needed. Will ask for confirmation before triggering the update. Use -dryrun to test the process."),
     RAW_GET("get", Collections.emptyList(), Collections.singletonList("url"), "Sends and display a GET request to the Digital Paper"),
-    MOUNT("mount", Collections.emptyList(), Collections.singletonList("mount-point"), "FUSE-mount the DPT at the specified mount point."),
+    MOUNT("mount", Collections.emptyList(), Collections.singletonList("[mount-point]"), "FUSE-mount the DPT at the specified mount point. If not mount point is specified, it will attempt to use the one passed previously"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 
     private final List<String> commandNames;

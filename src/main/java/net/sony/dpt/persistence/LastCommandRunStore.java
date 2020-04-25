@@ -7,10 +7,7 @@ import net.sony.util.LogWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This stores the last command parameters, which allows then to autofill the params for a next run
@@ -66,5 +63,22 @@ public class LastCommandRunStore extends AbstractStore implements Store<Map<Stri
     public List<String> retrieve(Command command) {
         Map<String, List<String>> persisted = retrieve();
         return persisted.getOrDefault(command.toString(), null);
+    }
+
+    /**
+     * Utility function doing all the work to retrive just one argument for simple commands
+     * @param command The command we'll retrieve args for
+     * @param arguments The args list passed to the CLI
+     * @return The one argument, either from this store, or from the command-line.
+     */
+    public String retrieveOneArgument(Command command, List<String> arguments) {
+        String singleArgument;
+        if (arguments.size() - 1 < command.getArgumentNames().size()) {
+            singleArgument = retrieve(command).get(0);
+        } else {
+            singleArgument = arguments.get(1);
+            store(command, singleArgument);
+        }
+        return singleArgument;
     }
 }

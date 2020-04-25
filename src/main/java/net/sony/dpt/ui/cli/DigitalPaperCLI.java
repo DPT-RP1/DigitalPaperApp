@@ -222,14 +222,7 @@ public class DigitalPaperCLI {
                 new Whiteboard(new TakeScreenshotCommand(digitalPaperEndpoint));
                 break;
             case SYNC:
-                String localSyncFolder;
-                if (arguments.size() - 1 < command.getArgumentNames().size()) {
-                    localSyncFolder = lastCommandRunStore.retrieve(command).get(0);
-                } else {
-                    localSyncFolder = arguments.get(1);
-                    lastCommandRunStore.store(command, localSyncFolder);
-                }
-                sync(localSyncFolder, dryrun);
+                sync(lastCommandRunStore.retrieveOneArgument(command, arguments), dryrun);
                 break;
             case DIALOG:
                 showDialog(arguments.get(1), arguments.get(2), arguments.get(3));
@@ -283,7 +276,7 @@ public class DigitalPaperCLI {
                 whiteboardHtml();
                 break;
             case MOUNT:
-                mount(arguments.get(1));
+                mount(lastCommandRunStore.retrieveOneArgument(command, arguments));
                 break;
         }
 

@@ -316,6 +316,13 @@ public class DptFuseMounter extends FuseStubFS {
             documentEntriesMap.put(path, entry);
         }
         try {
+            logWriter.log("Mounted the Digital Paper on " + mountPoint + ", type Ctrl+C to unmount");
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                umount();
+                logWriter.log("Digital Paper unmounted from " + mountPoint);
+            }));
+
             mount(mountPoint, true, false);
         }
         finally {
