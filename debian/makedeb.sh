@@ -34,7 +34,6 @@ echo "Building cups driver"
 echo "Writing package metadata"
 mkdir "${root_folder}/DEBIAN"
 
-#TODO: filtering for the version ?
 cp -R DEBIAN "${root_folder}/"
 cp copyright "${root_folder}/usr/share/doc/dpt/"
 

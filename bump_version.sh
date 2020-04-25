@@ -10,5 +10,5 @@ sed -i -e "s/<version><!-- Auto Generated -->.*</<version><!-- Auto Generated --
 echo "${VERSION}" > debian/VERSION
 
 # 3. Debian: control:Version: X.X.X
-sed -i -e "s/Version: .*/Version: ${VERSION}</" debian/DEBIAN/control
+sed -i -e "s/Version: .*/Version: ${VERSION}/" debian/DEBIAN/control
 
