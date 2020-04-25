@@ -1,5 +1,6 @@
 package net.sony.dpt.ui.cli;
 
+import net.sony.dpt.network.CheckedHttpClient;
 import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.dpt.command.authenticate.AuthenticateCommand;
 import net.sony.dpt.command.authenticate.AuthenticationCookie;
@@ -102,7 +103,7 @@ public class DigitalPaperCLI {
                 if (commandLine.hasOption("serial")) {
                     matchSerial = commandLine.getOptionValue("serial");
                 }
-                addr = new FindDigitalPaper(logWriter, UncheckedHttpClient.insecure(), matchSerial).findOneIpv4();
+                addr = new FindDigitalPaper(logWriter, new CheckedHttpClient(UncheckedHttpClient.insecure()), matchSerial).findOneIpv4();
             }
         }
         if (addr == null || addr.isEmpty()) throw new IllegalStateException("No device found or reachable.");
@@ -149,15 +150,15 @@ public class DigitalPaperCLI {
         String addr = findAddress(commandLine);
 
         if (!registrationTokenStore.registered() || command == Command.REGISTER) {
-            register(UncheckedHttpClient.insecure(), addr);
+            register(new CheckedHttpClient(UncheckedHttpClient.insecure()), addr);
             return;
         }
 
         RegistrationResponse registrationResponse = registrationTokenStore.retrieveRegistrationToken();
 
         SimpleHttpClient secureHttpClient = FindDigitalPaper.ZEROCONF_HOST.equals(addr)
-                ? UncheckedHttpClient.secure(registrationResponse.getPemCertificate(), registrationResponse.getPrivateKey(), cryptographyUtils)
-                : UncheckedHttpClient.secureNoHostVerification();
+                ? new CheckedHttpClient(UncheckedHttpClient.secure(registrationResponse.getPemCertificate(), registrationResponse.getPrivateKey(), cryptographyUtils))
+                : new CheckedHttpClient(UncheckedHttpClient.secureNoHostVerification());
 
         digitalPaperEndpoint = new DigitalPaperEndpoint(
                 addr,
@@ -375,7 +376,8 @@ public class DigitalPaperCLI {
     }
 
     private void register(SimpleHttpClient simpleHttpClient, String addr) throws IOException, BadPaddingException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, InvalidKeyException {
-        RegistrationResponse registrationResponse = new RegisterCommand(addr, simpleHttpClient, diffieHelman, cryptographyUtils, logWriter, inputReader).register();
+        RegistrationResponse registrationResponse = new RegisterCommand(addr, simpleHttpClient, diffieHelman, cryptographyUtils, logWriter, inputReader)
+                .register();
         registrationTokenStore.storeRegistrationToken(registrationResponse);
     }
 

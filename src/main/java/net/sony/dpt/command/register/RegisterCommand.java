@@ -1,6 +1,7 @@
 package net.sony.dpt.command.register;
 
 import com.google.common.primitives.Bytes;
+import net.sony.dpt.error.SonyException;
 import net.sony.dpt.network.SimpleHttpClient;
 import net.sony.util.*;
 
@@ -12,6 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Arrays;
 import java.util.UUID;
+
+import static net.sony.dpt.error.SonyException.ErrorCode.BAD_PARAMETER;
 
 public class RegisterCommand {
 
@@ -173,13 +176,33 @@ public class RegisterCommand {
      */
     public RegistrationResponse register() throws IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, NoSuchPaddingException {
 
-        cleanup();
+        PinResponse pinResponse = null;
+        HashRequest hashRequest = null;
+        HashResponse hashResponse = null;
 
-        PinResponse pinResponse = requestPin();
+        int retryCount = 5;
+        boolean pinFound = false;
+        while (!pinFound && retryCount > 0) {
+            cleanup();
 
-        byte[] nonce2 = cryptographyUtils.generateNonce(16);
-        HashRequest hashRequest = buildHashRequest(pinResponse, nonce2);
-        HashResponse hashResponse = encodeNonce(pinResponse, hashRequest);
+            try {
+                pinResponse = requestPin();
+
+                byte[] nonce2 = cryptographyUtils.generateNonce(16);
+                hashRequest = buildHashRequest(pinResponse, nonce2);
+                hashResponse = encodeNonce(pinResponse, hashRequest);
+                pinFound = true;
+            } catch (SonyException sonyException) {
+                if (sonyException.getCodeParsed() == BAD_PARAMETER) {
+                    logWriter.log("Failed to generate a PIN on the device, this can happen, retrying (" + retryCount + " attempts left)...");
+                    Thread.sleep(500);
+                } // All other cases are surprises / non standard and a retry will most likely not work...
+            }
+            retryCount -= 1;
+        }
+        if (!pinFound) {
+            throw new IllegalStateException("Impossible to register the device, giving up.");
+        }
 
         String pin = readDevicePin();
 

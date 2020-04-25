@@ -1,5 +1,6 @@
 package net.sony.dpt;
 
+import net.sony.dpt.error.SonyException;
 import net.sony.dpt.persistence.DeviceInfoStore;
 import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
@@ -28,6 +29,9 @@ public class DigitalPaperApp {
         );
         try {
             digitalPaperCLI.execute(args);
+        } catch (SonyException sonyException) {
+            System.err.println("A device exception occurred: " + sonyException.print());
+            sonyException.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(Command.printHelp());

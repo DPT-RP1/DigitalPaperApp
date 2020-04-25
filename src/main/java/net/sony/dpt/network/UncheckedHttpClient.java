@@ -16,9 +16,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -28,18 +25,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static net.sony.util.HttpUtils.*;
 import static net.sony.util.JsonUtils.writeValueAsString;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
-public class UncheckedHttpClient implements SimpleHttpClient {
+public class UncheckedHttpClient extends AbstractHttpClient implements SimpleHttpClient {
 
-    private static Map<String, String> defaultHeaders;
     private static CookieManager cookieManager;
     private final HttpClient httpClient;
 
     private static final int TIMEOUT = 10000;
 
     private UncheckedHttpClient(SSLContext sslContext) {
-        defaultHeaders = new HashMap<>();
+
         HttpClient.Builder builder = HttpClient
                 .newBuilder()
                 .cookieHandler(CookieHandler.getDefault());
@@ -113,145 +111,64 @@ public class UncheckedHttpClient implements SimpleHttpClient {
         }
     }
 
-
-
-    public HttpRequest.Builder requestBuilder() {
-        HttpRequest.Builder builder = HttpRequest.newBuilder();
-        for (Map.Entry<String, String> entry : defaultHeaders.entrySet()) {
-            builder.header(entry.getKey(), entry.getValue());
-        }
-        return builder;
-    }
-
-    @Override
-    public String get(String url) throws IOException, InterruptedException {
-        HttpRequest request = requestBuilder()
-                .uri(URI.create(url))
-                .method("GET", HttpRequest.BodyPublishers.ofString(""))
-                .build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
-    }
-
     @Override
     public HttpResponse<String> getWithResponse(String url) throws IOException, InterruptedException {
         HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
-                .method("GET", HttpRequest.BodyPublishers.ofString(""))
+                .method(GET, HttpRequest.BodyPublishers.ofString(EMPTY))
                 .build();
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     @Override
-    public String put(String url, Map<String, Object> jsonBody) throws IOException, InterruptedException {
-        return putWithResponse(url, jsonBody).body();
-    }
-
-    @Override
-    public String put(String url) throws IOException, InterruptedException {
+    public HttpResponse<String> putWithResponse(String url, Object serializable) throws IOException, InterruptedException {
         HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
-                .method("PUT", HttpRequest.BodyPublishers.ofString(""))
-                .build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
-    }
-
-    @Override
-    public void putCommonValue(String url, String rawBody) throws IOException, InterruptedException {
-        Map<String, Object> commonValueParam = new HashMap<>() {{
-            put("value", rawBody);
-        }};
-        put(url, commonValueParam);
-    }
-
-    @Override
-    public void putWithResponse(String url, Object serializable) throws IOException, InterruptedException {
-        HttpRequest request = requestBuilder()
-                .uri(URI.create(url))
-                .method("PUT", HttpRequest.BodyPublishers.ofString(writeValueAsString(serializable)))
-                .build();
-        httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-    }
-
-    @Override
-    public HttpResponse<String> putWithResponse(String url, Map<String, Object> jsonBody) throws IOException, InterruptedException {
-        HttpRequest request = requestBuilder()
-                .uri(URI.create(url))
-                .method("PUT", HttpRequest.BodyPublishers.ofString(writeValueAsString(jsonBody)))
+                .method("PUT", HttpRequest.BodyPublishers.ofString(
+                    serializable == null ? EMPTY : writeValueAsString(serializable)
+                ))
                 .timeout(Duration.ofMillis(TIMEOUT))
                 .build();
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     @Override
-    public String post(String url) throws IOException, InterruptedException {
-
+    public HttpResponse<String> postWithResponse(String url, Map<String, Object> jsonBody) throws IOException, InterruptedException {
         HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
-                .method("POST", HttpRequest.BodyPublishers.ofString(""))
+                .method(POST, HttpRequest.BodyPublishers.ofString(
+                        jsonBody == null ? EMPTY : writeValueAsString(jsonBody))
+                )
                 .build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     @Override
-    public String post(String url, Map<String, Object> jsonBody) throws IOException, InterruptedException {
-        HttpRequest request = requestBuilder()
-                .uri(URI.create(url))
-                .method("POST", HttpRequest.BodyPublishers.ofString(writeValueAsString(jsonBody)))
-                .build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
-    }
-
-    @Override
-    public InputStream getFile(String url) throws IOException, InterruptedException {
-        HttpRequest request = requestBuilder()
-                .uri(URI.create(url))
-                .method("GET", HttpRequest.BodyPublishers.ofString(""))
-                .build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream()).body();
-    }
-
-    @Override
-    public void addDefaultHeader(String header, String value) {
-        defaultHeaders.put(header, value);
-    }
-
-    @Override
-    public void putFile(String url, Path localFile) throws IOException, InterruptedException {
-        MimeMultipartData mimeMultipartData = MimeMultipartData.newBuilder()
-                .withCharset(StandardCharsets.UTF_8)
-                .addFile(localFile.getFileName().toString(), localFile, Files.probeContentType(localFile))
-                .build();
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .header("Content-Type", mimeMultipartData.getContentType())
-                .PUT(mimeMultipartData.getBodyPublisher())
-                .uri(URI.create(url))
-                .build();
-        httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
-    }
-
-    @Override
-    public void putBytes(String url, String filename, String mimeType, byte[] content) throws IOException, InterruptedException {
-        MimeMultipartData mimeMultipartData = MimeMultipartData.newBuilder()
-                .withCharset(StandardCharsets.UTF_8)
-                .addBlob(filename, filename, content, mimeType)
-                .build();
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .header("Content-Type", mimeMultipartData.getContentType())
-                .PUT(mimeMultipartData.getBodyPublisher())
-                .uri(URI.create(url))
-                .build();
-        httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
-    }
-
-    @Override
-    public void delete(String url) throws IOException, InterruptedException {
+    public HttpResponse<String> deleteWithResponse(String url) throws IOException, InterruptedException {
         HttpRequest request = requestBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(15))
-                .method("DELETE", HttpRequest.BodyPublishers.ofString(""))
+                .method(DELETE, HttpRequest.BodyPublishers.ofString(EMPTY))
                 .build();
-        httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    @Override
+    public HttpResponse<InputStream> getFileWithResponse(String url) throws IOException, InterruptedException {
+        HttpRequest request = requestBuilder()
+                .uri(URI.create(url))
+                .method(GET, HttpRequest.BodyPublishers.ofString(EMPTY))
+                .build();
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+    }
+
+    @Override
+    public HttpResponse<String> putMultipartWithResponse(String url, MimeMultipartData mimeMultipartData) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .header(CONTENT_TYPE, mimeMultipartData.getContentType())
+                .PUT(mimeMultipartData.getBodyPublisher())
+                .uri(URI.create(url))
+                .build();
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 }
