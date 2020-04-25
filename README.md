@@ -31,10 +31,11 @@ To install the library from the sources, clone this repository, then run `mvn cl
 The use the script in install/linux.sh to setup up the dpt command in your home folder.
 
 ## Using the command line utility
-Type dpt --help to find all the possible options.
+Type dpt --help to find all the possible options:
 
-### Supported commands
 ```bash
+dpt is an utility to manage a Sony Digital Paper device
+
 Usage: dpt COMMAND [PARAMETERS] [OPTIONS]
 
 Options that can be passed to every commands, but aren't mandatory to find the device:
@@ -44,7 +45,7 @@ Options that can be passed to every commands, but aren't mandatory to find the d
 Available commands:
   register                                Starts the pairing process with the Digital Paper
   ping                                    Tests the connection with the Digital Paper
-  sync local-sync-folder [-dryrun]        Synchronizes a local folder with the Digital paper
+  sync [local-sync-folder] [-dryrun]      Synchronizes a local folder with the Digital paper. If no folder is given, it will use the one passed previously
   list-documents                          Lists all documents
   document-info                           Prints all documents and their attributes, raw
   upload local-file [remote-file]         Sends a local file to the Digital Paper
@@ -74,7 +75,10 @@ Available commands:
   check-firmware                          Check if a new firmware version has been published
   update-firmware [-force] [-dryrun]      Check for update and update the firmware if needed. Will ask for confirmation before triggering the update. Use -dryrun to test the process.
   get url                                 Sends and display a GET request to the Digital Paper
-  mount mount-point                       FUSE-mount the DPT at the specified mount point.
+  mount [mount-point]                     FUSE-mounts the DPT at the specified mount point. If not mount point is specified, it will attempt to use the one passed previously
+  insert-note-template name path          Inserts a new note template from the specified file, with the specified name
+  get-configuration path                  Saves the system configuration to a local file at <path>
+  set-configuration path                  Send the system configuration from a local file at <path>
   help                                    Prints this message
 
 ```
