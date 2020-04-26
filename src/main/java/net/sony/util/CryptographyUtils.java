@@ -2,6 +2,7 @@ package net.sony.util;
 
 import com.google.common.primitives.Bytes;
 import net.sony.dpt.command.register.HashRequest;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.digests.GeneralDigest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
@@ -97,20 +98,24 @@ public class CryptographyUtils {
         );
     }
 
-    public byte[] unwrap(byte[] data, byte[] authKey, byte[] keyWrapKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-        byte[] iv = new byte[16];
-        System.arraycopy(data, data.length - 16, iv, 0, 16);
-
+    public byte[] decryptAES(byte[] data, byte[] key, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         AlgorithmParameterSpec ivSpec = new IvParameterSpec(iv);
-        SecretKeySpec skey = new SecretKeySpec(keyWrapKey, "AES");
+        SecretKeySpec skey = new SecretKeySpec(key, "AES");
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, skey, ivSpec);
 
+        return cipher.doFinal(data);
+    }
+
+    public byte[] unwrap(byte[] data, byte[] authKey, byte[] keyWrapKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        byte[] iv = new byte[16];
+        System.arraycopy(data, data.length - 16, iv, 0, 16);
+
         byte[] actualData = new byte[data.length - 16];
         System.arraycopy(data, 0, actualData, 0, data.length - 16);
 
-        byte[] unwrapped = cipher.doFinal(actualData);
+        byte[] unwrapped = decryptAES(actualData, keyWrapKey, iv);
         byte[] kwa = new byte[8];
         byte[] actualUnwrapped = new byte[unwrapped.length - 8];
 
@@ -146,8 +151,8 @@ public class CryptographyUtils {
 
     public PrivateKey readPkcs8PrivateKey(String pemFile) throws GeneralSecurityException {
         String privateKeyB64 = pemFile
-                .replaceAll("-----END PRIVATE KEY-----", "")
-                .replaceAll("-----BEGIN PRIVATE KEY-----", "")
+                .replaceAll(PKCS_8_PEM_FOOTER, "")
+                .replaceAll(PKCS_8_PEM_HEADER, "")
                 .replaceAll("\n", "");
         byte[] decoded = Base64.getMimeDecoder().decode(privateKeyB64);
 
@@ -155,12 +160,22 @@ public class CryptographyUtils {
         return factory.generatePrivate(new PKCS8EncodedKeySpec(decoded));
     }
 
-    public PrivateKey readPkcs1PrivateKey(String pemFile) throws IOException {
+    private Object parsePcks1Key(String pemFile) throws IOException {
         PEMParser pemParser = new PEMParser(new StringReader(pemFile));
+        return pemParser.readObject();
+    }
+
+    public PrivateKey readPkcs1PrivateKey(String pemFile) throws IOException {
         JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(new BouncyCastleProvider());
-        Object object = pemParser.readObject();
-        KeyPair kp = converter.getKeyPair((PEMKeyPair) object);
+        KeyPair kp = converter.getKeyPair((PEMKeyPair) parsePcks1Key(pemFile));
         return kp.getPrivate();
+    }
+
+    public KeyPair readPkcs1KeyPair(String privatePemFile, String publicPemFile) throws IOException {
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(new BouncyCastleProvider());
+        KeyPair privateKeyPair = converter.getKeyPair((PEMKeyPair) parsePcks1Key(privatePemFile));
+        PublicKey publicKey = converter.getPublicKey((SubjectPublicKeyInfo) parsePcks1Key(publicPemFile));
+        return new KeyPair(publicKey, privateKeyPair.getPrivate());
     }
 
     public PrivateKey readPrivateKeyFromPEM(String pemFile) throws GeneralSecurityException {
@@ -174,5 +189,19 @@ public class CryptographyUtils {
         signature.initSign(key);
         signature.update(input);
         return signature.sign();
+    }
+
+    public boolean verifySignature(byte[] input, byte[] signature, PublicKey publicKey) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+
+        Signature sig = Signature.getInstance("SHA256withRSA");
+        sig.initVerify(publicKey);
+        sig.update(input);
+        return sig.verify(signature);
+    }
+
+    public byte[] decryptRsa(PrivateKey privateKey, byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        return cipher.doFinal(data);
     }
 }

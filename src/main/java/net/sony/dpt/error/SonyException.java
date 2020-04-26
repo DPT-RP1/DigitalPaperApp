@@ -42,7 +42,7 @@ public class SonyException extends IOException {
     public enum ErrorCode {
         BAD_PARAMETER(40301), UNKNOWN(-1);
 
-        private static Map<Integer, ErrorCode> errorCodeMap;
+        private static final Map<Integer, ErrorCode> errorCodeMap;
 
         static {
             errorCodeMap = new HashMap<>();

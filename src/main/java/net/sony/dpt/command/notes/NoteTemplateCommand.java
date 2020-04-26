@@ -3,7 +3,6 @@ package net.sony.dpt.command.notes;
 import net.sony.dpt.network.DigitalPaperEndpoint;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 
 public class NoteTemplateCommand {
