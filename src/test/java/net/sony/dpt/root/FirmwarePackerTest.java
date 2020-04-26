@@ -82,14 +82,15 @@ public class FirmwarePackerTest {
         InputStream firmware = firmware();
         assumeThat(firmware, is(notNullValue()));
 
+        CryptographyUtils cryptographyUtils = new CryptographyUtils();
         FirmwarePacker firmwarePacker = new FirmwarePacker(
-                new CryptographyUtils()
+                cryptographyUtils
         );
 
         byte[] firmareBytes = firmwarePacker.loadRawFirmware(firmware);
         PkgWrap pkgWrap = firmwarePacker.wrap(firmareBytes);
 
-        assertTrue(firmwarePacker.verifyDataSignature(pkgWrap, firmwarePacker.unpackKey().getPublic()));
+        assertTrue(cryptographyUtils.verifySignature(pkgWrap.getEncryptedData(), pkgWrap.getSignature(), firmwarePacker.unpackKey().getPublic()));
     }
 
     @Test
@@ -113,8 +114,11 @@ public class FirmwarePackerTest {
         CryptographyUtils cryptographyUtils = new CryptographyUtils();
         FirmwarePacker firmwarePacker = new FirmwarePacker(cryptographyUtils);
 
-        Path target = temporaryFolder.getRoot().toPath().resolve("decrypted.tar.gz");
-        firmwarePacker.unpack(firmware, target);
-        assertThat(Files.size(target), is(215264813L));
+        Path targetData = temporaryFolder.getRoot().toPath().resolve("decryptedData.tar.gz");
+        Path targetAnimation = temporaryFolder.getRoot().toPath().resolve("decryptedAnimation.tar.gz");
+
+        firmwarePacker.unpack(firmware, targetData, targetAnimation);
+        assertThat(Files.size(targetData), is(215264813L));
+        assertThat(Files.size(targetAnimation), is(644593L));
     }
 }

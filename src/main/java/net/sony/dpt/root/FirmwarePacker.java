@@ -87,31 +87,45 @@ public class FirmwarePacker {
         return new PkgWrap(pkg);
     }
 
-    public boolean verifyDataSignature(PkgWrap wrap, PublicKey publicKey) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        // Verify data with signature
-        byte[] encryptedData = wrap.getEncryptedData();
-        byte[] signature = wrap.getSignature();
-
-        return cryptographyUtils.verifySignature(encryptedData, signature, publicKey);
-    }
-
-    private byte[] decrypt(byte[] source) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
-        KeyPair unpackKey = unpackKey();
-
-        PkgWrap wrap = wrap(source);
-        if (!verifyDataSignature(wrap, unpackKey.getPublic())) {
+    private byte[] decrypt(byte[] encryptedData,
+                           byte[] signature,
+                           KeyPair unpackKey,
+                           byte[] encryptedKey,
+                           byte[] binaryIv) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
+        if (!cryptographyUtils.verifySignature(
+                encryptedData,
+                signature,
+                unpackKey.getPublic()
+        )) {
             throw new IllegalStateException("Impossible to verify firmware");
         }
 
-        byte[] decryptedDataKey = cryptographyUtils.decryptRsa(unpackKey.getPrivate(), wrap.getEncryptedDataKey());
+        byte[] decryptedDataKey = cryptographyUtils.decryptRsa(unpackKey.getPrivate(), encryptedKey);
 
         // The decryptedDataKey is an hexadecimal representation, it should be instead a 256bit binary key
-        return cryptographyUtils.decryptAES(wrap.getEncryptedData(), ByteUtils.hexToByte(new String(decryptedDataKey, StandardCharsets.US_ASCII)), wrap.getBinaryIv());
+        return cryptographyUtils.decryptAES(encryptedData, ByteUtils.hexToByte(new String(decryptedDataKey, StandardCharsets.US_ASCII)), binaryIv);
     }
 
-    public void unpack(InputStream officialFirmware, Path targetDirectory) throws IOException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeyException {
-        byte[] decryptedTarGz = decrypt(loadRawFirmware(officialFirmware));
-        Files.write(targetDirectory, decryptedTarGz);
+    private byte[] decryptData(PkgWrap wrap, KeyPair unpackKey) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
+        return decrypt(wrap.getEncryptedData(), wrap.getSignature(), unpackKey, wrap.getEncryptedDataKey(), wrap.getBinaryIv());
+    }
+
+    public void unpack(InputStream officialFirmware, Path targetDataFile, Path targetAnimationFile) throws IOException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeyException {
+        KeyPair unpackKey = unpackKey();
+
+        PkgWrap wrap = wrap(loadRawFirmware(officialFirmware));
+
+        byte[] decryptedDataTarGz = decryptData(wrap, unpackKey);
+        Files.write(targetDataFile, decryptedDataTarGz);
+
+        if (!cryptographyUtils.verifySignature(
+                wrap.getAnimationData(),
+                wrap.getAnimationSignature(),
+                unpackKey.getPublic()
+        )) {
+            throw new IllegalStateException("Impossible to verify firmware animation");
+        }
+        Files.write(targetAnimationFile, wrap.getAnimationData());
     }
 
 }
