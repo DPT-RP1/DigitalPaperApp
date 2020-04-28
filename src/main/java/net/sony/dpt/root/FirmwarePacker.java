@@ -2,6 +2,7 @@ package net.sony.dpt.root;
 
 import net.sony.util.ByteUtils;
 import net.sony.util.CryptographyUtils;
+import net.sony.util.LogWriter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -52,9 +53,11 @@ public class FirmwarePacker {
     private static final String DPUP = "DPUP";
 
     private final CryptographyUtils cryptographyUtils;
+    private final LogWriter logWriter;
 
-    public FirmwarePacker(final CryptographyUtils cryptographyUtils) {
+    public FirmwarePacker(final CryptographyUtils cryptographyUtils, final LogWriter logWriter) {
         this.cryptographyUtils = cryptographyUtils;
+        this.logWriter = logWriter;
     }
 
     KeyPair unpackKey() throws IOException {
@@ -87,6 +90,10 @@ public class FirmwarePacker {
         return new PkgWrap(pkg);
     }
 
+    private byte[] encrypt(byte[] decryptedData, byte[] decryptedKey, byte[] binaryIv) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+        return cryptographyUtils.encryptAES(decryptedData, decryptedKey, binaryIv);
+    }
+
     private byte[] decrypt(byte[] encryptedData,
                            byte[] signature,
                            KeyPair unpackKey,
@@ -97,7 +104,7 @@ public class FirmwarePacker {
                 signature,
                 unpackKey.getPublic()
         )) {
-            throw new IllegalStateException("Impossible to verify firmware");
+            logWriter.log("Impossible to verify firmware, normal if self-signed");
         }
 
         byte[] decryptedDataKey = cryptographyUtils.decryptRsa(unpackKey.getPrivate(), encryptedKey);
@@ -110,10 +117,10 @@ public class FirmwarePacker {
         return decrypt(wrap.getEncryptedData(), wrap.getSignature(), unpackKey, wrap.getEncryptedDataKey(), wrap.getBinaryIv());
     }
 
-    public void unpack(InputStream officialFirmware, Path targetDataFile, Path targetAnimationFile) throws IOException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeyException {
+    public void unpack(InputStream firmware, Path targetDataFile, Path targetAnimationFile) throws IOException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeyException {
         KeyPair unpackKey = unpackKey();
 
-        PkgWrap wrap = wrap(loadRawFirmware(officialFirmware));
+        PkgWrap wrap = wrap(loadRawFirmware(firmware));
 
         byte[] decryptedDataTarGz = decryptData(wrap, unpackKey);
         Files.write(targetDataFile, decryptedDataTarGz);
@@ -123,9 +130,36 @@ public class FirmwarePacker {
                 wrap.getAnimationSignature(),
                 unpackKey.getPublic()
         )) {
-            throw new IllegalStateException("Impossible to verify firmware animation");
+            logWriter.log("Impossible to verify firmware animation, this is normal if self-signed");
         }
         Files.write(targetAnimationFile, wrap.getAnimationData());
+    }
+
+    public void pack(InputStream decryptedDataTarGz, InputStream decryptedAnimationTarGz, Path targetEncryptedFirmware) throws Exception {
+        KeyPair unpackKey = unpackKey();
+
+        byte[] decryptedDataBytes = IOUtils.toByteArray(decryptedDataTarGz);
+        byte[] decryptedAnimationBytes = IOUtils.toByteArray(decryptedAnimationTarGz);
+
+        byte[] iv = cryptographyUtils.generateNonce(16);
+        byte[] decryptedKey = cryptographyUtils.generateRandomAESKey();
+
+        byte[] encryptedDataBytes = encrypt(decryptedDataBytes, decryptedKey, iv);
+
+        byte[] hexDecryptedKey = ByteUtils.bytesToHex(decryptedKey).toLowerCase().getBytes(StandardCharsets.US_ASCII);
+        byte[] hexIv = ByteUtils.bytesToHex(iv).toLowerCase().getBytes(StandardCharsets.US_ASCII);
+        byte[] encryptedKey = cryptographyUtils.encryptRsa(unpackKey.getPublic(), hexDecryptedKey);
+
+        PkgWrap pkgWrap = new PkgWrap(
+            DPUP,
+            cryptographyUtils.signSHA256RSA(encryptedDataBytes, unpackKey.getPrivate()),
+            encryptedKey,
+            hexIv,
+            encryptedDataBytes,
+            cryptographyUtils.signSHA256RSA(decryptedAnimationBytes, unpackKey.getPrivate()),
+            decryptedAnimationBytes
+        );
+        Files.write(targetEncryptedFirmware, pkgWrap.getBytes());
     }
 
 }

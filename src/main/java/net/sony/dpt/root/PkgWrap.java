@@ -6,7 +6,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.security.PublicKey;
 
 public class PkgWrap {
 
@@ -31,6 +30,58 @@ public class PkgWrap {
     private byte[] animationSignature;
     private byte[] animationData;
 
+    public PkgWrap(String header, byte[] signature, byte[] encryptedDataKey, byte[] iv, byte[] encryptedData, byte[] animationSignature, byte[] animationData) {
+        this.header = header;
+        this.signature = signature;
+        this.encryptedDataKey = encryptedDataKey;
+        this.iv = iv;
+        this.encryptedData = encryptedData;
+        this.animationSignature = animationSignature;
+        this.animationData = animationData;
+
+        dataSize = encryptedData.length;
+        sigSize = signature.length;
+        dataKeyEncryptedSize = encryptedDataKey.length;
+        offsetData = 32 + dataKeyEncryptedSize + sigSize + 6 * 4 ;
+
+        if (animationData != null) {
+            animationDataSize = animationData.length;
+            this.animationSigSize = animationSignature.length;
+        }
+
+        wrap = ByteBuffer.allocate(offsetData + dataSize + animationSigSize + animationDataSize + 12);
+        wrap.order(ByteOrder.LITTLE_ENDIAN);
+
+        wrap.clear();
+
+        wrap.put(header.getBytes(StandardCharsets.US_ASCII), 0, 4);
+        wrap.putInt(offsetData);
+        wrap.putInt(dataSize);
+        wrap.putInt(0);
+
+        wrap.putInt(sigSize);
+        wrap.put(signature, 0, sigSize);
+
+        wrap.putInt(dataKeyEncryptedSize);
+        wrap.put(encryptedDataKey, 0, dataKeyEncryptedSize);
+
+        wrap.put(iv, 0, 32);
+
+        if (wrap.position() != offsetData) throw new IllegalStateException("Wrong offset...");
+        wrap.put(encryptedData, 0, dataSize);
+
+        if (animationData != null) {
+            this.animationData = animationData;
+            this.animationSignature = animationSignature;
+            wrap.putInt(4 * 3 + animationSigSize);
+            wrap.putInt(animationDataSize);
+            wrap.putInt(animationSigSize);
+
+            wrap.put(animationSignature, 0, animationSigSize);
+            wrap.put(animationData);
+
+        }
+    }
 
     public PkgWrap(final byte[] content) {
         wrap = ByteBuffer.wrap(content);
@@ -143,4 +194,7 @@ public class PkgWrap {
         return animationData;
     }
 
+    public byte[] getBytes() {
+        return wrap.array();
+    }
 }

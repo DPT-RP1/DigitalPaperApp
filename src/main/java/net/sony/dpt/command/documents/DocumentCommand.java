@@ -1,6 +1,7 @@
 package net.sony.dpt.command.documents;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.sony.dpt.error.SonyException;
 import net.sony.dpt.network.DigitalPaperEndpoint;
 
 import java.io.IOException;
@@ -73,7 +74,11 @@ public class DocumentCommand {
     }
 
     public String upload(byte[] content, Path remotePath) throws IOException, InterruptedException {
-        delete(remotePath);
+        try {
+            delete(remotePath);
+        } catch (SonyException e) {
+            if (e.getCodeParsed() != SonyException.ErrorCode.RESOURCE_NOT_FOUND) throw e;
+        }
         Path directory = remotePath.getParent();
 
         String parentId = createFolderRecursively(directory);

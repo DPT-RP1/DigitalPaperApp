@@ -11,9 +11,13 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,7 +39,7 @@ public class FirmwarePackerTest {
     @Test
     public void canLoadKeyPair() throws IOException {
         KeyPair keyPair = new FirmwarePacker(
-                new CryptographyUtils()
+                new CryptographyUtils(), System.out::println
         ).unpackKey();
 
         assertThat(keyPair, is(not(nullValue())));
@@ -49,7 +53,7 @@ public class FirmwarePackerTest {
         assumeThat(firmware, is(notNullValue()));
 
         FirmwarePacker firmwarePacker = new FirmwarePacker(
-                new CryptographyUtils()
+                new CryptographyUtils(), System.out::println
         );
 
         byte[] firmareBytes = firmwarePacker.loadRawFirmware(firmware);
@@ -62,7 +66,7 @@ public class FirmwarePackerTest {
         assumeThat(firmware, is(notNullValue()));
 
         FirmwarePacker firmwarePacker = new FirmwarePacker(
-                new CryptographyUtils()
+                new CryptographyUtils(), System.out::println
         );
 
         byte[] firmareBytes = firmwarePacker.loadRawFirmware(firmware);
@@ -84,7 +88,7 @@ public class FirmwarePackerTest {
 
         CryptographyUtils cryptographyUtils = new CryptographyUtils();
         FirmwarePacker firmwarePacker = new FirmwarePacker(
-                cryptographyUtils
+                cryptographyUtils, System.out::println
         );
 
         byte[] firmareBytes = firmwarePacker.loadRawFirmware(firmware);
@@ -98,7 +102,7 @@ public class FirmwarePackerTest {
         InputStream firmware = firmware();
         assumeThat(firmware, is(notNullValue()));
         CryptographyUtils cryptographyUtils = new CryptographyUtils();
-        FirmwarePacker firmwarePacker = new FirmwarePacker(cryptographyUtils);
+        FirmwarePacker firmwarePacker = new FirmwarePacker(cryptographyUtils, System.out::println);
 
         byte[] firmareBytes = firmwarePacker.loadRawFirmware(firmware);
         PkgWrap pkgWrap = firmwarePacker.wrap(firmareBytes);
@@ -112,7 +116,7 @@ public class FirmwarePackerTest {
         InputStream firmware = firmware();
         assumeThat(firmware, is(notNullValue()));
         CryptographyUtils cryptographyUtils = new CryptographyUtils();
-        FirmwarePacker firmwarePacker = new FirmwarePacker(cryptographyUtils);
+        FirmwarePacker firmwarePacker = new FirmwarePacker(cryptographyUtils, System.out::println);
 
         Path targetData = temporaryFolder.getRoot().toPath().resolve("decryptedData.tar.gz");
         Path targetAnimation = temporaryFolder.getRoot().toPath().resolve("decryptedAnimation.tar.gz");
@@ -121,4 +125,50 @@ public class FirmwarePackerTest {
         assertThat(Files.size(targetData), is(215264813L));
         assertThat(Files.size(targetAnimation), is(644593L));
     }
+
+    @Test
+    public void verifyPack() throws Exception {
+        InputStream firmware = firmware();
+        assumeThat(firmware, is(notNullValue()));
+        CryptographyUtils cryptographyUtils = new CryptographyUtils();
+        FirmwarePacker firmwarePacker = new FirmwarePacker(cryptographyUtils, System.out::println);
+
+        Path targetData = temporaryFolder.getRoot().toPath().resolve("decryptedData.tar.gz");
+        Path targetAnimation = temporaryFolder.getRoot().toPath().resolve("decryptedAnimation.tar.gz");
+
+        firmwarePacker.unpack(firmware, targetData, targetAnimation);
+        assertThat(Files.size(targetData), is(215264813L));
+        assertThat(Files.size(targetAnimation), is(644593L));
+
+        Path targetFirmware = temporaryFolder.getRoot().toPath().resolve("encryptedFirmware.tar.gz");
+
+        firmwarePacker.pack(Files.newInputStream(targetData), Files.newInputStream(targetAnimation), targetFirmware);
+
+        // Since some part of the packing process is random, we verify by unpacking again
+        firmwarePacker.unpack(Files.newInputStream(targetFirmware), targetData, targetAnimation);
+        assertThat(Files.size(targetData), is(215264813L));
+        assertThat(Files.size(targetAnimation), is(644593L));
+    }
+
+    // The hack at https://github.com/HappyZ/dpt-tools/blob/master/fw_updater_packer_by_shankerzhiwu/pkg_example/hack_basics/Makefile
+    // makes the injection in the IV
+    // dd if=$1 bs=$(($DATA_OFFSET)) skip=1 2>/dev/null | head -c $(($BODY_SIZE)) | i<-- that's where it uses "55 -none[...]" | tar -xz -C $2
+    @Test
+    public void decryptHack() throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("hackedFw/fw.pkg");
+        CryptographyUtils cryptographyUtils = new CryptographyUtils();
+        FirmwarePacker firmwarePacker = new FirmwarePacker(cryptographyUtils, System.out::println);
+
+        PkgWrap wrap = firmwarePacker.wrap(firmwarePacker.loadRawFirmware(inputStream));
+        KeyPair unpackKey = firmwarePacker.unpackKey();
+
+        byte[] decryptedKey = cryptographyUtils.decryptRsa(unpackKey.getPrivate(), wrap.getEncryptedDataKey());
+        System.out.println(new String(decryptedKey, StandardCharsets.UTF_8));
+
+        byte[] binaryKey = ByteUtils.hexToByte(new String(decryptedKey, StandardCharsets.US_ASCII).trim());
+        ByteBuffer buffer = ByteBuffer.wrap(binaryKey);
+        buffer.order(ByteOrder.BIG_ENDIAN);
+        while (buffer.position() < buffer.limit()) System.out.println(buffer.getChar());
+    }
+
 }

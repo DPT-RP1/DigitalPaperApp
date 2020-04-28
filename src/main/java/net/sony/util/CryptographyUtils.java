@@ -98,6 +98,21 @@ public class CryptographyUtils {
         );
     }
 
+    public byte[] generateRandomAESKey() throws NoSuchAlgorithmException {
+        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+        keyGen.init(256);
+        return keyGen.generateKey().getEncoded();
+    }
+
+    public byte[] encryptAES(byte[] data, byte[] key, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        AlgorithmParameterSpec ivSpec = new IvParameterSpec(iv);
+        SecretKeySpec skey = new SecretKeySpec(key, "AES");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, skey, ivSpec);
+
+        return cipher.doFinal(data);
+    }
+
     public byte[] decryptAES(byte[] data, byte[] key, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         AlgorithmParameterSpec ivSpec = new IvParameterSpec(iv);
         SecretKeySpec skey = new SecretKeySpec(key, "AES");
@@ -185,8 +200,12 @@ public class CryptographyUtils {
     public byte[] signSHA256RSA(byte[] input, String privateKeyPem) throws Exception {
         PrivateKey key = readPrivateKeyFromPEM(privateKeyPem);
 
+        return signSHA256RSA(input, key);
+    }
+
+    public byte[] signSHA256RSA(byte[] input, PrivateKey privateKey) throws Exception {
         Signature signature = Signature.getInstance("SHA256withRSA");
-        signature.initSign(key);
+        signature.initSign(privateKey);
         signature.update(input);
         return signature.sign();
     }
@@ -202,6 +221,12 @@ public class CryptographyUtils {
     public byte[] decryptRsa(PrivateKey privateKey, byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        return cipher.doFinal(data);
+    }
+
+    public byte[] encryptRsa(PublicKey publicKey, byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
         return cipher.doFinal(data);
     }
 }
