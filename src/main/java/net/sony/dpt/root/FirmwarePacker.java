@@ -137,8 +137,14 @@ public class FirmwarePacker {
         Files.write(targetAnimationFile, wrap.getAnimationData());
     }
 
+    /**
+     * This function will not *correctly* pack a pkg update folder: indeed we don't have yet Sony's
+     * private key, so we use the only other private key we know: the one used for decrypting the AES
+     * key.
+     */
     public void pack(InputStream decryptedDataTarGz, InputStream decryptedAnimationTarGz, Path targetEncryptedFirmware) throws Exception {
         KeyPair unpackKey = unpackKey();
+        PublicKey packKey = cryptographyUtils.generatePublicRsaKeyFromPrivate(unpackKey.getPrivate());
 
         byte[] decryptedDataBytes = IOUtils.toByteArray(decryptedDataTarGz);
         byte[] decryptedAnimationBytes = IOUtils.toByteArray(decryptedAnimationTarGz);
@@ -150,7 +156,7 @@ public class FirmwarePacker {
 
         byte[] hexDecryptedKey = ByteUtils.bytesToHex(decryptedKey).toLowerCase().getBytes(StandardCharsets.US_ASCII);
         byte[] hexIv = ByteUtils.bytesToHex(iv).toLowerCase().getBytes(StandardCharsets.US_ASCII);
-        byte[] encryptedKey = cryptographyUtils.encryptRsa(unpackKey.getPublic(), hexDecryptedKey);
+        byte[] encryptedKey = cryptographyUtils.encryptRsa(packKey, hexDecryptedKey);
 
         PkgWrap pkgWrap = new PkgWrap(
             DPUP,
