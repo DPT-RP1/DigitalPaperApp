@@ -110,7 +110,7 @@ public class FirmwarePacker {
         byte[] decryptedDataKey = cryptographyUtils.decryptRsa(unpackKey.getPrivate(), encryptedKey);
 
         // The decryptedDataKey is an hexadecimal representation, it should be instead a 256bit binary key
-        return cryptographyUtils.decryptAES(encryptedData, ByteUtils.hexToByte(new String(decryptedDataKey, StandardCharsets.US_ASCII)), binaryIv);
+        return cryptographyUtils.decryptAES(encryptedData, ByteUtils.hexToByte(new String(decryptedDataKey, StandardCharsets.US_ASCII).trim()), binaryIv);
     }
 
     private byte[] decryptData(PkgWrap wrap, KeyPair unpackKey) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
@@ -124,6 +124,8 @@ public class FirmwarePacker {
 
         byte[] decryptedDataTarGz = decryptData(wrap, unpackKey);
         Files.write(targetDataFile, decryptedDataTarGz);
+
+        if (targetAnimationFile == null) return;
 
         if (!cryptographyUtils.verifySignature(
                 wrap.getAnimationData(),

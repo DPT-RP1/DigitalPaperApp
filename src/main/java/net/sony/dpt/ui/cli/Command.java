@@ -39,6 +39,7 @@ public enum Command {
     INSERT_NOTE_TEMPLATE("insert-note-template", Collections.emptyList(), Arrays.asList("name", "path"), "Inserts a new note template from the specified file, with the specified name"),
     GET_CONFIGURATION("get-configuration", Collections.emptyList(), Collections.singletonList("path"), "Saves the system configuration to a local file at <path>"),
     SET_CONFIGURATION("set-configuration", Collections.emptyList(), Collections.singletonList("path"), "Send the system configuration from a local file at <path>"),
+    ROOT("root", Collections.singletonList(CommandOption.DRYRUN), Collections.emptyList(), "BETA - Root device"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 
     private final List<String> commandNames;

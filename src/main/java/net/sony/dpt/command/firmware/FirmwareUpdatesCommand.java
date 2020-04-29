@@ -145,19 +145,7 @@ public class FirmwareUpdatesCommand {
         return different;
     }
 
-    public void update(boolean force, boolean dryrun) throws IOException, InterruptedException, ParserConfigurationException, SAXException, XPathExpressionException {
-        boolean different = checkForUpdates();
-        if (!different && !force) {
-            logWriter.log("No difference, no upgrade will happen");
-            return;
-        }
-        if (force) {
-            logWriter.log("Forced mode: the update will proceed");
-        }
-
-        // 3. Download in memory if version > current
-        byte[] firmwareData = downloadAndVerify(firmware(parsedXml, modelTag));
-
+    public void updateAny(boolean dryrun, byte[] firmwareData) throws IOException, InterruptedException {
         logWriter.log("Sending to device...");
         // 4. Put on device
         digitalPaperEndpoint.putFirmwareOnDevice(firmwareData);
@@ -175,6 +163,22 @@ public class FirmwareUpdatesCommand {
         if (!dryrun) {
             digitalPaperEndpoint.triggerUpdate();
         }
+    }
+
+    public void updateOfficial(boolean force, boolean dryrun) throws IOException, InterruptedException, ParserConfigurationException, SAXException, XPathExpressionException {
+        boolean different = checkForUpdates();
+        if (!different && !force) {
+            logWriter.log("No difference, no upgrade will happen");
+            return;
+        }
+        if (force) {
+            logWriter.log("Forced mode: the update will proceed");
+        }
+
+        // 3. Download in memory if version > current
+        byte[] firmwareData = downloadAndVerify(firmware(parsedXml, modelTag));
+
+        updateAny(dryrun, firmwareData);
 
         // 7. Check it's done
         String expectedFirmware = firmwareVersionResponse.getValue();

@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
+import static java.util.Objects.deepEquals;
+
 public class PkgWrap {
 
     private final ByteBuffer wrap;
@@ -119,7 +121,7 @@ public class PkgWrap {
         // Checking if animation data follows
         if (wrap.position() < wrap.limit()) {
             animationHeaderSize = wrap.getInt();
-            if (animationHeaderSize <= 0) return;
+            if (animationHeaderSize <= 0 && wrap.position() >= wrap.limit()) return;
             // Found animation block, getting animation data size
             animationDataSize = wrap.getInt();
 
@@ -129,7 +131,7 @@ public class PkgWrap {
             wrap.get(animationSignature, 0, animationSigSize);
 
             // Animation data
-            animationData = new byte[animationDataSize];
+            animationData = new byte[animationDataSize == 0 ? wrap.limit() - wrap.position() : animationDataSize];
             wrap.get(animationData, 0, animationDataSize);
         }
 
@@ -196,5 +198,21 @@ public class PkgWrap {
 
     public byte[] getBytes() {
         return wrap.array();
+    }
+
+    public boolean equals(final PkgWrap other) {
+        if (dataSize != other.dataSize) return false;
+        if (dataKeyEncryptedSize != other.dataKeyEncryptedSize) return false;
+        if (offsetData != other.offsetData) return false;
+        if (animationDataSize != other.animationDataSize) return false;
+        if (!deepEquals(iv, other.iv)) return false;
+        if (!deepEquals(encryptedData, other.encryptedData)) return false;
+        if (!deepEquals(signature, other.signature)) return false;
+        if (animationSigSize != other.animationSigSize) return false;
+        if (sigSize != other.sigSize) return false;
+        if (!deepEquals(animationData, other.animationData)) return false;
+        if (!deepEquals(animationSignature, other.animationSignature)) return false;
+
+        return true;
     }
 }

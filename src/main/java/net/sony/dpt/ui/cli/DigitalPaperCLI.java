@@ -1,5 +1,6 @@
 package net.sony.dpt.ui.cli;
 
+import net.sony.dpt.command.firmware.RootCommand;
 import net.sony.dpt.command.notes.NoteTemplateCommand;
 import net.sony.dpt.network.CheckedHttpClient;
 import net.sony.dpt.network.DigitalPaperEndpoint;
@@ -27,6 +28,7 @@ import net.sony.dpt.persistence.DeviceInfoStore;
 import net.sony.dpt.persistence.LastCommandRunStore;
 import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
+import net.sony.dpt.root.RootPacker;
 import net.sony.dpt.ui.gui.whiteboard.Whiteboard;
 import net.sony.dpt.ui.html.WhiteboardBackend;
 import net.sony.dpt.zeroconf.FindDigitalPaper;
@@ -265,8 +267,22 @@ public class DigitalPaperCLI {
             case SET_CONFIGURATION:
                 setConfiguration(arguments.size() < 2 ? "./config.json" : arguments.get(1));
                 break;
+            case ROOT:
+                root(dryrun);
+                break;
         }
 
+    }
+
+    private void root(boolean dryrun) throws InterruptedException, IOException, URISyntaxException {
+        new RootCommand(logWriter,
+                new FirmwareUpdatesCommand(
+                        new LocalSyncProgressBar(System.out, ProgressBar.ProgressStyle.SQUARES_1),
+                        digitalPaperEndpoint,
+                        logWriter,
+                        inputReader
+                ),
+                new RootPacker()).rootDevice(dryrun);
     }
 
     private void getConfiguration(String path) throws IOException, InterruptedException {
@@ -346,7 +362,7 @@ public class DigitalPaperCLI {
                 digitalPaperEndpoint,
                 logWriter,
                 inputReader
-        ).update(force, dryrun);
+        ).updateOfficial(force, dryrun);
     }
 
     private void wifiState() throws IOException, InterruptedException {
