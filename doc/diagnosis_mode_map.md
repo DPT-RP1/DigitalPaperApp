@@ -34,6 +34,7 @@ debian:~$ sudo dmesg | grep Sony -A 10 -B 1
 * Press enter, to "poke" the serial port and trigger the login/password routine
 * Username: root, Password: 12345
 * You're logged in if you see `root@FPX-1010:~#`
+
 ![logged in](images/minicom_login.png)
 
 ## Mounting the various devices
