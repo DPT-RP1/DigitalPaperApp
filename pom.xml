@@ -6,7 +6,7 @@
 
     <groupId>net.sony</groupId>
     <artifactId>DigitalPaperApp</artifactId>
-    <version><!-- Auto Generated -->1.1.0</version>
+    <version><!-- Auto Generated -->1.2.0</version>
     <packaging>jar</packaging>
 
     <name>DigitalPaperApp</name>
