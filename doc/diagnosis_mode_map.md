@@ -39,7 +39,7 @@ debian:~$ sudo dmesg | grep Sony -A 10 -B 1
 
 ## Mounting the various devices
 * 3 important block devices:
-    * /dev/mmcblk0p8 : System partition, contains the software
+    * /dev/mmcblk0p9 : System partition, contains the software
     * /dev/mmcblk0p15 : Boot partition, same as the diag mode, already mounted on /
     * /dev/mmcblk0p16 : Mass storage, can be use to temporarily store stuff
 
@@ -48,7 +48,7 @@ You can run this to mount everything in one go:
 cd /tmp
 mkdir /tmp/sd
 mkdir /tmp/system
-mount /dev/mmcblk0p8 system
+mount /dev/mmcblk0p9 system
 mount /dev/mmcblk0p16 sd 
 ```    
 

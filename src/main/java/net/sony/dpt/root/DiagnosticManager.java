@@ -14,6 +14,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -21,9 +23,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_DATA_RECEIVED;
+import static com.fazecast.jSerialComm.SerialPort.TIMEOUT_NONBLOCKING;
 
 public class DiagnosticManager {
     private static final String SERIAL_PORT_NAME = "FPX-1010";
+
+    public static final Path SYSTEM_BLOCK_DEVICE = Path.of("/dev/mmcblk0p9");
+    public static final Path SD_BLOCK_DEVICE = Path.of("/dev/mmcblk0p16");
+
+    public static final Path SYSTEM_STD_MOUNT_POINT = Path.of("/system");
+    public static final Path SD_STD_MOUNT_POINT = Path.of("/mnt/sd");
+
+    private static final String NO_SUCH_FILE = "No such file or directory";
 
     private final LogWriter logWriter;
     private final InputReader inputReader;
@@ -88,14 +99,6 @@ public class DiagnosticManager {
     private static final String ROOT_USER = "root";
     private static final String ROOT_PASSWORD = "12345";
 
-    private void write(final String content) {
-        OutputStream outputStream = serialPort.getOutputStream();
-        try {
-            outputStream.write(content.getBytes());
-            outputStream.flush();
-        } catch (IOException ignored) { }
-    }
-
     public boolean login() throws IOException, InterruptedException {
         if (!serialPort.openPort()) throw new IllegalStateException("Please open the serial port before logging in");
 
@@ -143,7 +146,7 @@ public class DiagnosticManager {
             if (loggedIn.get() || attempt.get() <= 0) executor.shutdownNow();
             attempt.decrementAndGet();
         }, 0, 1000, TimeUnit.MILLISECONDS);
-
+        executor.awaitTermination(30, TimeUnit.SECONDS);
         serialPort.removeDataListener();
         return attempt.get() > 0;
     }
@@ -169,9 +172,7 @@ public class DiagnosticManager {
         if (!login()) throw new IllegalStateException("Impossible to login in diag mode");
 
         // We flush the input stream so that we read ONLY the file content
-        if (serialPort.getInputStream().available() > 0) {
-            logWriter.log(new String(serialPort.getInputStream().readAllBytes()));
-        }
+        flushSerialPort();
 
         SerialPortDataListener fileDataListener = new SerialPortMessageListener() {
             @Override
@@ -220,6 +221,113 @@ public class DiagnosticManager {
 
     public void setSerialPort(SerialPort serialPort) {
         this.serialPort = serialPort;
+    }
+
+    public void mount(final Path device, final Path mountPoint) throws IOException, InterruptedException {
+        if (!login()) throw new IllegalStateException("Impossible to login in diag mode");
+        final Map<String, String> alreadyMounted = mountPoints();
+        if (alreadyMounted.containsKey(device.toString()) && alreadyMounted.get(device.toString()).equals(mountPoint.toString())) return;
+
+        flushSerialPort();
+
+        // 1. Test if mount point exist
+        String command = "ls -l " + mountPoint.toString();
+        String response = sendCommand(command);
+
+        // 2. Unmount if so
+        if (!response.isEmpty() && !response.contains(NO_SUCH_FILE)) {
+            command = "unmount " + mountPoint;
+            sendCommand(command);
+        }
+
+        // 3. Create mount point if doesn't exist
+        if (response.contains(NO_SUCH_FILE)) {
+            command = "mkdir -p " + mountPoint;
+            sendCommand(command);
+        }
+
+        // 4. Mount
+        command = "mount " + device + " " + mountPoint;
+        response = sendCommand(command);
+        if (!response.isEmpty()) logWriter.log(response);
+    }
+
+    public void automount() throws IOException, InterruptedException {
+        mount(SYSTEM_BLOCK_DEVICE, SYSTEM_STD_MOUNT_POINT);
+        mount(SD_BLOCK_DEVICE, SD_STD_MOUNT_POINT);
+    }
+
+    /**
+     * Slow, byte by byte, blocking line-read, to use when short responses are expected.
+     * This helps figure out when to stop without having a full async Message listener.
+     * @return The line read, or String.EMPTY otherwise.
+     */
+    private String readLine() throws IOException {
+        StringBuilder line = new StringBuilder();
+        int c;
+        while((c = serialPort.getInputStream().read()) != '\n') {
+            line.append((char) c);
+            if (line.toString().contains(ROOT_PROMPT)) break;
+        }
+        return line.toString().trim();
+    }
+
+    public void flushSerialPort() throws IOException {
+        serialPort.getOutputStream().flush();
+        if (serialPort.getInputStream().available() > 0) {
+            logWriter.log(new String(serialPort.getInputStream().readNBytes(serialPort.getInputStream().available())));
+        }
+    }
+
+    private void write(final String content) {
+        OutputStream outputStream = serialPort.getOutputStream();
+        try {
+            outputStream.write(content.getBytes());
+            outputStream.flush();
+        } catch (IOException ignored) { }
+    }
+
+    private void writeLine(final String content) {
+        write(content + "\n");
+    }
+
+    public String sendCommand(final String command) throws IOException {
+        writeLine(command);
+        StringBuilder stringBuilder = new StringBuilder();
+
+        int oldReadTimeout = serialPort.getReadTimeout();
+        int oldWriteTimeout = serialPort.getWriteTimeout();
+        serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 0, 0);
+
+
+        String response = "";
+        while (!response.contains(ROOT_PROMPT)) {
+            response = readLine();
+            if (!response.equals(command) && !response.contains(ROOT_PROMPT)) {
+                stringBuilder.append(response).append("\n");
+            }
+        }
+        flushSerialPort();
+        // Reset timeout mode
+        serialPort.setComPortTimeouts(TIMEOUT_NONBLOCKING, oldReadTimeout, oldWriteTimeout);
+        return stringBuilder.toString().trim();
+    }
+
+    public Map<String, String> mountPoints() throws IOException, InterruptedException {
+
+        login();
+
+        Map<String, String> result = new HashMap<>();
+
+        String mounts = sendCommand("cat /proc/mounts");
+        String[] mountsArray = mounts.split("\n");
+        for (String mountLine : mountsArray) {
+            if (mountLine.startsWith("/")) {
+                String[] descriptors = mountLine.split(" ");
+                result.put(descriptors[0], descriptors[1]);
+            }
+        }
+        return result;
     }
 
     public void close() {

@@ -2,6 +2,7 @@ package net.sony.dpt.ui.cli;
 
 import net.sony.dpt.command.firmware.RootCommand;
 import net.sony.dpt.command.notes.NoteTemplateCommand;
+import net.sony.dpt.command.root.DiagnosticCommand;
 import net.sony.dpt.network.CheckedHttpClient;
 import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.dpt.command.authenticate.AuthenticateCommand;
@@ -28,6 +29,7 @@ import net.sony.dpt.persistence.DeviceInfoStore;
 import net.sony.dpt.persistence.LastCommandRunStore;
 import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
+import net.sony.dpt.root.DiagnosticManager;
 import net.sony.dpt.root.RootPacker;
 import net.sony.dpt.ui.gui.whiteboard.Whiteboard;
 import net.sony.dpt.ui.html.WhiteboardBackend;
@@ -127,9 +129,14 @@ public class DigitalPaperCLI {
             return;
         }
 
-        if (command == Command.HELP) {
-            printHelp();
-            return;
+        // This are pre-registration command
+        switch (command) {
+            case HELP:
+                printHelp();
+                return;
+            case DIAG_FETCH:
+                diagFetch(arguments.get(2), arguments.get(3));
+                return;
         }
 
         String addr = findAddress(commandLine);
@@ -272,6 +279,15 @@ public class DigitalPaperCLI {
                 break;
         }
 
+    }
+
+    private void diagFetch(String remotePath, String localPath) throws IOException, InterruptedException {
+        new DiagnosticCommand(
+            new DiagnosticManager(
+                logWriter,
+                inputReader
+            )
+        ).fetchFile(Path.of(remotePath), Path.of(localPath));
     }
 
     private void root(boolean dryrun) throws InterruptedException, IOException, URISyntaxException {

@@ -39,7 +39,8 @@ public enum Command {
     INSERT_NOTE_TEMPLATE("insert-note-template", Collections.emptyList(), Arrays.asList("name", "path"), "Inserts a new note template from the specified file, with the specified name"),
     GET_CONFIGURATION("get-configuration", Collections.emptyList(), Collections.singletonList("path"), "Saves the system configuration to a local file at <path>"),
     SET_CONFIGURATION("set-configuration", Collections.emptyList(), Collections.singletonList("path"), "Send the system configuration from a local file at <path>"),
-    ROOT("root", Collections.singletonList(CommandOption.DRYRUN), Collections.emptyList(), "BETA - Root device"),
+    ROOT("root", Collections.singletonList(CommandOption.DRYRUN), Collections.emptyList(), "BETA - Roots the device"),
+    DIAG_FETCH("diag fetch", Collections.emptyList(), Arrays.asList("remote-path", "local-path"), "BETA - Downloads a files from the diagnostic mode, after root. See docs/diagnosis_mod_map.md"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 
     private final List<String> commandNames;
@@ -90,8 +91,7 @@ public enum Command {
     }
 
     public static Command parse(String[] args) {
-        if (args.length == 0 || !commandMap.containsKey(args[0])) return HELP;
-        return commandMap.get(args[0]);
+        return commandMap.getOrDefault(args[0], commandMap.getOrDefault(args[0] + " " + args[1], HELP));
     }
 
     private static String left(String left) {

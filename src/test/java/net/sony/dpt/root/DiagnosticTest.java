@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Scanner;
 
+import static net.sony.dpt.root.DiagnosticManager.*;
+import static net.sony.dpt.root.DiagnosticManager.SD_BLOCK_DEVICE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
@@ -82,6 +84,24 @@ public class DiagnosticTest {
 
         assertThat(fileContent.length, is(27068));
         assertArrayEquals(expected, fileContent);
+    }
+
+    @Test
+    public void canMountSd() throws IOException, InterruptedException {
+        diagnosticManager.mount(SD_BLOCK_DEVICE, SD_STD_MOUNT_POINT);
+        String mounts = diagnosticManager.sendCommand("cat /proc/mounts");
+
+        assertTrue(mounts.contains(SD_BLOCK_DEVICE.toString()));
+        assertTrue(mounts.contains(SD_STD_MOUNT_POINT.toString()));
+    }
+
+    @Test
+    public void canMountSystem() throws IOException, InterruptedException {
+        diagnosticManager.mount(SYSTEM_BLOCK_DEVICE, SYSTEM_STD_MOUNT_POINT);
+        String mounts = diagnosticManager.sendCommand("cat /proc/mounts");
+
+        assertTrue(mounts.contains(SYSTEM_BLOCK_DEVICE.toString()));
+        assertTrue(mounts.contains(SYSTEM_STD_MOUNT_POINT.toString()));
     }
 
     @After
