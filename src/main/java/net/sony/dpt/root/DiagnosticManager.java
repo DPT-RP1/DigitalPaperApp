@@ -166,7 +166,7 @@ public class DiagnosticManager {
 
         logWriter.log("Preparing to send " + fetchCommand);
 
-        ByteArrayOutputStream file = new ByteArrayOutputStream();
+        StringBuilder base64File = new StringBuilder();
         AtomicBoolean fullyLoaded = new AtomicBoolean(false);
 
         if (!login()) throw new IllegalStateException("Impossible to login in diag mode");
@@ -174,12 +174,7 @@ public class DiagnosticManager {
         // We flush the input stream so that we read ONLY the file content
         flushSerialPort();
 
-        SerialPortDataListener fileDataListener = new SerialPortMessageListener() {
-            @Override
-            public byte[] getMessageDelimiter() { return "\r\n".getBytes(); }
-
-            @Override
-            public boolean delimiterIndicatesEndOfMessage() { return true; }
+        SerialPortDataListener fileDataListener = new SerialPortDataListener() {
 
             @Override
             public int getListeningEvents() { return LISTENING_EVENT_DATA_RECEIVED; }
@@ -187,18 +182,17 @@ public class DiagnosticManager {
             @Override
             public void serialEvent(SerialPortEvent event) {
                 if (event.getEventType() == LISTENING_EVENT_DATA_RECEIVED) {
-                    // We need to stop once we reach the end of file (new prompt)
-                    String dataStringView = new String(event.getReceivedData());
-                    if (!dataStringView.trim().contains(ROOT_PROMPT.trim()) && !dataStringView.trim().contains(fetchCommand.trim())) {
-
-                        byte[] decoded = base64Decoder.decode(dataStringView.trim());
-                        try { file.write(decoded); file.flush();} catch (IOException ignored) { }
-                        fullyLoaded.set(true);
+                    if (!fullyLoaded.get()) {
+                        // We need to stop once we reach the end of file (new prompt)
+                        String dataStringView = new String(event.getReceivedData());
+                        base64File.append(dataStringView.replaceAll("\r", "").replaceAll("\n", ""));
+                        fullyLoaded.set(base64File.toString().contains(ROOT_PROMPT));
                     }
                 }
             }
         };
 
+        serialPort.removeDataListener();
         serialPort.addDataListener(fileDataListener);
         write(fetchCommand);
 
@@ -214,7 +208,9 @@ public class DiagnosticManager {
         serialPort.removeDataListener();
         if (!fullyLoaded.get()) throw new IllegalStateException("The file could not be downloaded");
 
-        byte[] fileContent = file.toByteArray();
+        String base64String = base64File.toString();
+        base64String = base64String.substring(base64String.indexOf(fetchCommand) + fetchCommand.length(), base64String.indexOf(ROOT_PROMPT));
+        byte[] fileContent = base64Decoder.decode(base64String);
         logWriter.log("Files loaded (MD5: " + DigestUtils.md5Hex(fileContent) + ", Size: " + fileContent.length + ")");
         return fileContent;
     }
