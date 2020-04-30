@@ -4,7 +4,7 @@
 2. Once the screen display 3 rectangle and a square, plug the USB cable
 ![Diagnosis mode](images/diagnosis.jpg)
 ## Linux tty connection
-- The device name on debian 10 is `dev/ttyACM0`
+- The device name on debian 10 is `/dev/ttyACM0`
 - It's possible to find the latest plugged USB devices like this
 ```
 debian:~$ sudo dmesg | grep Sony -A 10 -B 1

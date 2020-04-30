@@ -40,7 +40,7 @@ public enum Command {
     GET_CONFIGURATION("get-configuration", Collections.emptyList(), Collections.singletonList("path"), "Saves the system configuration to a local file at <path>"),
     SET_CONFIGURATION("set-configuration", Collections.emptyList(), Collections.singletonList("path"), "Send the system configuration from a local file at <path>"),
     ROOT("root", Collections.singletonList(CommandOption.DRYRUN), Collections.emptyList(), "BETA - Roots the device"),
-    DIAG_FETCH("diag fetch", Collections.emptyList(), Arrays.asList("remote-path", "local-path"), "BETA - Downloads a files from the diagnostic mode, after root. See docs/diagnosis_mod_map.md"),
+    DIAG_FETCH("diag fetch", Collections.emptyList(), Arrays.asList("remote-path", "local-path"), "BETA - Downloads a files from the diagnostic mode, after root. See doc/diagnosis_mod_map.md"),
     DIAG_EXIT("diag exit", Collections.emptyList(), Collections.emptyList(), "Exits the diagnostic mode (triggers a reboot)"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 
