@@ -3,6 +3,7 @@ package net.sony.dpt.root;
 import net.sony.util.ByteUtils;
 import net.sony.util.CryptographyUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -23,9 +24,7 @@ import java.security.*;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeThat;
 
 public class FirmwarePackerTest {
 
@@ -53,7 +52,7 @@ public class FirmwarePackerTest {
     @Test
     public void validateHeader() throws IOException {
         InputStream firmware = firmware();
-        assumeThat(firmware, is(notNullValue()));
+        Assume.assumeTrue(firmware != null);
 
         FirmwarePacker firmwarePacker = new FirmwarePacker(
                 new CryptographyUtils(), System.out::println
@@ -66,7 +65,7 @@ public class FirmwarePackerTest {
     @Test
     public void validateWrap() throws IOException {
         InputStream firmware = firmware();
-        assumeThat(firmware, is(notNullValue()));
+        Assume.assumeTrue(firmware != null);
 
         FirmwarePacker firmwarePacker = new FirmwarePacker(
                 new CryptographyUtils(), System.out::println
@@ -87,7 +86,7 @@ public class FirmwarePackerTest {
     @Test
     public void verifySignature() throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         InputStream firmware = firmware();
-        assumeThat(firmware, is(notNullValue()));
+        Assume.assumeTrue(firmware != null);
 
         CryptographyUtils cryptographyUtils = new CryptographyUtils();
         FirmwarePacker firmwarePacker = new FirmwarePacker(
@@ -103,7 +102,7 @@ public class FirmwarePackerTest {
     @Test
     public void verifySignatureDecryption() throws IOException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
         InputStream firmware = firmware();
-        assumeThat(firmware, is(notNullValue()));
+        Assume.assumeTrue(firmware != null);
         CryptographyUtils cryptographyUtils = new CryptographyUtils();
         FirmwarePacker firmwarePacker = new FirmwarePacker(cryptographyUtils, System.out::println);
 
@@ -117,7 +116,7 @@ public class FirmwarePackerTest {
     @Test
     public void verifyUnpack() throws NoSuchPaddingException, SignatureException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException, InvalidKeyException {
         InputStream firmware = firmware();
-        assumeThat(firmware, is(notNullValue()));
+        Assume.assumeTrue(firmware != null);
         CryptographyUtils cryptographyUtils = new CryptographyUtils();
         FirmwarePacker firmwarePacker = new FirmwarePacker(cryptographyUtils, System.out::println);
 
@@ -132,7 +131,7 @@ public class FirmwarePackerTest {
     @Test
     public void verifyPack() throws Exception {
         InputStream firmware = firmware();
-        assumeThat(firmware, is(notNullValue()));
+        Assume.assumeTrue(firmware != null);
         CryptographyUtils cryptographyUtils = new CryptographyUtils();
         FirmwarePacker firmwarePacker = new FirmwarePacker(cryptographyUtils, System.out::println);
 
