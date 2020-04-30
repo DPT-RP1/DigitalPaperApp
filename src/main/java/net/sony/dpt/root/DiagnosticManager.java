@@ -45,11 +45,15 @@ public class DiagnosticManager {
 
     private SerialPort serialPort;
 
-    public DiagnosticManager(final LogWriter logWriter, final InputReader inputReader) {
+    public DiagnosticManager(final LogWriter logWriter, final InputReader inputReader, final boolean plugPrompt) {
         this.logWriter = logWriter;
         this.inputReader = inputReader;
         this.base64Decoder = Base64.getDecoder();
-        findDPTTty(true);
+        findDPTTty(plugPrompt);
+    }
+
+    public DiagnosticManager(final LogWriter logWriter, final InputReader inputReader) {
+        this(logWriter, inputReader, true);
     }
 
     public SerialPort findDPTTty(boolean plugPrompt) {
@@ -327,6 +331,6 @@ public class DiagnosticManager {
     }
 
     public void close() {
-        serialPort.closePort();
+        if (serialPort != null) serialPort.closePort();
     }
 }

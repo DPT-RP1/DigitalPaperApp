@@ -21,4 +21,8 @@ public class DiagnosticCommand {
         Files.write(local, file);
     }
 
+    public void exitDiagnosticMode() throws IOException, InterruptedException {
+        diagnosticManager.logout();
+    }
+
 }

@@ -79,8 +79,10 @@ Available commands:
   insert-note-template name path          Inserts a new note template from the specified file, with the specified name
   get-configuration path                  Saves the system configuration to a local file at <path>
   set-configuration path                  Send the system configuration from a local file at <path>
+  root [-dryrun]                          BETA - Roots the device
+  diag fetch remote-path local-path       BETA - Downloads a files from the diagnostic mode, after root. See docs/diagnosis_mod_map.md
+  diag exit                               Exits the diagnostic mode (triggers a reboot)
   help                                    Prints this message
-
 ```
 
 ### Registering the DPT-RP1

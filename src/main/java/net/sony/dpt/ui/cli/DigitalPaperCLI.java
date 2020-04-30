@@ -137,6 +137,9 @@ public class DigitalPaperCLI {
             case DIAG_FETCH:
                 diagFetch(arguments.get(2), arguments.get(3));
                 return;
+            case DIAG_EXIT:
+                diagExit();
+                return;
         }
 
         String addr = findAddress(commandLine);
@@ -279,6 +282,15 @@ public class DigitalPaperCLI {
                 break;
         }
 
+    }
+
+    private void diagExit() throws IOException, InterruptedException {
+        new DiagnosticCommand(
+                new DiagnosticManager(
+                        logWriter,
+                        inputReader
+                )
+        ).exitDiagnosticMode();
     }
 
     private void diagFetch(String remotePath, String localPath) throws IOException, InterruptedException {

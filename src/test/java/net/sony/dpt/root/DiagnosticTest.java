@@ -26,7 +26,7 @@ public class DiagnosticTest {
         }, () -> {
             Scanner scanner = new Scanner(System.in);
             return scanner.nextLine();
-        });
+        }, false);
 
         boolean isEngaged = diagnosticManager.isDiagnosticEngaged();
 
@@ -106,6 +106,6 @@ public class DiagnosticTest {
 
     @After
     public void tearDown() {
-        diagnosticManager.close();
+        if (diagnosticManager != null) diagnosticManager.close();
     }
 }

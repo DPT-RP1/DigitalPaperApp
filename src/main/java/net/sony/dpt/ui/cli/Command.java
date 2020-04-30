@@ -41,6 +41,7 @@ public enum Command {
     SET_CONFIGURATION("set-configuration", Collections.emptyList(), Collections.singletonList("path"), "Send the system configuration from a local file at <path>"),
     ROOT("root", Collections.singletonList(CommandOption.DRYRUN), Collections.emptyList(), "BETA - Roots the device"),
     DIAG_FETCH("diag fetch", Collections.emptyList(), Arrays.asList("remote-path", "local-path"), "BETA - Downloads a files from the diagnostic mode, after root. See docs/diagnosis_mod_map.md"),
+    DIAG_EXIT("diag exit", Collections.emptyList(), Collections.emptyList(), "Exits the diagnostic mode (triggers a reboot)"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 
     private final List<String> commandNames;
@@ -91,7 +92,8 @@ public enum Command {
     }
 
     public static Command parse(String[] args) {
-        return commandMap.getOrDefault(args[0], commandMap.getOrDefault(args[0] + " " + args[1], HELP));
+        if (args.length == 0) return HELP;
+        return commandMap.getOrDefault(args[0], args.length > 1 ? commandMap.getOrDefault(args[0] + " " + args[1], HELP) : HELP);
     }
 
     private static String left(String left) {
