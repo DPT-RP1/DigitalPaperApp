@@ -17,7 +17,10 @@ mkdir -p "${root_folder}/usr/share/man/man1/"
 
 echo "Building jar..."
 cd ..
-mvn clean package 1>/dev/null 2>/dev/null
+
+# shellcheck disable=SC2086
+mvn clean package ${1:-} 1>/dev/null 2>/dev/null
+
 cd debian || exit
 
 jar_name=DigitalPaperApp

@@ -514,6 +514,16 @@ public class DigitalPaperCLI {
         }
     }
 
+    /**
+     * Without quoting:
+     * Console arg: /mnt/bananas/books/Digital Paper Sync/
+     * Path interpretation: /mnt/bananas/books/Digital Paper Sync
+     *
+     * With quoting (won't work):
+     * Console arg: /mnt/bananas/books/Digital\ Paper\ Sync/
+     * Path interpretation: /mnt/bananas/books/Digital\ Paper\ Sync
+     *
+     */
     private void sync(String localFolder, boolean dryrun) throws IOException, InterruptedException {
         new SyncCommand(
                 Path.of(localFolder),

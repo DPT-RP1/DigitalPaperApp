@@ -81,6 +81,7 @@ public class SyncCommand {
         localFileMap.clear();
 
         if (!Files.exists(localRoot)) {
+            logWriter.log("The local path " + localRoot + " does not exist, creating...") ;
             if (dryrun) return localFileMap;
             Files.createDirectories(localRoot);
         }
