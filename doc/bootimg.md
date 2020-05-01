@@ -56,6 +56,7 @@ We can see here that happyz:
 * Modified 5 config files to start using it
 
 4. Compare each file with meld
+
 Meld is an interesting linux-only folder comparer:
 ```bash
 sudo apt install meld
