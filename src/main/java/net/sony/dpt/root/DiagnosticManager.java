@@ -127,7 +127,6 @@ public class DiagnosticManager {
             public void serialEvent(SerialPortEvent event) {
                 if (event.getEventType() == LISTENING_EVENT_DATA_RECEIVED) {
                     String responseString = new String(event.getReceivedData());
-                    logWriter.log(responseString);
 
                     if (responseString.contains(LOGIN_PROMPT)) {
                         write(ROOT_USER + "\n");
@@ -166,55 +165,42 @@ public class DiagnosticManager {
     }
 
     public byte[] fetchFile(final Path path) throws IOException, InterruptedException {
-        String fetchCommand = "cat " + path.toString() + " | busybox base64\n";
+        String fetchCommand = "cat " + path.toString() + " | busybox base64";
 
         logWriter.log("Preparing to send " + fetchCommand);
 
-        StringBuilder base64File = new StringBuilder();
-        AtomicBoolean fullyLoaded = new AtomicBoolean(false);
+        final FileFetchParser fetchParser = new FileFetchParser(fetchCommand, ROOT_PROMPT);
 
         if (!login()) throw new IllegalStateException("Impossible to login in diag mode");
 
+        serialPort.removeDataListener();
         // We flush the input stream so that we read ONLY the file content
         flushSerialPort();
 
         SerialPortDataListener fileDataListener = new SerialPortDataListener() {
-
-            @Override
-            public int getListeningEvents() { return LISTENING_EVENT_DATA_RECEIVED; }
-
+            @Override public int getListeningEvents() { return LISTENING_EVENT_DATA_RECEIVED; }
             @Override
             public void serialEvent(SerialPortEvent event) {
                 if (event.getEventType() == LISTENING_EVENT_DATA_RECEIVED) {
-                    if (!fullyLoaded.get()) {
-                        // We need to stop once we reach the end of file (new prompt)
-                        String dataStringView = new String(event.getReceivedData());
-                        base64File.append(dataStringView.replaceAll("\r", "").replaceAll("\n", ""));
-                        fullyLoaded.set(base64File.toString().contains(ROOT_PROMPT));
-                    }
+                    fetchParser.addBytes(event.getReceivedData());
                 }
             }
         };
 
-        serialPort.removeDataListener();
         serialPort.addDataListener(fileDataListener);
-        write(fetchCommand);
+        writeLine(fetchCommand);
 
         logWriter.log("Waiting for the file transfer to complete... this will time out after 2 minutes...");
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(() -> {
-            if (fullyLoaded.get()) {
-                executor.shutdownNow();
-            }
+            logWriter.log("Loaded " + fetchParser.size() + " base64 symbols");
+            if (fetchParser.finished()) { executor.shutdownNow(); }
         }, 0, 1000, TimeUnit.MILLISECONDS);
-
         executor.awaitTermination(2, TimeUnit.MINUTES);
-        serialPort.removeDataListener();
-        if (!fullyLoaded.get()) throw new IllegalStateException("The file could not be downloaded");
 
-        String base64String = base64File.toString();
-        base64String = base64String.substring(base64String.indexOf(fetchCommand) + fetchCommand.length(), base64String.indexOf(ROOT_PROMPT));
-        byte[] fileContent = base64Decoder.decode(base64String);
+        serialPort.removeDataListener();
+
+        byte[] fileContent = fetchParser.decodeBase64();
         logWriter.log("Files loaded (MD5: " + DigestUtils.md5Hex(fileContent) + ", Size: " + fileContent.length + ")");
         return fileContent;
     }
@@ -275,7 +261,7 @@ public class DiagnosticManager {
     public void flushSerialPort() throws IOException {
         serialPort.getOutputStream().flush();
         if (serialPort.getInputStream().available() > 0) {
-            logWriter.log(new String(serialPort.getInputStream().readNBytes(serialPort.getInputStream().available())));
+            serialPort.getInputStream().readNBytes(serialPort.getInputStream().available());
         }
     }
 
