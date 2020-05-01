@@ -119,6 +119,7 @@ diff official/initramfs/file_contexts happyz/initramfs/file_contexts
 > /system/bin/install-recovery.sh u:object_r:system_file:s0
 > #/system/bin/install-recovery.sh u:object_r:install_recovery_exec:s0
 ```
+These basically give root permission to the android process spawner `app_process32`
 
 * init.pxa1908.usb.rc
 ![deodex](images/meld5.png)
@@ -162,4 +163,6 @@ diff official/initramfs/init.usb.rc happyz/initramfs/init.usb.rc
   * Because since the boot.img can change across version, if we want the root package to be 
   universally compatible, we can't integrate it. We could downloand, unpack the pkg, unpack the img, patch and repack all
   but it's more convenient to distribute the img in a self-signed pkg after the root.
-* What are zygote vs system_file configurations  
+* What are zygote vs system_file configurations
+  * Zygote is the android user-space process spawner, which controls and enforces permissions. Replacing
+  it with the system_file stanza must give root access to all processes  

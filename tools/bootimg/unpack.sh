@@ -16,7 +16,7 @@ rm -rf "$target_folder/initramfs"
 rm -rf "$target_folder/zImage"
 
 mkdir -p "$target_folder/initramfs"
-mkdir -p "$target_folder/zImage"
+mkdir -p "$target_folder/zimage"
 
 mv initramfs.cpio.gz "$target_folder/"
 mv zImage "$target_folder/"
