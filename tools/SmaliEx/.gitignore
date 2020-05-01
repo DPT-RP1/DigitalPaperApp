@@ -1,0 +1,16 @@
+/.gradle
+/baksmali/build
+/dexlib/build
+/dexlib2/build
+/dexlib2/accessorTestGenerator/build
+/smali/build
+/smaliex/build
+/smaliex/src/main/java/localtest
+/smaliex-bin/*
+/util/build
+/smalidea/build
+/build
+*.iml
+*.ipr
+*.iws
+.idea
