@@ -207,7 +207,7 @@ Repeat the same process for the /system/app folder to fetch all the apks
 Now that we have the apk and the android base framework against which the apks were optimized we
 need to deoptimize, or "deodex" the apks/odex files.
 
-For context, here is what happen when an APK is detected for the first time on a device:
+For context, here is what happens when an APK is detected for the first time on a device:
 1. The .dex file, containing class files, is extracted and removed from the .apk file (so an apk on a device isn't self sufficient, you can't transfer on another)
 2. The .dex file is turned into an .odex file, specifically tailored to the architecture of the device (here arm), and placed
 into a folder named like the architecture (/system/app/\<ApplicationName\>/arm for the DPT)
@@ -236,7 +236,7 @@ drwxr-xr-x  3 user user    4096 May  1 21:28 arm
 -rw-r--r--  1 user user 2281805 May  1 23:31 DigitalPaperApp.jar
 ```
 
-The jar can then be read by intellij or any other decompile (FernFlower is really good: https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine)
+The jar can then be read by intellij or any other decompiler (FernFlower is really good: https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine)
 ![deodex](images/deodex.png)
 
 
