@@ -1,0 +1,1 @@
+See doc/bootimg.md for more information

@@ -42,6 +42,7 @@ public enum Command {
     ROOT("root", Collections.singletonList(CommandOption.DRYRUN), Collections.emptyList(), "BETA - Roots the device"),
     DIAG_FETCH("diag fetch", Collections.emptyList(), Arrays.asList("remote-path", "local-path"), "BETA - Downloads a files from the diagnostic mode, after root. See doc/diagnosis_mod_map.md"),
     DIAG_EXIT("diag exit", Collections.emptyList(), Collections.emptyList(), "Exits the diagnostic mode (triggers a reboot)"),
+    UNPACK("unpack", Collections.emptyList(), Arrays.asList("pkg", "target-directory"), "Unpacks an update pkg file into a data and animation archives"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 
     private final List<String> commandNames;

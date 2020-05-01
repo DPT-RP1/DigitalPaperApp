@@ -3,6 +3,7 @@ package net.sony.dpt.ui.cli;
 import net.sony.dpt.command.firmware.RootCommand;
 import net.sony.dpt.command.notes.NoteTemplateCommand;
 import net.sony.dpt.command.root.DiagnosticCommand;
+import net.sony.dpt.command.root.FirmwareCommand;
 import net.sony.dpt.network.CheckedHttpClient;
 import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.dpt.command.authenticate.AuthenticateCommand;
@@ -30,6 +31,7 @@ import net.sony.dpt.persistence.LastCommandRunStore;
 import net.sony.dpt.persistence.RegistrationTokenStore;
 import net.sony.dpt.persistence.SyncStore;
 import net.sony.dpt.root.DiagnosticManager;
+import net.sony.dpt.root.FirmwarePacker;
 import net.sony.dpt.root.RootPacker;
 import net.sony.dpt.ui.gui.whiteboard.Whiteboard;
 import net.sony.dpt.ui.html.WhiteboardBackend;
@@ -60,6 +62,7 @@ import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.List;
 
 public class DigitalPaperCLI {
@@ -139,6 +142,9 @@ public class DigitalPaperCLI {
                 return;
             case DIAG_EXIT:
                 diagExit();
+                return;
+            case UNPACK:
+                unpack(arguments.get(1), arguments.get(2));
                 return;
         }
 
@@ -282,6 +288,11 @@ public class DigitalPaperCLI {
                 break;
         }
 
+    }
+
+    private void unpack(final String pkgFile, final String targetDirectory) throws NoSuchPaddingException, SignatureException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException, InvalidKeyException {
+        new FirmwareCommand(logWriter, new FirmwarePacker(cryptographyUtils, logWriter))
+                .unpack(Path.of(pkgFile), Path.of(targetDirectory));
     }
 
     private void diagExit() throws IOException, InterruptedException {
