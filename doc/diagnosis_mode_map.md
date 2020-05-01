@@ -236,6 +236,10 @@ drwxr-xr-x  3 user user    4096 May  1 21:28 arm
 -rw-r--r--  1 user user 2281805 May  1 23:31 DigitalPaperApp.jar
 ```
 
+The jar can then be read by intellij or any other decompile (FernFlower is really good: https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine)
+![deodex](images/deodex.png)
+
+
 Finally, all the tools precompiled to do that are also included from their respective github, with changes to make them compile on debian/java11:
 * `/tools/scripts/dex-tools-2.1` and `/tools/dex2jar` come from https://github.com/pxb1988/dex2jar
 * `/tools/scripts/oat2dex.jar` `/tools/SmaliEx` come from https://github.com/testwhat/SmaliEx
