@@ -175,8 +175,72 @@ a command produces. Therefore, you can use the dpt tool in this repository:
 dpt diag fetch /path/to/remote/file /path/to/local/file
 ```
 
+## Using mass storage to transfer files
+
+You can also download files without dpt by running:
+```bash
+umount /mnt/sd
+/usr/local/bin/mass_storage.sh start 
+```
+A mass storage USB will appear in your system:
+![mass storage](images/mass_storage.png)
+
 ## Decompiling Sony's APK
-* Explain how to
+### Fetching the /system/framework and /system/app
+* Use minicom to copy the framework (needed to deodex) to the SD partition
+```bash
+umount /mnt/sd
+/usr/local/bin/mass_storage.sh stop
+
+mount /dev/mmcblk0p16 /mnt/sd
+cp -R /system/framework /mnt/sd
+umount /mnt/sd
+
+/usr/local/bin/mass_storage.sh start 
+```
+You can then see the framework folder and transfer it to your local disk
+![framework_dl](images/framework_dl.png)
+
+Repeat the same process for the /system/app folder to fetch all the apks
+
+### Deodexing
+Now that we have the apk and the android base framework against which the apks were optimized we
+need to deoptimize, or "deodex" the apks/odex files.
+
+For context, here is what happen when an APK is detected for the first time on a device:
+1. The .dex file, containing class files, is extracted and removed from the .apk file (so an apk on a device isn't self sufficient, you can't transfer on another)
+2. The .dex file is turned into an .odex file, specifically tailored to the architecture of the device (here arm), and placed
+into a folder named like the architecture (/system/app/\<ApplicationName\>/arm for the DPT)
+
+What we want to do is:
+1. Transform the .odex into a .dex
+2. Transform the .dex into a .jar
+3. Open the .jar
+
+There are ways to recompile and rebuild apk with changes, which will come later
+
+This repository contains a script in /tools/script/deodex.sh that works on Debian 10
+
+```bash
+./deodex /path/to/root/of/framework/folder nameOfApplicationFolder
+# e.g.:
+./deodex /tmp/fetched DigitalPaperApp
+``` 
+
+This will generate the following:
+```bash
+total 4936
+drwxr-xr-x  3 user user    4096 May  1 21:28 arm
+-rw-r--r--  1 user user  394794 May  1 09:12 DigitalPaperApp.apk
+-rw-r--r--  1 user user 2360512 May  1 23:31 DigitalPaperApp.dex
+-rw-r--r--  1 user user 2281805 May  1 23:31 DigitalPaperApp.jar
+```
+
+Finally, all the tools precompiled to do that are also included from their respective github, with changes to make them compile on debian/java11:
+* `/tools/scripts/dex-tools-2.1` and `/tools/dex2jar` come from https://github.com/pxb1988/dex2jar
+* `/tools/scripts/oat2dex.jar` `/tools/SmaliEx` come from https://github.com/testwhat/SmaliEx
+
+
 ### App launcher
 ### Document Manager
 ### Digital Paper App
