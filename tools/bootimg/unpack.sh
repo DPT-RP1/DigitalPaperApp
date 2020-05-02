@@ -20,6 +20,7 @@ mv zImage "$target_folder/"
 
 cd "$target_folder/initramfs" || exit
 zcat ../initramfs.cpio.gz | cpio -imdv
+zcat ../initramfs.cpio.gz | cpio -ivtn --numeric-uid-gid --extract-over-symlinks
 rm ../initramfs.cpio.gz
 
 cd "$cwd" || exit

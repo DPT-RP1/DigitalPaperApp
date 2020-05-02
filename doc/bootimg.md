@@ -157,6 +157,101 @@ diff official/initramfs/init.usb.rc happyz/initramfs/init.usb.rc
 >     chmod 0660 /sys/class/android_usb/android0/f_mass_storage/lun/file
 ```
 
+### File permission diff
+On top of content changes, there are also some permission changes:
+```bash
+2c2
+< ./data drwxr-x--x user user
+---
+> ./data drwxrwx--x user user
+16c16
+< ./init.pxa1908.usb.rc -rwxr-x--- user user
+---
+> ./init.pxa1908.usb.rc -rwxr-xr-x user user
+18c18
+< ./init -rwxr-x--- user user
+---
+> ./init -rwxr-xr-x user user
+21c21
+< ./init.usb.rc -rwxr-x--- user user
+---
+> ./init.usb.rc -rwxr-xr-x user user
+46a47
+> ./sbin/adbd -rwxr-xr-x user user
+48c49
+< ./sbin/healthd -rwxr-x--- user user
+---
+> ./sbin/healthd -rwxr-xr-x user user
+50c51
+< ./sbin/mount_ddat.sh -rwxr-x--- user user
+---
+> ./sbin/mount_ddat.sh -rwxr-xr-x user user
+
+```
+
+### CPIO mistakes
+It seems HappyZ quickly whipped up the cpio file without exactly
+trying to reproduce Sony's layout which is:
+* All files have 0:0 as owners
+* All files have 0 as epoch time
+* All files have 1 as hardlinks count
+* Files are sorted with LC_COLLATE=C (underscore avec dot)
+
+A reference scan is included in `tools/bootimg/official_cpio_content`
+
+On linux it is not possible to set special permissions on symlink, so files generated on linux will not match the symlink permission of
+Sony for the charger symlink.
+
+## Repacking the boot.img and testing in diag mode
+A set of scripts is available in the tools/bootimg folder to unpack, patch and repack:
+```bash
+cd tools/bootimg
+./unpack.sh boot-1.6.50.14130-official.img official
+cd patch_adb
+./patch.sh
+cd ..
+# Here you can modify stuff in the adb folder further
+./pack.sh adb
+# A new image is now present: adb_boot.img
+```
+### Testing in diagnostic mode
+The idea is to run the direct block copy `dd` in diag mode, restart, and 
+see if we now have adb running.
+
+```bash
+minicom # We connect in diag mode
+mass_storage.sh start
+# Here we copy our custom boot.img to the mass storage
+cp /path/to/adb_boot.img /path/to/mass_storage
+mass_storage.sh stop
+mount /dev/mmcblk0p16 /mnt/sd
+dd if=/mnt/sd/adb_boot.img of=/dev/mmcblk0p8 bs=4M
+sync
+umount /mnt/sd
+reboot
+```
+The DPT should reboot, with adb available. Type now:
+```bash
+adb devices
+List of devices attached
+324650005031805	device
+
+adb devices -l
+List of devices attached
+324650005031805        device usb:1-7 product:FPX_1010 model:DPT_RP1 device:FPX-1010 transport_id:1
+
+adb tcpip 5555
+restarting in TCP mode port: 5555
+
+adb connect digitalpaper.local
+connected to digitalpaper.local:5555
+
+adb shell
+> root@FPX-1010:/ # ls
+
+# If the device is "offline" there, use adb disconnect digitalpaper.local then adb connect <ip>
+```
+
 ## Remaining questions
 * How did HappyZ get the adb binary
 * Why isn't it automatically integrated into the root package

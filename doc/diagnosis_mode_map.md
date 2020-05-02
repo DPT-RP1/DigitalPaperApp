@@ -219,7 +219,7 @@ What we want to do is:
 
 There are ways to recompile and rebuild apk with changes, which will come later
 
-This repository contains a script in /tools/script/deodex.sh that works on Debian 10
+This repository contains a script in /tools/deodex/deodex.sh that works on Debian 10
 
 ```bash
 ./deodex /path/to/root/of/framework/folder nameOfApplicationFolder
