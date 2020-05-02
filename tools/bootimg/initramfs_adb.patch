@@ -1,0 +1,117 @@
+diff -ruN official/initramfs/default.prop adb/initramfs/default.prop
+--- official/initramfs/default.prop	1970-01-01 08:00:00.000000000 +0800
++++ adb/initramfs/default.prop	2020-04-06 14:36:58.000000000 +0800
+@@ -1,11 +1,13 @@
+ #
+ # ADDITIONAL_DEFAULT_PROPERTIES
+ #
+-ro.secure=1
++ro.secure=0
++ro.adb.secure=0
++service.adb.root=1
+ ro.allow.mock.location=0
+-ro.debuggable=0
++ro.debuggable=1
+ ro.zygote=zygote32
+-persist.sys.usb.config=acm,hid
++persist.sys.usb.config=acm,hid,adb
+ persist.sys.usb.enabled=true
+ dalvik.vm.dex2oat-Xms=64m
+ dalvik.vm.dex2oat-Xmx=512m
+diff -ruN official/initramfs/file_contexts adb/initramfs/file_contexts
+--- official/initramfs/file_contexts	1970-01-01 08:00:00.000000000 +0800
++++ adb/initramfs/file_contexts	2020-04-06 14:36:58.000000000 +0800
+@@ -127,7 +127,9 @@
+ /system/bin/sh		--	u:object_r:shell_exec:s0
+ /system/bin/run-as	--	u:object_r:runas_exec:s0
+ /system/bin/bootanimation u:object_r:bootanim_exec:s0
+-/system/bin/app_process32	u:object_r:zygote_exec:s0
++/system/bin/app_process     u:object_r:system_file:s0
++/system/bin/app_process32   u:object_r:system_file:s0
++#/system/bin/app_process32  u:object_r:zygote_exec:s0
+ /system/bin/app_process64	u:object_r:zygote_exec:s0
+ /system/bin/servicemanager	u:object_r:servicemanager_exec:s0
+ /system/bin/surfaceflinger	u:object_r:surfaceflinger_exec:s0
+@@ -149,7 +151,10 @@
+ /system/bin/pppd	u:object_r:ppp_exec:s0
+ /system/bin/tf_daemon	u:object_r:tee_exec:s0
+ /system/bin/racoon	u:object_r:racoon_exec:s0
+-/system/xbin/su		u:object_r:su_exec:s0
++/system/xbin/su     u:object_r:system_file:s0
++/system/xbin/supolicy       u:object_r:system_file:s0
++/system/xbin/daemonsu       u:object_r:system_file:s0
++#/system/xbin/su        u:object_r:su_exec:s0
+ /system/vendor/bin/gpsd u:object_r:gpsd_exec:s0
+ /system/bin/dnsmasq     u:object_r:dnsmasq_exec:s0
+ /system/bin/hostapd     u:object_r:hostapd_exec:s0
+@@ -160,7 +165,8 @@
+ /system/bin/uncrypt     u:object_r:uncrypt_exec:s0
+ /system/bin/logwrapper  u:object_r:system_file:s0
+ /system/bin/vdc         u:object_r:vdc_exec:s0
+-/system/bin/install-recovery.sh u:object_r:install_recovery_exec:s0
++/system/bin/install-recovery.sh u:object_r:system_file:s0
++#/system/bin/install-recovery.sh u:object_r:install_recovery_exec:s0
+ /system/bin/dex2oat     u:object_r:dex2oat_exec:s0
+ # patchoat executable has (essentially) the same requirements as dex2oat.
+ /system/bin/patchoat    u:object_r:dex2oat_exec:s0
+diff -ruN official/initramfs/init.pxa1908.usb.rc adb/initramfs/init.pxa1908.usb.rc
+--- official/initramfs/init.pxa1908.usb.rc	1970-01-01 08:00:00.000000000 +0800
++++ adb/initramfs/init.pxa1908.usb.rc	2020-04-06 14:36:58.000000000 +0800
+@@ -12,9 +12,10 @@
+ on property:sys.usb.config=acm,hid
+     write /sys/class/android_usb/android0/enable 0
+     write /sys/class/android_usb/android0/idProduct 0be5
+-    write /sys/class/android_usb/android0/functions ${sys.usb.config}
++    write /sys/class/android_usb/android0/functions ${sys.usb.config},adb
+     write /sys/class/android_usb/android0/enable 1
+-    setprop sys.usb.state ${sys.usb.config}
++    start adbd
++    setprop sys.usb.state ${sys.usb.config},adb
+ 
+ on property:sys.usb.config=acm,hid,adb
+     write /sys/class/android_usb/android0/enable 0
+@@ -24,6 +25,14 @@
+     start adbd
+     setprop sys.usb.state ${sys.usb.config}
+ 
++on property:sys.usb.config=acm,hid,adb,mass_storage
++    write /sys/class/android_usb/android0/enable 0
++    write /sys/class/android_usb/android0/idProduct 0be5
++    write /sys/class/android_usb/android0/functions ${sys.usb.config}
++    write /sys/class/android_usb/android0/f_mass_storage/lun/file /dev/block/mmcblk0p16
++    write /sys/class/android_usb/android0/enable 1
++    start adbd
++    setprop sys.usb.state ${sys.usb.config}
+ 
+ # CDC-ECM(ethernet)
+ on property:sys.usb.config=ecm
+diff -ruN official/initramfs/init.usb.rc adb/initramfs/init.usb.rc
+--- official/initramfs/init.usb.rc	1970-01-01 08:00:00.000000000 +0800
++++ adb/initramfs/init.usb.rc	2020-04-06 14:36:58.000000000 +0800
+@@ -6,8 +6,8 @@
+ on post-fs-data
+     chown system system /sys/class/android_usb/android0/f_rndis/ethaddr
+     chmod 0660 /sys/class/android_usb/android0/f_rndis/ethaddr
+-#    chown system system /sys/class/android_usb/android0/f_mass_storage/lun/file
+-#    chmod 0660 /sys/class/android_usb/android0/f_mass_storage/lun/file
++    chown system system /sys/class/android_usb/android0/f_mass_storage/lun/file
++    chmod 0660 /sys/class/android_usb/android0/f_mass_storage/lun/file
+ 
+ # Used to disable USB when switching states
+ on property:sys.usb.config=none
+Binary files official/initramfs/sbin/adbd and adb/initramfs/sbin/adbd differ
+diff -ruN official/initramfs/sbin/mount_ddat.sh adb/initramfs/sbin/mount_ddat.sh
+--- official/initramfs/sbin/mount_ddat.sh	1970-01-01 08:00:00.000000000 +0800
++++ adb/initramfs/sbin/mount_ddat.sh	2020-04-06 14:36:58.000000000 +0800
+@@ -1,9 +1,9 @@
+ #!/system/bin/sh
+ 
+ mkdir /tmp/updater
+-mount -t vfat -o noatime,umask=000 /dev/block/platform/soc.2/by-name/ddat /tmp/updater
++mount -t vfat -o noatime,umask=000,iocharset=utf8 /dev/block/platform/soc.2/by-name/ddat /tmp/updater
+ if [ $? -ne 0 ]
+ then
+   mkfs.vfat /dev/block/platform/soc.2/by-name/ddat
+-  mount -t vfat -o noatime,umask=000 /dev/block/platform/soc.2/by-name/ddat /tmp/updater
++  mount -t vfat -o noatime,umask=000,iocharset=utf8 /dev/block/platform/soc.2/by-name/ddat /tmp/updater
+ fi
