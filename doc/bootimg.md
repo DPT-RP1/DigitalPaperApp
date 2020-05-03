@@ -195,7 +195,7 @@ trying to reproduce Sony's layout which is:
 * All files have 0:0 as owners
 * All files have 0 as epoch time
 * All files have 1 as hardlinks count
-* Files are sorted with LC_COLLATE=C (underscore avec dot)
+* Files are sorted with LC_COLLATE=C (underscore before dot)
 
 A reference scan is included in `tools/bootimg/official_cpio_content`
 

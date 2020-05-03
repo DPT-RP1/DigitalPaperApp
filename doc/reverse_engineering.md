@@ -14,3 +14,17 @@ root@FPX-1010:/mnt/sdcard/dp_user_storage/file # ls **/** | busybox head -10
 ```
 The exact structure is therefore:
 UUID1-UUID2-UUID3-UUID4-UUID5/UUID1.pdf
+
+This is mapped probably to a database view, which can retrieve the documents directly by their id with a simple fs lookup.
+
+## What is the SDK version to target when building applications
+```bash
+root@FPX-1010:/data/data # getprop ro.build.version.sdk 
+22
+root@FPX-1010:/data/data # wm size
+Physical size: 1650x2200
+root@FPX-1010:/data/data # wm density
+Physical density: 160
+root@FPX-1010:/data/data # cat /proc/meminfo | grep MemTotal
+MemTotal:        1983232 kB
+```
