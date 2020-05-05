@@ -1,11 +1,13 @@
 package net.sony.dpt.ui.cli;
 
 import com.android.ddmlib.AdbCommandRejectedException;
+import com.android.ddmlib.ShellCommandUnresponsiveException;
 import com.android.ddmlib.SyncException;
 import com.android.ddmlib.TimeoutException;
 import net.sony.dpt.command.firmware.RootCommand;
 import net.sony.dpt.command.notes.NoteTemplateCommand;
 import net.sony.dpt.command.root.AdbCommand;
+import net.sony.dpt.command.root.AdbException;
 import net.sony.dpt.command.root.DiagnosticCommand;
 import net.sony.dpt.command.root.FirmwareCommand;
 import net.sony.dpt.network.CheckedHttpClient;
@@ -156,6 +158,12 @@ public class DigitalPaperCLI {
             case ADB_FETCH_EXTENSION:
                 adbFetchExtension(arguments.get(2), arguments.get(3));
                 return;
+            case ADB_SETUP_EXTENSION:
+                adbSetupExtension(arguments.get(2), arguments.get(3), arguments.get(4), arguments.get(5));
+                return;
+            case ADB_REMOVE_EXTENSION:
+                adbRemoveExtension(arguments.get(2));
+                return;
         }
 
         String addr = findAddress(commandLine);
@@ -300,19 +308,54 @@ public class DigitalPaperCLI {
 
     }
 
+    private void adbRemoveExtension(String name) throws InterruptedException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException {
+        AdbCommand adbCommand = null;
+        try {
+            adbCommand = new AdbCommand(logWriter, new LocalSyncProgressBar(
+                    System.out,
+                    ProgressBar.ProgressStyle.SQUARES_1
+            ));
+            adbCommand.removeExtension(name);
+        } finally {
+            if (adbCommand != null) { adbCommand.tearDown(); }
+        }
+    }
+
+    private void adbSetupExtension(String name, String component, String action, String icon) throws InterruptedException, IOException, URISyntaxException, SyncException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException {
+        AdbCommand adbCommand = null;
+        try {
+            adbCommand = new AdbCommand(logWriter, new LocalSyncProgressBar(
+                    System.out,
+                    ProgressBar.ProgressStyle.SQUARES_1
+            ));
+            adbCommand.setupExtension(name, component, action, Files.readAllBytes(Path.of(icon)));
+        } finally {
+            if (adbCommand != null) { adbCommand.tearDown(); }
+        }
+    }
+
     private void adbListExtensions() throws InterruptedException {
-        AdbCommand adbCommand = new AdbCommand(logWriter, null);
-        adbCommand.showExtensionsDescriptors();
-        adbCommand.tearDown();
+        AdbCommand adbCommand = null;
+        try {
+            adbCommand = new AdbCommand(logWriter, null);
+            adbCommand.showExtensionsDescriptors();
+        } finally {
+            if (adbCommand != null) { adbCommand.tearDown(); }
+        }
     }
 
     private void adbFetchExtension(final String name, final String targetFolder) throws InterruptedException, TimeoutException, AdbCommandRejectedException, SyncException, IOException {
-        AdbCommand adbCommand = new AdbCommand(
-            logWriter,
-            new LocalSyncProgressBar(System.out, ProgressBar.ProgressStyle.SQUARES_1)
-        );
-        adbCommand.downloadExtensionsDescriptor(name, Path.of(targetFolder));
-        adbCommand.tearDown();
+        AdbCommand adbCommand = null;
+        try {
+            adbCommand = new AdbCommand(
+                    logWriter,
+                    new LocalSyncProgressBar(System.out, ProgressBar.ProgressStyle.SQUARES_1)
+            );
+            adbCommand.downloadExtensionsDescriptor(name, Path.of(targetFolder));
+        } finally {
+            if (adbCommand != null) { adbCommand.tearDown(); }
+        }
+
     }
 
     private void unpack(final String pkgFile, final String targetDirectory) throws NoSuchPaddingException, SignatureException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException, InvalidKeyException {

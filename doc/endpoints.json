@@ -3808,13 +3808,13 @@
         ],
         "responses": {
           "200": {
-            "description": "指定された状態項目の状態値",
+            "description": "Status value of the specified status item",
             "schema": {
               "$ref": "#/definitions/commonValueObject"
             }
           },
           "404": {
-            "description": "* [40401] Extensionsには指定された状態項目が存在しない",
+            "description": "* [40401] Extensions does not have the specified status item",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
@@ -3836,7 +3836,7 @@
         "description": "Obtain a list of setting values (for extended applications)",
         "responses": {
           "200": {
-            "description": "各種設定値の一覧<br>(JSONの属性名 'item1, item2...' は動的に変化する)",
+            "description": "List of various setting values <br> (JSON attribute name 'item1, item2 ...' changes dynamically)",
             "schema": {
               "$ref": "#/definitions/extensionConfigsGetResult"
             }
@@ -3855,19 +3855,19 @@
         "produces": [
           "application/json"
         ],
-        "description": "(Extensions向け) 設定値を取得する",
+        "description": "(For Extensions) Get the setting value",
         "parameters": [
           {
             "name": "item",
             "in": "path",
-            "description": "設置項目名",
+            "description": "Installation item name",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "指定された設定項目の設定値",
+            "description": "Setting value of the specified setting item",
             "schema": {
               "$ref": "#/definitions/commonValueObject"
             }
@@ -3893,7 +3893,7 @@
         "produces": [
           "application/json"
         ],
-        "description": "(Extensions向け) 指定した内容で設定を変更する",
+        "description": "(For Extensions) Change settings with specified contents",
         "parameters": [
           {
             "name": "item",
@@ -3923,7 +3923,7 @@
             }
           },
           "404": {
-            "description": "* [40401] Extensionsには指定された設定項目が存在しない",
+            "description": "* [40401] The specified setting item does not exist in Extensions",
             "schema": {
               "$ref": "#/definitions/errorResult"
             }
