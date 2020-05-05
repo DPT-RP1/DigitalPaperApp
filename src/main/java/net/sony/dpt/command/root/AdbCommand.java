@@ -1,12 +1,26 @@
 package net.sony.dpt.command.root;
 
 import com.android.ddmlib.*;
+import net.dongliu.apk.parser.ApkFile;
 import net.sony.util.LogWriter;
 import net.sony.util.ProgressBar;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringBufferInputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -236,10 +250,10 @@ public class AdbCommand {
         syncService.close();
     }
 
-    private void copyExtensionFile(final String name, final Map<String, String> replacements, final Path templatePath, final Path tempDir) throws IOException {
+    private void copyExtensionFile(final String name, final Map<String, String> replacements, final String templateRootResource, final Path tempDir) throws IOException {
         logWriter.log("Preparing " + name);
 
-        String newContent = Files.readString(templatePath.resolve(name), StandardCharsets.UTF_8);
+        String newContent = IOUtils.toString(Objects.requireNonNull(AdbCommand.class.getClassLoader().getResourceAsStream(templateRootResource + "/" + name)), StandardCharsets.UTF_8);
 
         for (String key : replacements.keySet()) {
             newContent = newContent.replaceAll(key, replacements.get(key));
@@ -259,11 +273,7 @@ public class AdbCommand {
         Path tempDir = Files.createDirectories(Files.createTempDirectory("dpt").resolve(name));
         try {
             // We first copy the resources with the correct name
-            URL templateURL = AdbCommand.class.getClassLoader().getResource(TEMPLATE_ROOT);
-            AtomicBoolean failed = new AtomicBoolean(false);
-
             logWriter.log("Preparing extension into " + tempDir);
-            Path templatePath = Path.of(Objects.requireNonNull(templateURL).toURI());
 
             Map<String, String> replacements = new HashMap<>() {{
                 put(EXTENSION_TEMPLATE_TOKEN, name);
@@ -274,12 +284,27 @@ public class AdbCommand {
                 put(EXTENSION_TEMPLATE_ACTIVITY_PATH, component);
                 put(EXTENSION_TEMPLATE_ACTION, action);
             }};
-            copyExtensionFile(EXTENSION_XML, replacements, templatePath, tempDir);
-            copyExtensionFile(EXTENSION_STRINGS_EN, replacements, templatePath, tempDir);
-            copyExtensionFile(EXTENSION_STRINGS_JA, replacements, templatePath, tempDir);
-            copyExtensionFile(EXTENSION_STRINGS_PUTONGHUA, replacements, templatePath, tempDir);
+            copyExtensionFile(EXTENSION_XML, replacements, TEMPLATE_ROOT, tempDir);
+            copyExtensionFile(EXTENSION_STRINGS_EN, replacements, TEMPLATE_ROOT, tempDir);
+            copyExtensionFile(EXTENSION_STRINGS_JA, replacements, TEMPLATE_ROOT, tempDir);
+            copyExtensionFile(EXTENSION_STRINGS_PUTONGHUA, replacements, TEMPLATE_ROOT, tempDir);
 
-            Files.copy(templatePath.resolve(EXTENSION_ICON), tempDir.resolve(EXTENSION_ICON.replaceAll(EXTENSION_TEMPLATE_LOWER, name.toLowerCase())));
+            if (icon == null || icon.length == 0) {
+                icon = IOUtils.toByteArray(
+                        Objects.requireNonNull(
+                                AdbCommand.class.getClassLoader().getResourceAsStream(TEMPLATE_ROOT + "/" + EXTENSION_ICON)
+                        ));
+            }
+
+            Files.write(
+                    tempDir.resolve(
+                            EXTENSION_ICON.replaceAll(
+                                    EXTENSION_TEMPLATE_LOWER,
+                                    name.toLowerCase()
+                            )
+                    ),
+                    icon
+            );
 
             // Now that everything is ready, we need to push the extension. First let's see if it was there already
             createFolderIfNotExists(USERSPACE_EXTENSION_PATH);
@@ -360,6 +385,41 @@ public class AdbCommand {
 
         executeShellCommandSync("mv " + dbPath + " " + dbPath + ".backup");
         executeShellCommandSync("mv " + dbJournalPath + " " + dbPath + ".backup");
+    }
+
+    public void installApk(final Path apkLocation) throws IOException, ParserConfigurationException, SAXException, XPathExpressionException, InstallException, AdbCommandRejectedException, InterruptedException, SyncException, ShellCommandUnresponsiveException, TimeoutException, URISyntaxException {
+        // We need an activity and an action
+        // Activity: /manifest/android:package + / + /manifest/application/activity/android:name
+        // Action: we take the first intent filter
+
+        ApkFile apkFile = new ApkFile(apkLocation.toFile());
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(new StringBufferInputStream(apkFile.getManifestXml()));
+
+        XPathFactory xPathfactory = XPathFactory.newInstance();
+        XPath xpath = xPathfactory.newXPath();
+
+        String packageDefinition = apkFile.getApkMeta().getPackageName();
+
+        XPathExpression expr = xpath.compile("/manifest/application/activity/@name");
+        String activityName = expr.evaluate(doc);
+
+        expr = xpath.compile("/manifest/application/activity/intent-filter/action/@name");
+        String action = expr.evaluate(doc);
+
+        expr = xpath.compile("/manifest/application/@icon");
+        String iconPath = expr.evaluate(doc);
+
+        byte[] icon = apkFile.getFileData(iconPath);
+        String apkName = apkFile.getApkMeta().getName();
+
+        // We can now trigger the install process with adb
+        digitalPaperDevice.installPackage(apkLocation.toString(), true);
+
+        // Now that we're installed, we can create a new extension
+        setupExtension(apkName, packageDefinition + "/" + activityName, action, icon);
     }
 
     public void tearDown() {

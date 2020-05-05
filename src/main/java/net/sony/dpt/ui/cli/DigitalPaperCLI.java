@@ -1,9 +1,6 @@
 package net.sony.dpt.ui.cli;
 
-import com.android.ddmlib.AdbCommandRejectedException;
-import com.android.ddmlib.ShellCommandUnresponsiveException;
-import com.android.ddmlib.SyncException;
-import com.android.ddmlib.TimeoutException;
+import com.android.ddmlib.*;
 import net.sony.dpt.command.firmware.RootCommand;
 import net.sony.dpt.command.notes.NoteTemplateCommand;
 import net.sony.dpt.command.root.AdbCommand;
@@ -54,6 +51,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import java.awt.*;
 import java.io.IOException;
@@ -163,6 +161,9 @@ public class DigitalPaperCLI {
                 return;
             case ADB_REMOVE_EXTENSION:
                 adbRemoveExtension(arguments.get(2));
+                return;
+            case ADB_INSTALL_APK:
+                adbInstallApk(arguments.get(2));
                 return;
         }
 
@@ -306,6 +307,19 @@ public class DigitalPaperCLI {
                 break;
         }
 
+    }
+
+    private void adbInstallApk(String localPath) throws InterruptedException, IOException, URISyntaxException, ParserConfigurationException, InstallException, SyncException, SAXException, TimeoutException, AdbCommandRejectedException, XPathExpressionException, ShellCommandUnresponsiveException {
+        AdbCommand adbCommand = null;
+        try {
+            adbCommand = new AdbCommand(logWriter, new LocalSyncProgressBar(
+                    System.out,
+                    ProgressBar.ProgressStyle.SQUARES_1
+            ));
+            adbCommand.installApk(Path.of(localPath));
+        } finally {
+            if (adbCommand != null) { adbCommand.tearDown(); }
+        }
     }
 
     private void adbRemoveExtension(String name) throws InterruptedException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException {
