@@ -141,6 +141,11 @@
             <artifactId>commons-codec</artifactId>
             <version>1.14</version>
         </dependency>
+        <dependency>
+            <groupId>com.android.tools.ddms</groupId>
+            <artifactId>ddmlib</artifactId>
+            <version>25.3.3</version>
+        </dependency>
 
 
     </dependencies>

@@ -43,6 +43,8 @@ public enum Command {
     DIAG_FETCH("diag fetch", Collections.emptyList(), Arrays.asList("remote-path", "local-path"), "BETA - Downloads a files from the diagnostic mode, after root. See doc/diagnosis_mod_map.md"),
     DIAG_EXIT("diag exit", Collections.emptyList(), Collections.emptyList(), "Exits the diagnostic mode (triggers a reboot)"),
     UNPACK("unpack", Collections.emptyList(), Arrays.asList("pkg", "target-directory"), "Unpacks an update pkg file into a data and animation archives"),
+    ADB_LIST_EXTENSIONS("adb list-extensions", Collections.emptyList(), Collections.emptyList(), "Lists all extensions installed on the Digital Paper"),
+    ADB_FETCH_EXTENSION("adb fetch-extension", Collections.emptyList(), Arrays.asList("name", "local-path"), "Retrieve extension descriptors as return by dpt adb list-extensions"),
     HELP(Arrays.asList("help", "command-help"), "Prints this message");
 
     private final List<String> commandNames;

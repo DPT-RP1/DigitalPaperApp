@@ -56,6 +56,7 @@ public class LocalSyncProgressBar implements ProgressBar {
     @Override
     public void stop() {
         currentTask = "\nTask complete !";
+        percentDone = 100;
         repaint();
     }
 

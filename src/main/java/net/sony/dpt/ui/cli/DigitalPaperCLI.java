@@ -1,7 +1,11 @@
 package net.sony.dpt.ui.cli;
 
+import com.android.ddmlib.AdbCommandRejectedException;
+import com.android.ddmlib.SyncException;
+import com.android.ddmlib.TimeoutException;
 import net.sony.dpt.command.firmware.RootCommand;
 import net.sony.dpt.command.notes.NoteTemplateCommand;
+import net.sony.dpt.command.root.AdbCommand;
 import net.sony.dpt.command.root.DiagnosticCommand;
 import net.sony.dpt.command.root.FirmwareCommand;
 import net.sony.dpt.network.CheckedHttpClient;
@@ -146,6 +150,12 @@ public class DigitalPaperCLI {
             case UNPACK:
                 unpack(arguments.get(1), arguments.get(2));
                 return;
+            case ADB_LIST_EXTENSIONS:
+                adbListExtensions();
+                return;
+            case ADB_FETCH_EXTENSION:
+                adbFetchExtension(arguments.get(2), arguments.get(3));
+                return;
         }
 
         String addr = findAddress(commandLine);
@@ -288,6 +298,21 @@ public class DigitalPaperCLI {
                 break;
         }
 
+    }
+
+    private void adbListExtensions() throws InterruptedException {
+        AdbCommand adbCommand = new AdbCommand(logWriter, null);
+        adbCommand.showExtensionsDescriptors();
+        adbCommand.tearDown();
+    }
+
+    private void adbFetchExtension(final String name, final String targetFolder) throws InterruptedException, TimeoutException, AdbCommandRejectedException, SyncException, IOException {
+        AdbCommand adbCommand = new AdbCommand(
+            logWriter,
+            new LocalSyncProgressBar(System.out, ProgressBar.ProgressStyle.SQUARES_1)
+        );
+        adbCommand.downloadExtensionsDescriptor(name, Path.of(targetFolder));
+        adbCommand.tearDown();
     }
 
     private void unpack(final String pkgFile, final String targetDirectory) throws NoSuchPaddingException, SignatureException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException, InvalidKeyException {

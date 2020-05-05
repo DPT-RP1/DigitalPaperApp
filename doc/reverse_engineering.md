@@ -28,3 +28,8 @@ Physical density: 160
 root@FPX-1010:/data/data # cat /proc/meminfo | grep MemTotal
 MemTotal:        1983232 kB
 ```
+
+### How are extensions / apk presented to the app launcher
+
+* Contrary to https://github.com/HappyZ/dpt-tools/wiki/ADB-Tricks,-DIY-Launcher-App it turns how there's a second scan path,
+in /data/dp_extensions, which is writable by default and can definitely be handled by a little install script.
