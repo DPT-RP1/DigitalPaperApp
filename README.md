@@ -79,14 +79,15 @@ Available commands:
   insert-note-template name path          Inserts a new note template from the specified file, with the specified name
   get-configuration path                  Saves the system configuration to a local file at <path>
   set-configuration path                  Send the system configuration from a local file at <path>
-  root [-dryrun]                          Roots the device, builds the pkg inline from the repo files (no surprise)
-  diag fetch remote-path local-path       Downloads a files from the diagnostic mode, after root. See doc/diagnosis_mod_map.md
+  root [-dryrun]                          BETA - Roots the device
+  diag fetch remote-path local-path       BETA - Downloads a files from the diagnostic mode, after root. See doc/diagnosis_mod_map.md
   diag exit                               Exits the diagnostic mode (triggers a reboot)
   unpack pkg target-directory             Unpacks an update pkg file into a data and animation archives
   adb list-extensions                     Lists all extensions installed on the Digital Paper
   adb fetch-extension name local-path     Retrieve extension descriptors as return by dpt adb list-extensions
   adb setup-extension name component action icon-path Setup an extension (apk intent launcher) for the official app launcher.
   adb remove-extension name               Removes a user-space extension, do not use to delete offical apps.
+  adb install-apk local-path              Installs an APK and enables it in the launcher
   help                                    Prints this message
 ```
 
