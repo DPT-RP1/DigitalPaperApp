@@ -1,7 +1,11 @@
 #!/bin/bash
 brew tap homebrew/cask-versions
 brew cask install osxfuse
+brew install maven
 brew cask install java
+xcode-select --install
+brew install gcc
+
 export JAVA_8_HOME=$(/usr/libexec/java_home -v1.8)
 export JAVA_11_HOME=$(/usr/libexec/java_home -v11)
 
