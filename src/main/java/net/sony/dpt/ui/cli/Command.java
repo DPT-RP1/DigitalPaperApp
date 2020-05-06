@@ -44,7 +44,7 @@ public enum Command {
     DIAG_EXIT("diag exit", Collections.emptyList(), Collections.emptyList(), "Exits the diagnostic mode (triggers a reboot)"),
     UNPACK("unpack", Collections.emptyList(), Arrays.asList("pkg", "target-directory"), "Unpacks an update pkg file into a data and animation archives"),
     ADB_LIST_EXTENSIONS("adb list-extensions", Collections.emptyList(), Collections.emptyList(), "Lists all extensions installed on the Digital Paper"),
-    ADB_FETCH_EXTENSION("adb fetch-extension", Collections.emptyList(), Arrays.asList("name", "local-path"), "Retrieve extension descriptors as return by dpt adb list-extensions"),
+    ADB_FETCH_EXTENSION("adb fetch-extension", Collections.emptyList(), Arrays.asList("name", "local-path"), "Retrieve extension descriptors as returned by dpt adb list-extensions"),
     ADB_SETUP_EXTENSION("adb setup-extension", Collections.emptyList(), Arrays.asList("name", "component", "action", "icon-path"), "Setup an extension (apk intent launcher) for the official app launcher."),
     ADB_REMOVE_EXTENSION("adb remove-extension", Collections.emptyList(), Collections.singletonList("name"), "Removes a user-space extension, do not use to delete offical apps."),
     ADB_INSTALL_APK("adb install-apk", Collections.emptyList(), Collections.singletonList("local-path"), "Installs an APK and enables it in the launcher"),

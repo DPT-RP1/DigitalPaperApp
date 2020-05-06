@@ -84,7 +84,7 @@ Available commands:
   diag exit                               Exits the diagnostic mode (triggers a reboot)
   unpack pkg target-directory             Unpacks an update pkg file into a data and animation archives
   adb list-extensions                     Lists all extensions installed on the Digital Paper
-  adb fetch-extension name local-path     Retrieve extension descriptors as return by dpt adb list-extensions
+  adb fetch-extension name local-path     Retrieve extension descriptors as returned by dpt adb list-extensions
   adb setup-extension name component action icon-path Setup an extension (apk intent launcher) for the official app launcher.
   adb remove-extension name               Removes a user-space extension, do not use to delete offical apps.
   adb install-apk local-path              Installs an APK and enables it in the launcher
