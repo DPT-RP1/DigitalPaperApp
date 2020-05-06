@@ -2,6 +2,7 @@ package net.sony.dpt.command.root;
 
 import com.android.ddmlib.*;
 import net.dongliu.apk.parser.ApkFile;
+import net.sony.util.ImageUtils;
 import net.sony.util.LogWriter;
 import net.sony.util.ProgressBar;
 import org.apache.commons.io.FileUtils;
@@ -36,6 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.android.ddmlib.FileListingService.*;
+import static net.sony.util.AsyncUtils.waitForFinished;
 
 public class AdbCommand {
 
@@ -360,14 +362,6 @@ public class AdbCommand {
         waitForFinished(finished, 30);
     }
 
-    private void waitForFinished(final AtomicBoolean finished, final int timeoutSeconds) throws InterruptedException {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(() -> {
-            if (finished.get()) executor.shutdownNow();
-        }, 0, 1, TimeUnit.SECONDS);
-        executor.awaitTermination(timeoutSeconds, TimeUnit.SECONDS);
-    }
-
     private IShellOutputReceiver shellOutputReceiver(final AtomicBoolean finished) {
         return new IShellOutputReceiver() {
             @Override
@@ -413,6 +407,7 @@ public class AdbCommand {
         String iconPath = expr.evaluate(doc);
 
         byte[] icon = apkFile.getFileData(iconPath);
+        icon = ImageUtils.resize(icon, "png", 220, 120);
         String apkName = apkFile.getApkMeta().getName();
 
         // We can now trigger the install process with adb
