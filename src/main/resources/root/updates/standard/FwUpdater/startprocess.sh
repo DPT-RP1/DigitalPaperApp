@@ -36,7 +36,7 @@ detect_key_pressed () {
 
 echo ""
 echo "================================================"
-echo " Replacing diagnosis root password to 12345.."
+echo " Replacing diagnosis root password to 12345"
 echo "================================================"
 if [ ! -f ${ROOTPWD} ]
 then
@@ -73,7 +73,7 @@ fi
 
 echo ""
 echo "========================================="
-echo " Enabling diagnosis mode without OTG.."
+echo " Enabling diagnosis mode without OTG"
 echo "========================================="
 echo ""
 echo "== Original ${DIAGFUNC} (30 lines):"
@@ -106,7 +106,7 @@ fi
 
 echo ""
 echo "======================================="
-echo " Patching customized updater script.."
+echo " Patching customized updater script"
 echo "======================================="
 echo ""
 

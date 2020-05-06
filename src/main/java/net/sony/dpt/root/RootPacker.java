@@ -5,26 +5,21 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.io.filefilter.RegexFileFilter;
 
 import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.zip.GZIPInputStream;
+
+import static net.sony.util.ResourcesUtils.folder;
 
 /**
  * This will use the FactoryReset.pkg provided by Sony as base signed package, with a fake animation signature
@@ -94,6 +89,25 @@ public class RootPacker {
         }
     }
 
+    private void putInTar(final Path location, final Path path, final TarArchiveOutputStream tarArchiveOutputStream) throws IOException {
+        String relativeFilePath = location.relativize(path).toString();
+
+        TarArchiveEntry tarEntry = new TarArchiveEntry(relativeFilePath);
+        tarEntry.setSize(Files.size(path));
+        tarEntry.setUserName("dptrp1");
+        tarEntry.setGroupName("staff");
+        tarEntry.setIds(501, 20);
+        if (path.getFileName().toString().equals("start_eufwupdater.sh")) {
+            tarEntry.setMode(PosixUtils.mode644());
+        } else {
+            tarEntry.setMode(PosixUtils.mode755());
+        }
+
+        tarArchiveOutputStream.putArchiveEntry(tarEntry);
+        if (!Files.isDirectory(path)) tarArchiveOutputStream.write(Files.readAllBytes(path));
+        tarArchiveOutputStream.closeArchiveEntry();
+    }
+
     public byte[] tarGz(Path location) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
@@ -103,35 +117,40 @@ public class RootPacker {
             tarArchiveOutputStream.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
             tarArchiveOutputStream.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
 
-            List<File> files = new ArrayList<>(FileUtils.listFilesAndDirs(
-                    location.resolve("FwUpdater").toFile(),
-                    new RegexFileFilter("^(.*?)"),
-                    DirectoryFileFilter.DIRECTORY
-            ));
-            files.sort(new PosixUtils.SortIgnoreCase());
-            for (File file : files) {
-                Path path = Path.of(file.toURI());
-                String relativeFilePath = location.relativize(path).toString();
+            Files.walkFileTree(location.resolve("FwUpdater"), new FileVisitor<>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    return FileVisitResult.CONTINUE;
+                }
 
-                TarArchiveEntry tarEntry = new TarArchiveEntry(path.toFile(), relativeFilePath);
-                tarEntry.setSize(Files.size(path));
-                tarEntry.setUserName("dptrp1");
-                tarEntry.setGroupName("staff");
-                tarEntry.setIds(501, 20);
-                tarEntry.setMode(PosixUtils.mode(path));
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    putInTar(location, file, tarArchiveOutputStream);
+                    return FileVisitResult.CONTINUE;
+                }
 
-                tarArchiveOutputStream.putArchiveEntry(tarEntry);
-                if (file.isFile()) tarArchiveOutputStream.write(Files.readAllBytes(path));
-                tarArchiveOutputStream.closeArchiveEntry();
-            }
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    return FileVisitResult.CONTINUE;
+                }
+            });
         }
         return outputStream.toByteArray();
     }
 
     public byte[] createStandardRootPackage() throws URISyntaxException, IOException {
         InputStream basePackage = RootPacker.class.getClassLoader().getResourceAsStream(BASE_LOCATION);
+        if (basePackage == null) throw new NullPointerException("No base package to create root pkg");
 
-        return createRootPackage(basePackage, tarGz(Path.of(Objects.requireNonNull(RootPacker.class.getClassLoader().getResource(STANDARD_ROOT_RESOURCE_LOCATION)).toURI())));
+        return createRootPackage(
+                basePackage,
+                tarGz(folder(STANDARD_ROOT_RESOURCE_LOCATION))
+        );
     }
 
     public void unpackRootPackage(InputStream rootPackage, Path targetPath) throws IOException {

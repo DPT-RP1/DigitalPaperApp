@@ -2,8 +2,6 @@
 
 echo ""
 echo "====================================="
-echo "Welcome DPT Users"
-echo "We will begin the process soon"
-echo "Fingers crossed!"
+echo "Rooting the device..."
 echo "====================================="
 echo ""

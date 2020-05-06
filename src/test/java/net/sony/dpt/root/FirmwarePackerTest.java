@@ -15,9 +15,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.*;
@@ -186,18 +183,11 @@ public class FirmwarePackerTest {
         RootPacker rootPacker = new RootPacker();
         byte[] actualBytes = rootPacker.createStandardRootPackage();
 
-        PkgWrap exectedPkg = new PkgWrap(expectedBytes);
-        PkgWrap actualPkg = new PkgWrap(actualBytes);
-
-        //assertTrue(exectedPkg.equals(actualPkg));
-
         Path expectedDataTar = temporaryFolder.getRoot().toPath().resolve("expectedDataTar.tar.gz");
         Path actualDataTar = temporaryFolder.getRoot().toPath().resolve("actualDataTar.tar.gz");
 
         rootPacker.unpackRootPackage(new ByteArrayInputStream(expectedBytes), expectedDataTar);
         rootPacker.unpackRootPackage(new ByteArrayInputStream(actualBytes), actualDataTar);
-
-        //assertThat(Files.size(expectedDataTar), is(185275L));
     }
 
 }

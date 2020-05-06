@@ -4,14 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Set;
-
-import static org.apache.commons.compress.archivers.tar.TarArchiveEntry.DEFAULT_DIR_MODE;
-import static org.apache.commons.compress.archivers.tar.TarArchiveEntry.DEFAULT_FILE_MODE;
 
 /** Utilities for files on Posix based systems. */
 public class PosixUtils {
@@ -54,12 +50,44 @@ public class PosixUtils {
         return result;
     }
 
+    public static int mode644() {
+        PosixFilePermission[] mode755 = new PosixFilePermission[]{
+                PosixFilePermission.OWNER_READ,
+                PosixFilePermission.OWNER_WRITE,
+
+                PosixFilePermission.GROUP_READ,
+
+                PosixFilePermission.OTHERS_READ,
+        };
+        return permissionsToMode(mode755);
+    }
+
+
+    public static int mode755() {
+        PosixFilePermission[] mode755 = new PosixFilePermission[]{
+                PosixFilePermission.OWNER_READ,
+                PosixFilePermission.OWNER_WRITE,
+                PosixFilePermission.OWNER_EXECUTE,
+
+                PosixFilePermission.GROUP_READ,
+                PosixFilePermission.GROUP_EXECUTE,
+
+                PosixFilePermission.OTHERS_READ,
+                PosixFilePermission.OTHERS_EXECUTE,
+        };
+        return permissionsToMode(mode755);
+    }
+
+    public static int permissionsToMode(PosixFilePermission[] permissions) {
+        return permissionsToMode(Set.of(permissions));
+    }
+
     public static int permissionsToMode(Set<PosixFilePermission> permissions) {
         PosixFilePermission[] allPermissions = PosixFilePermission.values();
         int result = 0;
-        for (PosixFilePermission allPermission : allPermissions) {
+        for (PosixFilePermission permission : allPermissions) {
             result <<= 1;
-            result |= permissions.contains(allPermission) ? 1 : 0;
+            result |= permissions.contains(permission) ? 1 : 0;
         }
         return result;
     }
