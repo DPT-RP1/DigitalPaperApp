@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Application name="EXTENSION_TEMPLATE_TOKEN" type="System" version="2">
-    <LauncherEntry name="EXTENSION_TEMPLATE_TOKEN" category="Launcher" uri="intent:#Intent;component=EXTENSION_TEMPLATE_ACTIVITY_PATH;action=EXTENSION_TEMPLATE_ACTION
-;end" string="STR_ICONMENU_1001" icon="ic_homemenu_EXTENSION_TEMPLATE_lower.png" order="1"/>
+    <LauncherEntry name="EXTENSION_TEMPLATE_TOKEN" category="Launcher" uri="EXTENSION_URI_TOKEN" string="STR_ICONMENU_1001" icon="ic_homemenu_EXTENSION_TEMPLATE_lower.png" order="1"/>
 </Application>

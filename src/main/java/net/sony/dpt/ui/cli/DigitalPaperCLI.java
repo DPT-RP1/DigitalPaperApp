@@ -322,7 +322,7 @@ public class DigitalPaperCLI {
         }
     }
 
-    private void adbRemoveExtension(String name) throws InterruptedException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException {
+    private void adbRemoveExtension(String name) throws InterruptedException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException, SyncException {
         AdbCommand adbCommand = null;
         try {
             adbCommand = new AdbCommand(logWriter, new LocalSyncProgressBar(
