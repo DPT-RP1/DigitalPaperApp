@@ -4,7 +4,6 @@ import com.android.ddmlib.*;
 import net.sony.dpt.command.firmware.RootCommand;
 import net.sony.dpt.command.notes.NoteTemplateCommand;
 import net.sony.dpt.command.root.AdbCommand;
-import net.sony.dpt.command.root.AdbException;
 import net.sony.dpt.command.root.DiagnosticCommand;
 import net.sony.dpt.command.root.FirmwareCommand;
 import net.sony.dpt.network.CheckedHttpClient;
@@ -51,7 +50,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import java.awt.*;
 import java.io.IOException;
@@ -81,6 +79,7 @@ public class DigitalPaperCLI {
     private final SyncStore syncStore;
     private final DeviceInfoStore deviceInfoStore;
     private final LastCommandRunStore lastCommandRunStore;
+    private FindDigitalPaper findDigitalPaper;
 
     private DigitalPaperEndpoint digitalPaperEndpoint;
 
@@ -106,12 +105,6 @@ public class DigitalPaperCLI {
         options = CommandOption.options();
     }
 
-    private String findAddress(CommandLine commandLine) throws IOException, InterruptedException {
-        if (commandLine.hasOption("addr")) return FindDigitalPaper.findAddress(deviceInfoStore, logWriter, commandLine.getOptionValue("addr"), null);
-        if (commandLine.hasOption("serial")) return FindDigitalPaper.findAddress(deviceInfoStore, logWriter, null, commandLine.getOptionValue("serial"));
-        return FindDigitalPaper.findAddress(deviceInfoStore, logWriter, null, null);
-    }
-
     private void printHelp() {
         logWriter.log(Command.printHelp());
     }
@@ -121,6 +114,8 @@ public class DigitalPaperCLI {
 
         boolean dryrun = commandLine.hasOption("dryrun");
         boolean force = commandLine.hasOption("force");
+        boolean hasAddr = commandLine.hasOption("addr");
+        boolean matchSerial = commandLine.hasOption("serial");
 
         Command command = Command.parse(args);
 
@@ -135,6 +130,13 @@ public class DigitalPaperCLI {
             printHelp();
             return;
         }
+
+        findDigitalPaper = new FindDigitalPaper(
+                logWriter,
+                deviceInfoStore,
+                new CheckedHttpClient(UncheckedHttpClient.insecure()),
+                matchSerial ? commandLine.getOptionValue("serial") : null,
+                hasAddr ? commandLine.getOptionValue("addr") : null);
 
         // This are pre-registration command
         switch (command) {
@@ -167,7 +169,7 @@ public class DigitalPaperCLI {
                 return;
         }
 
-        String addr = findAddress(commandLine);
+        String addr = findDigitalPaper.findAddress();
 
         if (!registrationTokenStore.registered() || command == Command.REGISTER) {
             register(new CheckedHttpClient(UncheckedHttpClient.insecure()), addr);
@@ -312,10 +314,12 @@ public class DigitalPaperCLI {
     private void adbInstallApk(String localPath) throws InterruptedException, IOException, URISyntaxException, ParserConfigurationException, InstallException, SyncException, SAXException, TimeoutException, AdbCommandRejectedException, XPathExpressionException, ShellCommandUnresponsiveException {
         AdbCommand adbCommand = null;
         try {
-            adbCommand = new AdbCommand(logWriter, new LocalSyncProgressBar(
-                    System.out,
-                    ProgressBar.ProgressStyle.SQUARES_1
-            ));
+            adbCommand = new AdbCommand(logWriter,
+                    new LocalSyncProgressBar(
+                        System.out,
+                        ProgressBar.ProgressStyle.SQUARES_1
+                    ),
+                    findDigitalPaper);
             adbCommand.installApk(Path.of(localPath));
         } finally {
             if (adbCommand != null) { adbCommand.tearDown(); }
@@ -325,33 +329,40 @@ public class DigitalPaperCLI {
     private void adbRemoveExtension(String name) throws InterruptedException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException, SyncException {
         AdbCommand adbCommand = null;
         try {
-            adbCommand = new AdbCommand(logWriter, new LocalSyncProgressBar(
-                    System.out,
-                    ProgressBar.ProgressStyle.SQUARES_1
-            ));
+            adbCommand = new AdbCommand(logWriter,
+                    new LocalSyncProgressBar(
+                        System.out,
+                        ProgressBar.ProgressStyle.SQUARES_1
+                    ),
+                    findDigitalPaper
+            );
             adbCommand.removeExtension(name);
         } finally {
             if (adbCommand != null) { adbCommand.tearDown(); }
         }
     }
 
-    private void adbSetupExtension(String name, String component, String action, String icon) throws InterruptedException, IOException, URISyntaxException, SyncException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException {
+    private void adbSetupExtension(String name, String component, String action, String icon) throws InterruptedException, IOException, SyncException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException {
         AdbCommand adbCommand = null;
         try {
-            adbCommand = new AdbCommand(logWriter, new LocalSyncProgressBar(
-                    System.out,
-                    ProgressBar.ProgressStyle.SQUARES_1
-            ));
+            adbCommand = new AdbCommand(
+                    logWriter,
+                    new LocalSyncProgressBar(
+                        System.out,
+                        ProgressBar.ProgressStyle.SQUARES_1
+                    ),
+                    findDigitalPaper
+            );
             adbCommand.setupExtension(name, component, action, Files.readAllBytes(Path.of(icon)));
         } finally {
             if (adbCommand != null) { adbCommand.tearDown(); }
         }
     }
 
-    private void adbListExtensions() throws InterruptedException {
+    private void adbListExtensions() throws InterruptedException, IOException {
         AdbCommand adbCommand = null;
         try {
-            adbCommand = new AdbCommand(logWriter, null);
+            adbCommand = new AdbCommand(logWriter, null, findDigitalPaper);
             adbCommand.showExtensionsDescriptors();
         } finally {
             if (adbCommand != null) { adbCommand.tearDown(); }
@@ -363,7 +374,8 @@ public class DigitalPaperCLI {
         try {
             adbCommand = new AdbCommand(
                     logWriter,
-                    new LocalSyncProgressBar(System.out, ProgressBar.ProgressStyle.SQUARES_1)
+                    new LocalSyncProgressBar(System.out, ProgressBar.ProgressStyle.SQUARES_1),
+                    findDigitalPaper
             );
             adbCommand.downloadExtensionsDescriptor(name, Path.of(targetFolder));
         } finally {

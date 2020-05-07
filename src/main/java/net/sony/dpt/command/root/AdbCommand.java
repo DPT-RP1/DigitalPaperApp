@@ -3,6 +3,7 @@ package net.sony.dpt.command.root;
 import com.android.ddmlib.*;
 import net.dongliu.apk.parser.ApkFile;
 import net.sony.dpt.data.extmgr.ExtMgrDao;
+import net.sony.dpt.zeroconf.FindDigitalPaper;
 import net.sony.util.ImageUtils;
 import net.sony.util.LogWriter;
 import net.sony.util.ProgressBar;
@@ -52,6 +53,13 @@ public class AdbCommand {
     private AndroidDebugBridge adb;
     private IDevice digitalPaperDevice;
 
+    private static final String TCP_CONNECTION_PROP = "persist.adb.tcp.port";
+    private static final String TCP_REMOTE_PORT = "5555";
+    private final static String TCP_ADB_COMMAND = "setprop " + TCP_CONNECTION_PROP + " 5555";
+    private final static String START_ADBD = "start adbd";
+    private final static String STOP_ADBD = "start adbd";
+    private final static String RESTART_ADBD = "setprop ctl.restart adbd";
+
     private final static String USERSPACE_EXTENSION_PATH = "/data/dp_extensions";
     private final static String[] extensionsSearchPaths = new String[] {"/etc/dp_extensions", USERSPACE_EXTENSION_PATH};
     private final static String TEMPLATE_ROOT = "root/extensions/template";
@@ -76,13 +84,17 @@ public class AdbCommand {
     private final static String EXTENSION_ICON = "ic_homemenu_EXTENSION_TEMPLATE_lower.png";
     private final static String EXTENSION_URI = "intent:#Intent;component=EXTENSION_TEMPLATE_ACTIVITY_PATH;action=EXTENSION_TEMPLATE_ACTION;end";
 
+    private FindDigitalPaper findDigitalPaper;
 
-    public AdbCommand(final LogWriter logWriter, final ProgressBar progressBar) throws InterruptedException {
+    public AdbCommand(final LogWriter logWriter,
+                      final ProgressBar progressBar,
+                      final FindDigitalPaper findDigitalPaper) throws InterruptedException, IOException {
         this.logWriter = logWriter;
         this.progressBar = progressBar;
+        this.findDigitalPaper = findDigitalPaper;
         try {
             initAdb();
-        } catch (AdbException e) {
+        } catch (AdbException | IOException e) {
             tearDown();
             throw e;
         }
@@ -95,7 +107,7 @@ public class AdbCommand {
         digitalPaperDevice = device;
     }
 
-    public void initAdb() throws InterruptedException {
+    public void initAdb() throws InterruptedException, IOException {
         if (!isInit) {
             AndroidDebugBridge.init(false);
             adb = AndroidDebugBridge.createBridge();
@@ -109,7 +121,7 @@ public class AdbCommand {
                 trials--;
             }
 
-            if(!adb.isConnected()) {
+            if (!adb.isConnected()) {
                 throw new AdbException("Impossible to connect to adb, did you install it, is your device plugged via USB ?");
             }
 
@@ -128,8 +140,22 @@ public class AdbCommand {
 
             IDevice[] devices = adb.getDevices();
 
-            if (devices.length == 0) {
-                throw new AdbException("Impossible to list devices, did you connect your digital paper ?");
+            if (devices.length == 0 && findDigitalPaper != null) {
+                logWriter.log("Trying to find your DPT via TCP/IP");
+                String addr = findDigitalPaper.findAddress();
+                if (addr == null || addr.isEmpty()) {
+                    throw new AdbException("Impossible to list devices, did you connect your digital paper ?");
+                }
+
+                Process p = Runtime.getRuntime().exec("adb connect " + addr);
+                p.waitFor();
+                IOUtils.copy(p.getInputStream(), System.out);
+                IOUtils.copy(p.getErrorStream(), System.err);
+
+                devices = adb.getDevices();
+                if (devices == null || devices.length == 0) {
+                    throw new AdbException("Impossible to list devices, did you connect your digital paper ?");
+                }
             }
 
             for (IDevice device : devices) {
@@ -144,6 +170,15 @@ public class AdbCommand {
                 throw new AdbException("Impossible to find a DPT (ro.product.name = FPX_1010), did you connect your digital paper ?");
             }
 
+            if (!digitalPaperDevice.getProperty(TCP_CONNECTION_PROP).equals(TCP_REMOTE_PORT)) {
+                logWriter.log("Running " + TCP_ADB_COMMAND + " to set remote adb forever...");
+                try {
+                    executeShellCommandSync(TCP_ADB_COMMAND);
+                    executeShellCommandSync(RESTART_ADBD);
+                    tearDown();
+                    initAdb();
+                } catch (Exception ignored) { }
+            }
         }
     }
 
