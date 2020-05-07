@@ -5,6 +5,7 @@ import net.sony.dpt.command.documents.EntryType;
 import net.sony.dpt.command.firmware.FirmwareVersionResponse;
 import net.sony.dpt.command.wifi.AccessPoint;
 import net.sony.dpt.command.wifi.AccessPointCreationRequest;
+import net.sony.dpt.error.SonyException;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.io.IOException;
@@ -111,10 +112,16 @@ public class DigitalPaperEndpoint {
         String encodedPath = URLEncoder.encode(path.toString(), StandardCharsets.UTF_8);
         String url = secured(resolve(resolveObjectByPathUrl, variable("enc_path", encodedPath)));
 
-        HttpResponse<String> result = simpleHttpClient.getWithResponse(url);
-        if (ok(result)) {
-            return (String) objectMapper.readValue(result.body(), Map.class).get("entry_id");
+        try {
+            HttpResponse<String> result = simpleHttpClient.getWithResponse(url);
+            if (ok(result)) {
+                return (String) objectMapper.readValue(result.body(), Map.class).get("entry_id");
+            }
+        } catch (SonyException e) {
+            // A sony error code is send on file not found
+            if (e.getCodeParsed() != SonyException.ErrorCode.RESOURCE_NOT_FOUND) throw e;
         }
+
         return null;
     }
 
