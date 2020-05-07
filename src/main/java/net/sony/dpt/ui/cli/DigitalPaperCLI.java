@@ -565,11 +565,12 @@ public class DigitalPaperCLI {
         accessPointList.getAccessPoints().forEach(accessPoint -> logWriter.log(accessPoint.getDecodedSSID()));
     }
 
-    private void upload(String localPath, String remotePath) throws IOException, InterruptedException {
+    private void upload(String local, String remotePath) throws IOException, InterruptedException {
+        Path localPath = Path.of(local);
         if (remotePath == null) {
-            remotePath = "Document/" + localPath;
+            remotePath = "Document/Received" + localPath.getFileName();
         }
-        new DocumentCommand(digitalPaperEndpoint).upload(Path.of(localPath), Path.of(remotePath));
+        new DocumentCommand(digitalPaperEndpoint).upload(localPath, Path.of(remotePath));
     }
 
     private void deleteFolder(String remotePath) throws IOException, InterruptedException {
