@@ -568,7 +568,7 @@ public class DigitalPaperCLI {
     private void upload(String local, String remotePath) throws IOException, InterruptedException {
         Path localPath = Path.of(local);
         if (remotePath == null) {
-            remotePath = "Document/Received" + localPath.getFileName();
+            remotePath = "Document/Received/" + localPath.getFileName();
         }
         new DocumentCommand(digitalPaperEndpoint).upload(localPath, Path.of(remotePath));
     }
