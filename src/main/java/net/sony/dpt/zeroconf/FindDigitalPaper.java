@@ -1,8 +1,6 @@
 package net.sony.dpt.zeroconf;
 
 import net.sony.dpt.command.ping.PingCommand;
-import net.sony.dpt.network.CheckedHttpClient;
-import net.sony.dpt.network.UncheckedHttpClient;
 import net.sony.dpt.persistence.DeviceInfoStore;
 import net.sony.util.LogWriter;
 import net.sony.dpt.network.SimpleHttpClient;
@@ -27,9 +25,19 @@ public class FindDigitalPaper {
     private static final String SERVICE_NAME = "Digital Paper DPT-RP1";
     private final LogWriter logWriter;
     private final DigitalPaperServiceListener digitalPaperServiceListener;
+    private final DeviceInfoStore deviceInfoStore;
+    private final String cliMatchSerial;
+    private final String cliAddr;
 
-    public FindDigitalPaper(LogWriter logWriter, SimpleHttpClient simpleHttpClient, String matchSerial) {
+    public FindDigitalPaper(LogWriter logWriter,
+                            DeviceInfoStore deviceInfoStore,
+                            SimpleHttpClient simpleHttpClient,
+                            String matchSerial,
+                            String addr) {
         this.logWriter = logWriter;
+        this.deviceInfoStore = deviceInfoStore;
+        this.cliAddr = addr;
+        this.cliMatchSerial = matchSerial;
         digitalPaperServiceListener = new DigitalPaperServiceListener(logWriter, simpleHttpClient, matchSerial);
     }
 
@@ -144,9 +152,13 @@ public class FindDigitalPaper {
         }
     }
 
-    public static String findAddress(DeviceInfoStore deviceInfoStore, LogWriter logWriter, String address, String serial) throws IOException, InterruptedException {
+    public String findAddress() throws IOException, InterruptedException {
+        return findAddress(deviceInfoStore, logWriter, cliAddr, cliMatchSerial);
+    }
+
+    private String findAddress(DeviceInfoStore deviceInfoStore, LogWriter logWriter, String address, String serial) throws IOException, InterruptedException {
         String addr;
-        if (address != null) {
+        if (address != null && !address.isEmpty()) {
             addr = address;
         } else {
             // Before trying autoconfig, we can try loading the last ip
@@ -154,7 +166,7 @@ public class FindDigitalPaper {
             if (lastIp != null && new PingCommand().ping(lastIp)) {
                 addr = lastIp;
             } else {
-                addr = new FindDigitalPaper(logWriter, new CheckedHttpClient(UncheckedHttpClient.insecure()), serial).findOneIpv4();
+                addr = findOneIpv4();
             }
         }
         if (addr == null || addr.isEmpty()) throw new IllegalStateException("No device found or reachable.");

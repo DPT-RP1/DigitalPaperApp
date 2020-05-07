@@ -2,12 +2,15 @@ package net.sony.dpt.command.root;
 
 import com.android.ddmlib.*;
 import net.dongliu.apk.parser.ApkFile;
+import net.sony.dpt.data.extmgr.ExtMgrDao;
+import net.sony.dpt.zeroconf.FindDigitalPaper;
 import net.sony.util.ImageUtils;
 import net.sony.util.LogWriter;
 import net.sony.util.ProgressBar;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.sqlite.core.DB;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -27,6 +30,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -49,11 +53,24 @@ public class AdbCommand {
     private AndroidDebugBridge adb;
     private IDevice digitalPaperDevice;
 
+    private static final String TCP_CONNECTION_PROP = "persist.adb.tcp.port";
+    private static final String TCP_REMOTE_PORT = "5555";
+    private final static String TCP_ADB_COMMAND = "setprop " + TCP_CONNECTION_PROP + " 5555";
+    private final static String START_ADBD = "start adbd";
+    private final static String STOP_ADBD = "start adbd";
+    private final static String RESTART_ADBD = "setprop ctl.restart adbd";
+
     private final static String USERSPACE_EXTENSION_PATH = "/data/dp_extensions";
     private final static String[] extensionsSearchPaths = new String[] {"/etc/dp_extensions", USERSPACE_EXTENSION_PATH};
     private final static String TEMPLATE_ROOT = "root/extensions/template";
+    private final static String DB_NAME = "ExtMgr.db";
+    private final static String DB_JOURNAL_NAME = DB_NAME + "-journal";
+    private final static String DB_PATH = "/data/system/" + DB_NAME;
+    private final static String DB_JOURNAL_PATH = "/data/system/" + DB_JOURNAL_NAME;
+    private final static String DEFAULT_ICON_ID = "STR_ICONMENU_1001";
 
     private final static String EXTENSION_TEMPLATE_TOKEN = "EXTENSION_TEMPLATE_TOKEN";
+    private final static String EXTENSION_URI_TOKEN = "EXTENSION_URI_TOKEN";
     private final static String EXTENSION_TEMPLATE_LOWER = "EXTENSION_TEMPLATE_lower";
     private final static String EXTENSION_TEMPLATE_ACTIVITY_PATH = "EXTENSION_TEMPLATE_ACTIVITY_PATH";
     private final static String EXTENSION_TEMPLATE_ACTION = "EXTENSION_TEMPLATE_ACTION";
@@ -65,14 +82,19 @@ public class AdbCommand {
     private final static String EXTENSION_STRINGS_PUTONGHUA = "EXTENSION_TEMPLATE_TOKEN_strings-zh_CN.xml";
     private final static String EXTENSION_TEMPLATE_PUTONGHUA_NAME = "EXTENSION_TEMPLATE_PUTONGHUA_NAME";
     private final static String EXTENSION_ICON = "ic_homemenu_EXTENSION_TEMPLATE_lower.png";
+    private final static String EXTENSION_URI = "intent:#Intent;component=EXTENSION_TEMPLATE_ACTIVITY_PATH;action=EXTENSION_TEMPLATE_ACTION;end";
 
+    private FindDigitalPaper findDigitalPaper;
 
-    public AdbCommand(final LogWriter logWriter, final ProgressBar progressBar) throws InterruptedException {
+    public AdbCommand(final LogWriter logWriter,
+                      final ProgressBar progressBar,
+                      final FindDigitalPaper findDigitalPaper) throws InterruptedException, IOException {
         this.logWriter = logWriter;
         this.progressBar = progressBar;
+        this.findDigitalPaper = findDigitalPaper;
         try {
             initAdb();
-        } catch (AdbException e) {
+        } catch (AdbException | IOException e) {
             tearDown();
             throw e;
         }
@@ -85,7 +107,7 @@ public class AdbCommand {
         digitalPaperDevice = device;
     }
 
-    public void initAdb() throws InterruptedException {
+    public void initAdb() throws InterruptedException, IOException {
         if (!isInit) {
             AndroidDebugBridge.init(false);
             adb = AndroidDebugBridge.createBridge();
@@ -99,7 +121,7 @@ public class AdbCommand {
                 trials--;
             }
 
-            if(!adb.isConnected()) {
+            if (!adb.isConnected()) {
                 throw new AdbException("Impossible to connect to adb, did you install it, is your device plugged via USB ?");
             }
 
@@ -118,8 +140,22 @@ public class AdbCommand {
 
             IDevice[] devices = adb.getDevices();
 
-            if (devices.length == 0) {
-                throw new AdbException("Impossible to list devices, did you connect your digital paper ?");
+            if (devices.length == 0 && findDigitalPaper != null) {
+                logWriter.log("Trying to find your DPT via TCP/IP");
+                String addr = findDigitalPaper.findAddress();
+                if (addr == null || addr.isEmpty()) {
+                    throw new AdbException("Impossible to list devices, did you connect your digital paper ?");
+                }
+
+                Process p = Runtime.getRuntime().exec("adb connect " + addr);
+                p.waitFor();
+                IOUtils.copy(p.getInputStream(), System.out);
+                IOUtils.copy(p.getErrorStream(), System.err);
+
+                devices = adb.getDevices();
+                if (devices == null || devices.length == 0) {
+                    throw new AdbException("Impossible to list devices, did you connect your digital paper ?");
+                }
             }
 
             for (IDevice device : devices) {
@@ -134,6 +170,15 @@ public class AdbCommand {
                 throw new AdbException("Impossible to find a DPT (ro.product.name = FPX_1010), did you connect your digital paper ?");
             }
 
+            if (!digitalPaperDevice.getProperty(TCP_CONNECTION_PROP).equals(TCP_REMOTE_PORT)) {
+                logWriter.log("Running " + TCP_ADB_COMMAND + " to set remote adb forever...");
+                try {
+                    executeShellCommandSync(TCP_ADB_COMMAND);
+                    executeShellCommandSync(RESTART_ADBD);
+                    tearDown();
+                    initAdb();
+                } catch (Exception ignored) { }
+            }
         }
     }
 
@@ -271,12 +316,15 @@ public class AdbCommand {
         );
     }
 
-    public void setupExtension(final String name, final String component, final String action, byte[] icon) throws IOException, URISyntaxException, AdbCommandRejectedException, ShellCommandUnresponsiveException, TimeoutException, InterruptedException, SyncException {
+    public void setupExtension(final String name, final String component, final String action, byte[] icon) throws IOException, AdbCommandRejectedException, ShellCommandUnresponsiveException, TimeoutException, InterruptedException, SyncException {
         Path tempDir = Files.createDirectories(Files.createTempDirectory("dpt").resolve(name));
         try {
             // We first copy the resources with the correct name
             logWriter.log("Preparing extension into " + tempDir);
 
+            String uri = EXTENSION_URI
+                    .replaceAll(EXTENSION_TEMPLATE_ACTION, action)
+                    .replaceAll(EXTENSION_TEMPLATE_ACTIVITY_PATH, component);
             Map<String, String> replacements = new HashMap<>() {{
                 put(EXTENSION_TEMPLATE_TOKEN, name);
                 put(EXTENSION_TEMPLATE_LOWER, name.toLowerCase());
@@ -285,6 +333,8 @@ public class AdbCommand {
                 put(EXTENSION_TEMPLATE_PUTONGHUA_NAME, name);
                 put(EXTENSION_TEMPLATE_ACTIVITY_PATH, component);
                 put(EXTENSION_TEMPLATE_ACTION, action);
+                put(EXTENSION_URI_TOKEN, uri);
+
             }};
             copyExtensionFile(EXTENSION_XML, replacements, TEMPLATE_ROOT, tempDir);
             copyExtensionFile(EXTENSION_STRINGS_EN, replacements, TEMPLATE_ROOT, tempDir);
@@ -298,20 +348,22 @@ public class AdbCommand {
                         ));
             }
 
+            String iconName = EXTENSION_ICON.replaceAll(
+                    EXTENSION_TEMPLATE_LOWER,
+                    name.toLowerCase()
+            );
+
             Files.write(
-                    tempDir.resolve(
-                            EXTENSION_ICON.replaceAll(
-                                    EXTENSION_TEMPLATE_LOWER,
-                                    name.toLowerCase()
-                            )
-                    ),
+                    tempDir.resolve(iconName),
                     icon
             );
 
             // Now that everything is ready, we need to push the extension. First let's see if it was there already
             createFolderIfNotExists(USERSPACE_EXTENSION_PATH);
             FileEntry extensionEntry = isInPath(USERSPACE_EXTENSION_PATH, name);
-            if (extensionEntry != null) deleteFolderIfExists(USERSPACE_EXTENSION_PATH + "/name");
+
+            String extensionTargetFolder = USERSPACE_EXTENSION_PATH + "/" + name;
+            if (extensionEntry != null) deleteFolderIfExists(extensionTargetFolder);
 
             AtomicBoolean finished = new AtomicBoolean(false);
 
@@ -322,16 +374,33 @@ public class AdbCommand {
             waitForFinished(finished, 30);
             syncService.close();
 
-            refreshExtensionDB();
+            String remoteIconPath = extensionTargetFolder + "/" + iconName;
 
-            // And we reboot
+            String localDBPath = tempDir.resolve(DB_NAME).toString();
+            String localDBJournalPath = tempDir.resolve(DB_JOURNAL_NAME).toString();
+            digitalPaperDevice.pullFile(DB_PATH, localDBPath);
+
+            Path dbPath = tempDir.resolve(DB_NAME);
+            try (ExtMgrDao extMgrDao = new ExtMgrDao(dbPath, logWriter)){
+                extMgrDao.insertExtension(name, extensionTargetFolder, uri, DEFAULT_ICON_ID, remoteIconPath, ExtMgrDao.Order.INSERT_LAST);
+            } catch (Exception e) {
+                logWriter.log("Something went wrong when editing the database, we'll delete it entirely and let the device recreate it." + e.getMessage());
+                refreshExtensionDB();
+                digitalPaperDevice.reboot(null);
+            }
+
+            logWriter.log("Writing to remote launcher DB");
+            digitalPaperDevice.pushFile(localDBPath, DB_PATH);
+
+            logWriter.log("Rebooting");
             digitalPaperDevice.reboot(null);
+
         } finally {
             FileUtils.deleteDirectory(tempDir.toFile());
         }
     }
 
-    public void removeExtension(final String name) throws InterruptedException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException {
+    public void removeExtension(final String name) throws InterruptedException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException, SyncException {
         // First we scan in the userspace folder
         FileEntry extension = isInPath(USERSPACE_EXTENSION_PATH, name);
         if (extension != null) {
@@ -342,9 +411,32 @@ public class AdbCommand {
         }
 
         deleteFolderIfExists(USERSPACE_EXTENSION_PATH + "/" + name);
-        refreshExtensionDB();
-        logWriter.log("Successfully uninstalled, rebooting...");
-        digitalPaperDevice.reboot(null);
+
+        Path tempDir = Files.createTempDirectory("dpt");
+        try {
+            String localDBPath = tempDir.resolve(DB_NAME).toString();
+            String localDBJournalPath = tempDir.resolve(DB_JOURNAL_NAME).toString();
+            digitalPaperDevice.pullFile(DB_PATH, localDBPath);
+
+            Path dbPath = tempDir.resolve(DB_NAME);
+            try (ExtMgrDao extMgrDao = new ExtMgrDao(dbPath, logWriter)) {
+                extMgrDao.deleteIfExists(name);
+            } catch (Exception e) {
+                logWriter.log("Something went wrong when editing the database, we'll delete it entirely and let the device recreate it: " + e.getMessage());
+                refreshExtensionDB();
+                // And we reboot
+                digitalPaperDevice.reboot(null);
+                return;
+            }
+
+            logWriter.log("Writing to remote launcher DB");
+            digitalPaperDevice.pushFile(localDBPath, DB_PATH);
+
+            logWriter.log("Rebooting");
+            digitalPaperDevice.reboot(null);
+        } finally {
+            FileUtils.deleteDirectory(tempDir.toFile());
+        }
     }
 
     private void deleteFolderIfExists(String folderToDelete) throws TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException, InterruptedException {
@@ -374,11 +466,13 @@ public class AdbCommand {
     }
 
     private void refreshExtensionDB() throws InterruptedException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException {
-        String dbPath = "/data/system/ExtMgr.db";
-        String dbJournalPath = "/data/system/ExtMgr.db-journal";
+        executeShellCommandSync("mv " + DB_PATH + " " + DB_PATH + ".backup");
+        executeShellCommandSync("mv " + DB_JOURNAL_PATH + " " + DB_JOURNAL_PATH + ".backup");
+    }
 
-        executeShellCommandSync("mv " + dbPath + " " + dbPath + ".backup");
-        executeShellCommandSync("mv " + dbJournalPath + " " + dbPath + ".backup");
+    private void restartLauncher() throws InterruptedException, TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException {
+        executeShellCommandSync("am stopservice -n com.sony.apps.applauncher/.presentation.service.impl.LaunchViewService");
+        executeShellCommandSync("am startservice -n com.sony.apps.applauncher/.presentation.service.impl.LaunchViewService");
     }
 
     public void installApk(final Path apkLocation) throws IOException, ParserConfigurationException, SAXException, XPathExpressionException, InstallException, AdbCommandRejectedException, InterruptedException, SyncException, ShellCommandUnresponsiveException, TimeoutException, URISyntaxException {
@@ -386,8 +480,10 @@ public class AdbCommand {
         // Activity: /manifest/android:package + / + /manifest/application/activity/android:name
         // Action: we take the first intent filter
 
+        logWriter.log("Loading APK");
         ApkFile apkFile = new ApkFile(apkLocation.toFile());
 
+        logWriter.log("Parsing APK");
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(new StringBufferInputStream(apkFile.getManifestXml()));
@@ -406,13 +502,16 @@ public class AdbCommand {
         expr = xpath.compile("/manifest/application/@icon");
         String iconPath = expr.evaluate(doc);
 
+        logWriter.log("Resizing icon to 220 x 120");
         byte[] icon = apkFile.getFileData(iconPath);
         icon = ImageUtils.resize(icon, "png", 220, 120);
         String apkName = apkFile.getApkMeta().getName();
 
+        logWriter.log("Sending APK to the DPT");
         // We can now trigger the install process with adb
         digitalPaperDevice.installPackage(apkLocation.toString(), true);
 
+        logWriter.log("Setting up extension (App Launcher)");
         // Now that we're installed, we can create a new extension
         setupExtension(apkName, packageDefinition + "/" + activityName, action, icon);
     }

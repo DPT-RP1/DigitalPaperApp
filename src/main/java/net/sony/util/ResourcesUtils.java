@@ -26,4 +26,8 @@ public class ResourcesUtils {
             return Paths.get(uri);
         }
     }
+
+    public static Path resource(final String resourcePath) throws URISyntaxException {
+        return Path.of(Objects.requireNonNull(ResourcesUtils.class.getClassLoader().getResource(resourcePath)).toURI());
+    }
 }
