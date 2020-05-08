@@ -39,56 +39,61 @@ dpt is an utility to manage a Sony Digital Paper device
 Usage: dpt COMMAND [PARAMETERS] [OPTIONS]
 
 Options that can be passed to every commands, but aren't mandatory to find the device:
-  -addr=IP_ADDR                           ip address of the DPT
-  -serial=SERIAL                          serial code of the device
+  -addr=IP_ADDR                                               ip address of the DPT
+  -serial=SERIAL                                              serial code of the device
 
 Available commands:
-  register                                Starts the pairing process with the Digital Paper
-  ping                                    Tests the connection with the Digital Paper
-  sync [local-sync-folder] [-dryrun]      Synchronizes a local folder with the Digital paper. If no folder is given, it will use the one passed previously
-  list-documents                          Lists all documents
-  document-info                           Prints all documents and their attributes, raw
-  upload local-file [remote-file]         Sends a local file to the Digital Paper
-  download                                Downloads a remote file locally
-  move source target                      Moves a document on the device
-  copy source target                      Copies a document on the device
-  new-folder remote-folder                Creates a new folder on the device
-  delete-folder remote-file               Remove a folder on the device
-  delete remote-file                      Deletes a file on the device
-  print local-file                        Sends a pdf to the Digital Paper, and opens it immediately
-  watch-print local-folder                Watches a folder, and print pdfs on creation/modification in this folder
-  screenshot png-file                     Takes a PNG screenshot and stores it locally
-  whiteboard                              Shows a landscape half-scale projection of the digital paper, refreshed every second
-  whiteboard-html                         Opens a distribution server with /frontend path feeding the images from the Digital Paper
-  dialog title content button             Prints a dialog on the Digital Paper
-  get-owner                               Displays the owner's name
-  set-owner owner-name                    Sets the owner's name
-  wifi-list                               Lists all wifi configured on the device
-  wifi-scan                               Scans all wifi hotspot available around the device
-  wifi-add                                Adds a wifi hotspot (obsolete since the latest firmware)
-  wifi-del                                Deletes a wifi hotspot (obsolete since the latest firmware)
-  wifi                                    Displays the current wifi configured
-  wifi-enable                             Enables the wifi network device
-  wifi-disable                            Disables the wifi network device
-  battery                                 Shows the battery status informations
-  storage                                 Shows the storage status informations
-  check-firmware                          Check if a new firmware version has been published
-  update-firmware [-force] [-dryrun]      Check for update and update the firmware if needed. Will ask for confirmation before triggering the update. Use -dryrun to test the process.
-  get url                                 Sends and display a GET request to the Digital Paper
-  mount [mount-point]                     FUSE-mounts the DPT at the specified mount point. If not mount point is specified, it will attempt to use the one passed previously
-  insert-note-template name path          Inserts a new note template from the specified file, with the specified name
-  get-configuration path                  Saves the system configuration to a local file at <path>
-  set-configuration path                  Send the system configuration from a local file at <path>
-  root [-dryrun]                          BETA - Roots the device
-  diag fetch remote-path local-path       BETA - Downloads a files from the diagnostic mode, after root. See doc/diagnosis_mod_map.md
-  diag exit                               Exits the diagnostic mode (triggers a reboot)
-  unpack pkg target-directory             Unpacks an update pkg file into a data and animation archives
-  adb list-extensions                     Lists all extensions installed on the Digital Paper
-  adb fetch-extension name local-path     Retrieve extension descriptors as returned by dpt adb list-extensions
-  adb setup-extension name component action icon-path Setup an extension (apk intent launcher) for the official app launcher.
-  adb remove-extension name               Removes a user-space extension, do not use to delete offical apps.
-  adb install-apk local-path              Installs an APK and enables it in the launcher
-  help                                    Prints this message
+  register                                                    Starts the pairing process with the Digital Paper
+  ping                                                        Tests the connection with the Digital Paper
+  sync [local-sync-folder] [-dryrun]                          Synchronizes a local folder with the Digital paper. If no folder is given, it will use the one passed previously
+  list-documents                                              Lists all documents
+  document-info                                               Prints all documents and their attributes, raw
+  upload local-file [remote-file]                             Sends a local file to the Digital Paper
+  download                                                    Downloads a remote file locally
+  move source target                                          Moves a document on the device
+  copy source target                                          Copies a document on the device
+  new-folder remote-folder                                    Creates a new folder on the device
+  delete-folder remote-file                                   Remove a folder on the device
+  delete remote-file                                          Deletes a file on the device
+  print local-file                                            Sends a pdf to the Digital Paper, and opens it immediately
+  watch-print local-folder                                    Watches a folder, and print pdfs on creation/modification in this folder
+  screenshot png-file                                         Takes a PNG screenshot and stores it locally
+  whiteboard [-orientation] [-scalingFactor]                  Shows a projection of the digital paper, refreshed every second, orientation=[portrait|landscape],
+                                                              the scaling factor is a multiplier of the resolution (0.5 by default)
+  whiteboard-html                                             Opens a distribution server with /frontend path feeding the images from the Digital Paper
+  dialog title content button                                 Prints a dialog on the Digital Paper
+  get-owner                                                   Displays the owner's name
+  set-owner owner-name                                        Sets the owner's name
+  wifi-list                                                   Lists all wifi configured on the device
+  wifi-scan                                                   Scans all wifi hotspot available around the device
+  wifi-add                                                    Adds a wifi hotspot (obsolete since the latest firmware)
+  wifi-del                                                    Deletes a wifi hotspot (obsolete since the latest firmware)
+  wifi                                                        Displays the current wifi configured
+  wifi-enable                                                 Enables the wifi network device
+  wifi-disable                                                Disables the wifi network device
+  battery                                                     Shows the battery status informations
+  storage                                                     Shows the storage status informations
+  check-firmware                                              Check if a new firmware version has been published
+  update-firmware [-force] [-dryrun]                          Check for update and update the firmware if needed. Will ask for confirmation before triggering the update. Use -dryrun to test the process.
+  get url                                                     Sends and displays a GET request to the Digital Paper
+  mount [mount-point]                                         FUSE-mounts the DPT at the specified mount point. If not mount point is specified, it will attempt to use the one passed previously
+  insert-note-template name path                              Inserts a new note template from the specified file, with the specified name
+  get-configuration path                                      Saves the system configuration to a local file at <path>
+  set-configuration path                                      Sends the system configuration from a local file at <path>
+  root [-dryrun]                                              Roots the device
+  diag fetch remote-path local-path                           Downloads a file from the diagnostic mode, after root. See doc/diagnosis_mod_map.md
+  diag exit                                                   Exits the diagnostic mode (triggers a reboot)
+  unpack pkg target-directory                                 Unpacks an update pkg file into a data and animation archives
+  adb list-extensions                                         Lists all extensions installed on the Digital Paper
+  adb fetch-extension name local-path                         Retrieves extension descriptors as returned by dpt adb list-extensions
+  adb setup-extension name component action icon-path         Setup an extension (apk intent launcher) for the official app launcher.
+  adb remove-extension name                                   Removes a user-space extension, do not use to delete offical apps.
+  adb install-apk local-path                                  Installs an APK and enables it in the launcher
+  help                                                        Prints this message
+
+Disconnected from the target VM, address: '127.0.0.1:40211', transport: 'socket'
+
+Process finished with exit code 0
 ```
 
 ### Registering the DPT-RP1

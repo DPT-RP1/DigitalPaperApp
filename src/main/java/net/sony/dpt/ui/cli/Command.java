@@ -18,7 +18,7 @@ public enum Command {
     PRINT("print", Collections.emptyList(), Collections.singletonList("local-file"), "Sends a pdf to the Digital Paper, and opens it immediately"),
     WATCH_PRINT("watch-print", Collections.emptyList(), Collections.singletonList("local-folder"), "Watches a folder, and print pdfs on creation/modification in this folder"),
     SCREENSHOT("screenshot", Collections.emptyList(), Collections.singletonList("png-file"), "Takes a PNG screenshot and stores it locally"),
-    WHITEBOARD("whiteboard", "Shows a landscape half-scale projection of the digital paper, refreshed every second"),
+    WHITEBOARD("whiteboard", Arrays.asList(CommandOption.ORIENTATION, CommandOption.SCALING_FACTOR), Collections.emptyList(), "Shows a projection of the digital paper, refreshed every second, orientation=[portrait|landscape],\nthe scaling factor is a multiplier of the resolution (0.5 by default)"),
     WHITEBOARD_HTML("whiteboard-html", "Opens a distribution server with /frontend path feeding the images from the Digital Paper"),
     DIALOG("dialog", Collections.emptyList(), Arrays.asList("title", "content", "button"), "Prints a dialog on the Digital Paper"),
     GET_OWNER(Arrays.asList("get-owner", "show-owner"), "Displays the owner's name"),
@@ -103,11 +103,15 @@ public enum Command {
     }
 
     private static String left(String left) {
-        return String.format("  %-40s", left);
+        return String.format("  %-60s", left);
+    }
+
+    private static String rightNewLine(String right) {
+        return left("") + right;
     }
 
     public static String printVersion() {
-        return "dpt 1.0";
+        return "dpt 1.x";
     }
 
     public static String printHelp() {
@@ -133,7 +137,12 @@ public enum Command {
             }
             helpBuilder.append(left(commandHelpBuilder.toString()));
             if (command.description != null && !command.description.isEmpty()) {
-                helpBuilder.append(command.description);
+                String[] descriptionLines = command.description.split("\n");
+                helpBuilder.append(descriptionLines[0]);
+                for (int i = 1; i < descriptionLines.length; i++) {
+                    helpBuilder.append("\n");
+                    helpBuilder.append(rightNewLine(descriptionLines[i]));
+                }
             } else {
                 helpBuilder.append("BETA");
             }
@@ -164,5 +173,6 @@ public enum Command {
 
     public static void main(String[] args) {
         System.out.println(Command.printHelp());
+        System.out.flush();
     }
 }

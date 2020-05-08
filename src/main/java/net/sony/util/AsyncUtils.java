@@ -18,6 +18,8 @@ public class AsyncUtils {
             }
         }, 0, 1, TimeUnit.SECONDS);
         executor.awaitTermination(timeoutSeconds, TimeUnit.SECONDS);
+        future[0].cancel(true);
+        executor.shutdownNow();
     }
 
 }

@@ -10,7 +10,6 @@ import net.sony.util.ProgressBar;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.sqlite.core.DB;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -21,26 +20,19 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringBufferInputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.android.ddmlib.FileListingService.*;
+import static com.android.ddmlib.FileListingService.FileEntry;
 import static net.sony.util.AsyncUtils.waitForFinished;
 
 public class AdbCommand {

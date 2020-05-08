@@ -21,7 +21,10 @@ public class DigitalPaperApp {
         DigitalPaperCLI digitalPaperCLI = new DigitalPaperCLI(
                 new DiffieHelman(),
                 new CryptographyUtils(),
-                System.out::println,
+                (message) -> {
+                   System.out.println(message);
+                   System.out.flush();
+                },
                 () -> {
                     Scanner scanner = new Scanner(System.in);
                     return scanner.nextLine();
@@ -39,6 +42,7 @@ public class DigitalPaperApp {
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(Command.printHelp());
+            System.out.flush();
         }
     }
 

@@ -1,31 +1,31 @@
 package net.sony.dpt.ui.cli;
 
 import com.android.ddmlib.*;
-import net.sony.dpt.command.firmware.RootCommand;
-import net.sony.dpt.command.notes.NoteTemplateCommand;
-import net.sony.dpt.command.root.AdbCommand;
-import net.sony.dpt.command.root.DiagnosticCommand;
-import net.sony.dpt.command.root.FirmwareCommand;
-import net.sony.dpt.network.CheckedHttpClient;
-import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.dpt.command.authenticate.AuthenticateCommand;
 import net.sony.dpt.command.authenticate.AuthenticationCookie;
 import net.sony.dpt.command.device.SystemConfigCommand;
 import net.sony.dpt.command.device.TakeScreenshotCommand;
 import net.sony.dpt.command.dialog.DialogCommand;
-import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.documents.DocumentCommand;
+import net.sony.dpt.command.documents.DocumentListResponse;
 import net.sony.dpt.command.firmware.FirmwareUpdatesCommand;
+import net.sony.dpt.command.firmware.RootCommand;
+import net.sony.dpt.command.notes.NoteTemplateCommand;
 import net.sony.dpt.command.ping.PingCommand;
 import net.sony.dpt.command.print.PrintCommand;
 import net.sony.dpt.command.register.RegisterCommand;
 import net.sony.dpt.command.register.RegistrationResponse;
 import net.sony.dpt.command.reversing.ReverseEngineeringCommand;
+import net.sony.dpt.command.root.AdbCommand;
+import net.sony.dpt.command.root.DiagnosticCommand;
+import net.sony.dpt.command.root.FirmwareCommand;
 import net.sony.dpt.command.sync.LocalSyncProgressBar;
 import net.sony.dpt.command.sync.SyncCommand;
 import net.sony.dpt.command.wifi.AccessPointList;
 import net.sony.dpt.command.wifi.WifiCommand;
 import net.sony.dpt.fuse.DptFuseMounter;
+import net.sony.dpt.network.CheckedHttpClient;
+import net.sony.dpt.network.DigitalPaperEndpoint;
 import net.sony.dpt.network.SimpleHttpClient;
 import net.sony.dpt.network.UncheckedHttpClient;
 import net.sony.dpt.persistence.DeviceInfoStore;
@@ -35,6 +35,7 @@ import net.sony.dpt.persistence.SyncStore;
 import net.sony.dpt.root.DiagnosticManager;
 import net.sony.dpt.root.FirmwarePacker;
 import net.sony.dpt.root.RootPacker;
+import net.sony.dpt.ui.gui.whiteboard.Orientation;
 import net.sony.dpt.ui.gui.whiteboard.Whiteboard;
 import net.sony.dpt.ui.html.WhiteboardBackend;
 import net.sony.dpt.zeroconf.FindDigitalPaper;
@@ -236,7 +237,11 @@ public class DigitalPaperCLI {
                 takeScreenshot(arguments.get(1));
                 break;
             case WHITEBOARD:
-                new Whiteboard(new TakeScreenshotCommand(digitalPaperEndpoint));
+                showWhiteboard(
+                        commandLine.hasOption("orientation") ? commandLine.getOptionValue("orientation") : null,
+                        commandLine.hasOption("scalingFactor") ? commandLine.getOptionValue("scalingFactor") : null
+                );
+
                 break;
             case SYNC:
                 sync(lastCommandRunStore.retrieveOneArgument(command, arguments), dryrun);
@@ -309,6 +314,14 @@ public class DigitalPaperCLI {
                 break;
         }
 
+    }
+
+    private void showWhiteboard(String orientationOption, String scalingFactorOption) throws IOException, InterruptedException {
+        Orientation orientation = Orientation.LANDSCAPE;
+        float scalingFactor = 0.5f;
+        if (orientationOption != null) orientation = Orientation.valueOf(orientationOption.toUpperCase());
+        if (scalingFactorOption != null) scalingFactor = Float.parseFloat(scalingFactorOption);
+        new Whiteboard(new TakeScreenshotCommand(digitalPaperEndpoint), orientation, scalingFactor);
     }
 
     private void adbInstallApk(String localPath) throws InterruptedException, IOException, URISyntaxException, ParserConfigurationException, InstallException, SyncException, SAXException, TimeoutException, AdbCommandRejectedException, XPathExpressionException, ShellCommandUnresponsiveException {

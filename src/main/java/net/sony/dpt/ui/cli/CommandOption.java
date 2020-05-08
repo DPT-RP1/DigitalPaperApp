@@ -10,6 +10,8 @@ public enum CommandOption {
     INTERACTIVE("interactive", "For commands that can run in interactive mode, stop the process to ask for user input"),
     FORCE("force", "For commands that can run in force mode, continue despite validation errors"),
     VERSION("version", "Prints the version of the program"),
+    ORIENTATION("orientation", true, "portrait | landscape"),
+    SCALING_FACTOR("scalingFactor", true, "Multply width and height by a decimal number. Default 0.5."),
     HELP("help", "Prints helpful informations about the program");
 
     private String optionLongName;
