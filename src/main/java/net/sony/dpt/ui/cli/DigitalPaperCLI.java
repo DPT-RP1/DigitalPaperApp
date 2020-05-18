@@ -295,7 +295,7 @@ public class DigitalPaperCLI {
                 rawGet(arguments.get(1));
                 break;
             case WHITEBOARD_HTML:
-                whiteboardHtml();
+                whiteboardHtml(commandLine.hasOption("orientation") ? commandLine.getOptionValue("orientation") : null);
                 break;
             case MOUNT:
                 mount(lastCommandRunStore.retrieveOneArgument(command, arguments));
@@ -455,8 +455,15 @@ public class DigitalPaperCLI {
         new FirmwareUpdatesCommand(null, digitalPaperEndpoint, logWriter, null).checkForUpdates();
     }
 
-    private void whiteboardHtml() throws IOException, URISyntaxException {
-        WhiteboardBackend whiteboardBackend = new WhiteboardBackend(new TakeScreenshotCommand(digitalPaperEndpoint), logWriter);
+    private void whiteboardHtml(String orientationOption) throws IOException, URISyntaxException {
+        Orientation orientation = Orientation.LANDSCAPE;
+        if (orientationOption != null) orientation = Orientation.valueOf(orientationOption.toUpperCase());
+
+        WhiteboardBackend whiteboardBackend = new WhiteboardBackend(
+                new TakeScreenshotCommand(digitalPaperEndpoint),
+                logWriter,
+                orientation
+        );
         int port = whiteboardBackend.bind();
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
             Desktop.getDesktop().browse(new URI("http://localhost:" + port + "/frontend"));

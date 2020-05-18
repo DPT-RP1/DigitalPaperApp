@@ -1,0 +1,61 @@
+<html lang="en">
+    <head>
+        <script>
+            let lastLength = 0;
+            let updateWhiteboard = function(data) {
+                if (lastLength === data.length) return;
+                lastLength = data.length;
+                let parent = document.getElementById("whiteboard-container");
+                console.log(data.length);
+                let buffer = new Image();
+                // We swap the buffer to avoid flickering
+                buffer.onload = function(){
+                    buffer.className = "whiteboard"
+                    let child = parent.lastElementChild;
+                    while (child) {
+                        parent.removeChild(child);
+                        child = parent.lastElementChild;
+                    }
+                    parent.appendChild(buffer);
+                }
+                buffer.src = 'data:image/jpeg;base64,' + data;
+            }
+
+            let loadWhiteboardData = function() {
+                let xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === XMLHttpRequest.DONE
+                        && xhr.status === 200
+                        && xhr.responseText != null
+                        && xhr.responseText !== "") {
+                        updateWhiteboard(xhr.responseText);
+                    }
+                };
+                xhr.open('GET', '/lastImage');
+                xhr.send()
+            }
+
+            setInterval(loadWhiteboardData, 200);
+        </script>
+
+        <style>
+            body, html {
+                height: 100%;
+                margin: 0;
+                overflow: hidden;
+            }
+
+            .whiteboard {
+                width: 100vh;
+                transform: translatex(calc(50vw - 50%)) translatey(calc(50vh - 50%)) rotate(90deg);
+            }
+        </style>
+
+        <title>DPT-RP1 Whiteboard</title>
+    </head>
+
+    <body>
+        <div id="whiteboard-container">
+        </div>
+    </body>
+</html>

@@ -19,7 +19,7 @@ public enum Command {
     WATCH_PRINT("watch-print", Collections.emptyList(), Collections.singletonList("local-folder"), "Watches a folder, and print pdfs on creation/modification in this folder"),
     SCREENSHOT("screenshot", Collections.emptyList(), Collections.singletonList("png-file"), "Takes a PNG screenshot and stores it locally"),
     WHITEBOARD("whiteboard", Arrays.asList(CommandOption.ORIENTATION, CommandOption.SCALING_FACTOR), Collections.emptyList(), "Shows a projection of the digital paper, refreshed every second, orientation=[portrait|landscape],\nthe scaling factor is a multiplier of the resolution (0.5 by default)"),
-    WHITEBOARD_HTML("whiteboard-html", "Opens a distribution server with /frontend path feeding the images from the Digital Paper"),
+    WHITEBOARD_HTML("whiteboard-html", Collections.singletonList(CommandOption.ORIENTATION), Collections.emptyList(), "Opens a distribution server with /frontend path feeding the images from the Digital Paper"),
     DIALOG("dialog", Collections.emptyList(), Arrays.asList("title", "content", "button"), "Prints a dialog on the Digital Paper"),
     GET_OWNER(Arrays.asList("get-owner", "show-owner"), "Displays the owner's name"),
     SET_OWNER("set-owner", Collections.emptyList(), Collections.singletonList("owner-name"), "Sets the owner's name"),
